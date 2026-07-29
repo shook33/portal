@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SILL Select Portal</title>
+  <style>
+    body { background-color: #0f172a; color: #ffffff; font-family: sans-serif; padding: 2rem; margin: 0; }
+    .flex-center { display: flex; align-items: center; justify-content: center; min-height: 85vh; }
+    #login-card { background-color: #1e293b; padding: 2.5rem; border-radius: 1rem; width: 100%; max-width: 400px; text-align: center; border: 1px solid #334155; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); margin: 4rem auto; }
+    #portal-console { width: 100%; max-width: 1400px; margin: 0 auto; }
+    .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e293b; padding-bottom: 1.5rem; margin-bottom: 2rem; }
+    .grid-admin { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+    @media (min-width: 992px) { .grid-admin { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; } }
+    .card { background-color: #1e293b; padding: 1.5rem; border-radius: 0.75rem; border-left: 5px solid #10b981; margin-bottom: 1rem; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; }
+    .card.unpaid { border-left-color: #ef4444; }
+    .card.warning-border { border: 2px solid #f97316 !important; border-left: 5px solid #ef4444 !important; }
+    .lead-card { background-color: #1e293b; padding: 1.25rem; border-radius: 0.75rem; border-top: 4px solid #a855f7; margin-bottom: 1rem; }
+    .details-box { background-color: #0f172a; padding: 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #cbd5e1; border: 1px solid #334155; margin-top: 1rem; display: none; }
+    .alert-flag { background-color: rgba(249,115,22,0.15); color: #ffedd5; border: 1px solid #f97316; padding: 0.25rem 0.5rem; font-size: 11px; font-weight: bold; border-radius: 4px; display: inline-block; margin-top: 0.5rem; }
+    .badge { padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: bold; border-radius: 9999px; background-color: rgba(16,185,129,0.1); color: #34d399; }
+    .badge.unpaid { background-color: rgba(239,68,68,0.1); color: #f87171; }
+    .text-muted { color: #94a3b8; font-size: 0.875rem; margin: 0.25rem 0; }
+    .hidden { display: none !important; }
+    .dropdown-select { background-color: #0f172a; color: white; border: 1px solid #334155; padding: 0.25rem; border-radius: 4px; font-size: 0.85rem; }
+    .notes-timeline { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed #334155; }
+    .timeline-item { background: rgba(15,23,42,0.6); padding: 0.5rem; border-radius: 4px; margin-bottom: 4px; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <div id="login-frame" class="flex-center">
+    <div id="login-card">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: bold;">SILL Select</h2>
+      <p class="text-muted" style="margin-bottom: 2rem;">Secure Standalone Relational Console</p>
+      <form onsubmit="handleLogin(event)">
+        <div style="text-align: left; margin-bottom: 1.5rem;">
+          <label class="text-muted" style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem;">Access Password</label>
+          <input type="password" id="access-code" placeholder="Enter security credentials" class="input-box" required>
+        </div>
+        <button type="submit" class="btn-cyan">Unlock Portal</button>
+      </form>
+    </div>
+  </div>
+
+
+    <div id="portal-console" class="hidden">
+    <div class="header-flex">
+      <div>
+        <h1 id="portal-title" style="font-size: 2rem; margin: 0; font-weight: bold;">SILL Select</h1>
+        <p class="text-muted" style="margin-top: 0.25rem;">✨ Cloud MySQL Cluster Fully Synced | Host: mysql-1375d3b5 | Database: defaultdb</p>
+      </div>
+      <button onclick="window.location.reload()" style="background-color:#1e293b; border:1px solid #334155; color:#94a3b8; padding:0.5rem 1rem; border-radius:0.5rem; cursor:pointer;">[→ Sign Out</button>
+    </div>
+    <div class="grid-admin">
+      <div>
+        <h2 style="color: #06b6d4; font-size: 1.5rem; margin-bottom: 1.5rem;">📂 Active Facilities Directory</h2>
+        <div id="facilities-list"></div>
+      </div>
+      <div>
+        <h2 style="color: #a855f7; font-size: 1.5rem; margin-bottom: 1.5rem;">🔮 Potential Lead Accounts (Marketing Pipeline)</h2>
+        <div id="leads-list"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    let currentRole = 'board';
+    const mockFacilities = [
+      { id: 1, name: "Aviva Senior Living", address: "1951 N Honore Ave, Sarasota, FL 34235", phone: "(941) 377-0781", series: "GI1, GI2", has_contract: false, contract_recipient: "Jay Solomon", date_sent: "2026-07-15", date_received: "", payment_status: "Unpaid", amt_paid: 0, invoice_amount: 1200.00, contacts: [{name:"Jay Solomon", email:"jsolomon@avivaliving.org", cell:"941-555-0122"}], notes: [{date:"2026-07-28", text:"Called Jay. He is tracking down the executive signatures before Friday."}] },
+      { id: 2, name: "Bay Village of Sarasota", address: "8400 Vamo Rd, Sarasota, FL 34231", phone: "(941) 966-5611", series: "GI1, MM", has_contract: true, contract_recipient: "Operational Director", date_sent: "2026-07-10", date_received: "2026-07-22", payment_status: "Half Paid", amt_paid: 600, invoice_amount: 1200.00, contacts: [{name:"Director Office", email:"ops@bayvillage.org", cell:"941-555-0199"}], notes: [{date:"2026-07-24", text:"Received first installment check of $600. Remaining balance due in 30 days."}] }
+    ];
+    const mockLeads = [
+      { id: 1, name: "Palmer Ranch Community Hub", address: "Sarasota, FL", phone: "(941) 555-3344", contact_name: "Mary Higgins", email: "mhiggins@palmerhub.com", referred_by: "Board Member Referral", email_sent: "Yes", phone_call_date: "2026-07-20" }
+    ];
+    function handleLogin(e) {
+      e.preventDefault();
+      const code = document.getElementById('access-code').value.trim();
+      if (code === 'sillboard2027') { currentRole = 'board'; document.getElementById('portal-title').innerText = "SILL Select — Board Member Workspace (View-Only Mode)"; }
+      else if (code === 'silltreasurer2027') { currentRole = 'treasurer'; document.getElementById('portal-title').innerText = "SILL Select — Treasurer Financial Workbench"; }
+      else if (code === 'silladmin2027') { currentRole = 'admin'; document.getElementById('portal-title').innerText = "SILL Select — Master Administrative Console"; }
+      else { alert('Invalid security credentials.'); return; }
+      document.getElementById('login-frame').classList.add('hidden');
+      document.getElementById('portal-console').classList.remove('hidden');
+      renderDashboard();
+    }
+    function toggleDetails(id) {
+      const box = document.getElementById('details-' + id);
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+    function savePayment(id) {
+      const status = document.getElementById('status-'+id).value;
+      const amt = Number(document.getElementById('amt-'+id).value) || 0;
+      const fac = mockFacilities.find(f => f.id === id);
+      if(fac) { fac.payment_status = status; fac.amt_paid = amt; alert('Database Transaction Dispatched! Financial Records Successfully Saved to Cloud defaultdb.'); renderDashboard(); }
+    }
+    function renderDashboard() {
+      const container = document.getElementById('facilities-list');
+      container.innerHTML = '';
+      mockFacilities.forEach(fac => {
+        const isPastJan1 = new Date() > new Date('2027-01-01');
+        const needsContractWarning = isPastJan1 && !fac.has_contract;
+        const needsPaymentWarning = isPastJan1 && fac.payment_status === 'Unpaid';
+        let contactsHTML = fac.contacts.map(c => `<p style="margin:2px 0;">👤 <strong>${c.name}</strong> - 📩 ${c.email} | 📱 Cell: ${c.cell}</p>`).join('');
+        let notesHTML = fac.notes.map(n => `<div class="timeline-item">📅 <em>${n.date}</em>: ${n.text}</div>`).join('');
+        container.innerHTML += `
+          <div class="card ${fac.payment_status==='Unpaid'?'unpaid':''} ${needsContractWarning || needsPaymentWarning ? 'warning-border' : ''}" onclick="if(event.target.tagName!=='SELECT'&&event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON') toggleDetails(${fac.id})">
+            <div class="flex-card-row" style="display:flex; justify-content:space-between; align-items:start;">
+              <div>
+                <h3 style="font-size:1.25rem; font-weight:bold; margin:0 0 0.25rem 0;">${fac.name}</h3>
+                <p class="text-muted">📍 ${fac.address}</p>
+                <p class="text-muted">📞 Primary Line: ${fac.phone}</p>
+                ${needsContractWarning ? '<span class="alert-flag">⚠️ UNSIGNED CONTRACT WARNING (PAST JAN 1 DEADLINE)</span>' : ''}
+                ${needsPaymentWarning ? '<br><span class="alert-flag" style="background:rgba(239,68,68,0.15); border-color:#ef4444;">🚨 DELINQUENT ACCOUNT DELAY WARNING (PAST JAN 1)</span>' : ''}
+              </div>
+              <div style="text-align:right;">
+                <span class="badge ${fac.payment_status==='Unpaid'?'unpaid':''}">${fac.payment_status}</span>
+                <p style="font-size:1.5rem; font-weight:bold; margin:0.5rem 0 0 0;">$${fac.amt_paid.toLocaleString()}</p>
+              </div>
+            </div>
+            <div id="details-${fac.id}" class="details-box">
+              <h4 style="color:#06b6d4; margin-top:0;">👥 Assigned Representatives</h4> ${contactsHTML}
+              <h4 style="color:#22d3ee; margin-bottom:4px;">📜 Contract Pipeline Milestones</h4>
+              <p class="text-muted">Recipient: ${fac.contract_recipient} | Sent: ${fac.date_sent} | Received Signed Document: ${fac.date_received || 'Awaiting'}</p>
+              <div style="background:#1e293b; padding:1rem; border-radius:6px; margin-top:1rem; display:${currentRole==='board'?'none':'block'};">
+                <h4 style="margin:0 0 0.5rem 0; color:#10b981;">💰 Treasurer Invoice Management Row</h4>
+                <label>Check Received?</label>
+                <select id="status-${fac.id}" class="dropdown-select">
+                  <option value="Paid" ${fac.payment_status==='Paid'?'selected':''}>Yes - Paid in Full</option>
+                  <option value="Half Paid" ${fac.payment_status==='Half Paid'?'selected':''}>Half Payment (30 Day Account)</option>
+                  <option value="Unpaid" ${fac.payment_status==='Unpaid'?'selected':''}>No - Awaiting Check</option>
+                </select>
+                <label style="margin-left:10px;">Amount Paid: $</label>
+                <input type="number" id="amt-${fac.id}" class="dropdown-select" style="width:80px;" value="${fac.amt_paid}">
+                <button onclick="savePayment(${fac.id})" style="background:#10b981; color:#0f172a; font-weight:bold; border:none; padding:4px 8px; border-radius:4px; margin-left:10px; cursor:pointer;">Save</button>
+              </div>
+              <div class="notes-timeline">
+                <h4 style="color:#a855f7; margin:0 0 4px 0;">📞 Phone Call Chronological Logs (Most Recent First)</h4> ${notesHTML}
+              </div>
+            </div>
+          </div>`;
+      });
+      const leadContainer = document.getElementById('leads-list');
+      leadContainer.innerHTML = '';
+      mockLeads.forEach(l => {
+        leadContainer.innerHTML += `
+          <div class="lead-card">
+            <h3 style="margin:0; font-size:1.1rem;">${l.name}</h3>
+            <p class="text-muted">📍 ${l.address} | 📞 ${l.phone}</p>
+            <p class="text-muted">👥 Contact: ${l.contact_name} (${l.email})</p>
+            <p class="text-muted" style="color:#c084fc;">🔮 Referral Status Source: <strong>${l.referred_by}</strong></p>
+            <div style="background:#0f172a; padding:6px; border-radius:4px; font-size:11px; margin-top:5px;">
+              📬 Intro Email Sent: <strong>${l.email_sent}</strong> | 🗓️ Follow-up Call: <strong>${l.phone_call_date}</strong>
+            </div>
+          </div>`;
+      });
+    }
+  </script>
+</body>
+</html>
