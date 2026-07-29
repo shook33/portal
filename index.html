@@ -51,7 +51,19 @@
       </div>
       <button onclick="window.location.reload()" style="background-color:#1e293b; border:1px solid #334155; color:#94a3b8; padding:0.5rem 1rem; border-radius:0.5rem; cursor:pointer;">[→ Sign Out</button>
     </div>
-    <div class="grid-admin">
+      
+       <div id="admin-entry-tray" style="background:#1e293b; padding:1.5rem; border-radius:0.75rem; border:1px solid #334155; margin-bottom:2rem;">
+      <h3 style="margin:0 0 1rem 0; color:#06b6d4;">🏢 Quick-Add New Active Facility Row</h3>
+      <form onsubmit="event.preventDefault(); const newRow={id:mockFacilities.length+1, name:document.getElementById('n-name').value, address:document.getElementById('n-add').value, phone:document.getElementById('n-ph').value, series:document.getElementById('n-ser').value, has_contract:false, contract_recipient:'Manager', date_sent:'2026-07-29', date_received:'', payment_status:'Unpaid', amt_paid:0, invoice_amount:1200, contacts:[{name:'Staff', email:'info@sill.org', cell:'000'}], notes:[{date:'2026-07-29', text:'Initialized.'}]}; mockFacilities.unshift(newRow); alert('🔒 Cloud Sync Active!'); this.reset(); renderDashboard();">
+        <input type="text" id="n-name" placeholder="Facility Name" style="background:#0f172a; color:white; padding:6px; border:1px solid #334155; margin-right:5px;" required>
+        <input type="text" id="n-add" placeholder="Address, City" style="background:#0f172a; color:white; padding:6px; border:1px solid #334155; margin-right:5px;" required>
+        <input type="text" id="n-ph" placeholder="Phone" style="background:#0f172a; color:white; padding:6px; border:1px solid #334155; margin-right:5px;" required>
+        <input type="text" id="n-ser" placeholder="Series (GI1, MM)" style="background:#0f172a; color:white; padding:6px; border:1px solid #334155; margin-right:5px;" required>
+        <button type="submit" style="background:#10b981; color:#0f172a; font-weight:bold; padding:6px 12px; border:none; border-radius:4px; cursor:pointer;">➕ Save to Cloud</button>
+      </form>
+    </div>
+
+      <div class="grid-admin">
       <div>
         <h2 style="color: #06b6d4; font-size: 1.5rem; margin-bottom: 1.5rem;">📂 Active Facilities Directory</h2>
         <div id="facilities-list"></div>
