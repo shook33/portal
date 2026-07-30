@@ -208,9 +208,21 @@
               <div style="text-align:right;"><span class="badge ${fac.payment_status==='Unpaid'?'unpaid':''}">${fac.payment_status}</span><p style="font-size:1.5rem; font-weight:bold; margin:0.5rem 0 0 0;">$${fac.amt_paid.toLocaleString()}</p></div>
             </div>
             <div id="details-${fac.id}" class="details-box">
-              <h4 style="color:#06b6d4; margin-top:0;">👥 Assigned Representatives</h4> ${contactsHTML}
+                           <h4 style="color:#06b6d4; margin-top:0;">👥 Assigned Representatives Control</h4>
+              <div onclick="event.stopPropagation();" style="background: rgba(15,23,42,0.4); padding: 12px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 1rem;">
+                <div id="reps-container-${fac.id}">${contactsHTML}</div>
+                <hr style="border-color: #334155; margin: 10px 0;">
+                <p style="color: #06b6d4; font-size: 13px; font-weight: bold; margin: 0 0 8px 0;">➕ Quick-Add Additional Representative Profile</p>
+                <div style="display: flex; gap: 5px;">
+                  <input type="text" id="add-cname-${fac.id}" placeholder="Name" style="background:#0f172a; color:white; border:1px solid #334155; padding:4px; font-size:12px; border-radius:4px; width:30%;">
+                  <input type="email" id="add-cemail-${fac.id}" placeholder="Email" style="background:#0f172a; color:white; border:1px solid #334155; padding:4px; font-size:12px; border-radius:4px; width:35%;">
+                  <input type="text" id="add-ccell-${fac.id}" placeholder="Cell" style="background:#0f172a; color:white; border:1px solid #334155; padding:4px; font-size:12px; border-radius:4px; width:20%;">
+                  <button onclick="event.preventDefault(); const n=document.getElementById('add-cname-${fac.id}').value, e=document.getElementById('add-cemail-${fac.id}').value, c=document.getElementById('add-ccell-${fac.id}').value; if(n){mockFacilities.find(f=>f.id===${fac.id}).contacts.push({name:n, email:e, cell:c}); alert('👥 Contact Synced to Cloud!'); renderDashboard();}" style="background:#10b981; color:#0f172a; border:none; font-weight:bold; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:12px;">Add</button>
+                </div>
+              </div>
               <h4 style="color:#22d3ee; margin-bottom:4px;">📜 Contract Pipeline Milestones</h4><p class="text-muted">Recipient: ${fac.contract_recipient} | Sent: ${fac.date_sent} | Received: ${fac.date_received || 'Awaiting'}</p>
               <div class="notes-timeline"><h4 style="color:#a855f7; margin:0 0 4px 0;">📞 Phone Call History</h4> ${notesHTML}</div>
+
             </div>
           </div>`;
 
