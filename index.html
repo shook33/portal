@@ -232,7 +232,7 @@
                   <button onclick="event.preventDefault(); const n=document.getElementById('add-cname-${fac.id}').value, e=document.getElementById('add-cemail-${fac.id}').value, c=document.getElementById('add-ccell-${fac.id}').value; if(n){mockFacilities.find(f=>f.id===${fac.id}).contacts.push({name:n, email:e, cell:c}); alert('👥 Contact Synced to Cloud!'); renderDashboard();}" style="background:#10b981; color:#0f172a; border:none; font-weight:bold; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:12px;">Add</button>
                 </div>
               </div>
-                        <h4 style="color:#22d3ee; margin: 1rem 0 4px 0;">📜 Core Facility Profile Settings</h4>
+              <h4 style="color:#22d3ee; margin: 1rem 0 4px 0;">📜 Core Facility Profile Settings</h4>
               <div onclick="event.stopPropagation();" style="background: rgba(15,23,42,0.4); padding: 12px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 1rem;">
                 <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
                   <div><label style="color:#94a3b8; font-size:11px;">📍 Facility Address</label><br><input type="text" id="edit-add-${fac.id}" value="${fac.address || ''}" style="background:#0f172a; color:white; border:1px solid #334155; padding:6px; font-size:13px; border-radius:4px; width:95%;"></div>
@@ -240,9 +240,11 @@
                   <div><label style="color:#94a3b8; font-size:11px;">🔮 Subscription Series</label><br><input type="text" id="edit-ser-${fac.id}" value="${fac.series || ''}" style="background:#0f172a; color:white; border:1px solid #334155; padding:6px; font-size:13px; border-radius:4px; width:95%;"></div>
                 </div>
                 <div style="text-align: right;">
-                  <button onclick="event.preventDefault(); saveProfileChanges(${fac.id});" class="btn-green" style="padding: 4px 12px; font-size: 12px;">💾 Save Profile Changes</button>
+                  <button onclick="event.preventDefault(); event.stopPropagation(); const f=mockFacilities.find(x=>x.id===${fac.id}); if(f){f.address=document.getElementById('edit-add-${fac.id}').value; f.phone=document.getElementById('edit-ph-${fac.id}').value; f.series=document.getElementById('edit-ser-${fac.id}').value; alert('💾 Core Facility Profile Matrix Synced to Cloud!'); renderDashboard();}" class="btn-green" style="padding: 4px 12px; font-size: 12px;">💾 Save Profile Changes</button>
                 </div>
               </div>
+
+
 
 
             </div>
