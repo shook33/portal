@@ -63,17 +63,18 @@
         <h3 style="margin:0 0 1rem 0; color:#06b6d4;">➕ Quick-Add New Active Facility</h3>
         <form onsubmit="addNewFacility(event)">
           <div class="form-grid">
-            <input type="text" id="f-name" placeholder="Facility Name" class="form-input" required>
-            <input type="text" id="f-add" placeholder="Address, City, ZIP" class="form-input" required>
-            <input type="text" id="f-ph" placeholder="Primary Phone" class="form-input" required>
-            <input type="text" id="f-ser" placeholder="Series (GI1, MM)" class="form-input" required>
+            <input type="text" id="f-name" placeholder="Facility Name" class="form-input" >
+            <input type="text" id="f-add" placeholder="Address, City, ZIP" class="form-input" >
+            <input type="text" id="f-ph" placeholder="Primary Phone" class="form-input" >
+           <input type="text" id="f-ser" placeholder="Series (GI1, MM)" class="form-input">
           </div>
           <div class="form-grid">
-            <input type="text" id="f-cname" placeholder="Primary Contact Name" class="form-input" required>
-            <input type="email" id="f-cemail" placeholder="Contact Direct Email" class="form-input" required>
-            <input type="text" id="f-ccell" placeholder="Contact Mobile Cell" class="form-input" required>
+            <input type="text" id="f-cname" placeholder="Primary Contact Name" class="form-input">
+            <input type="email" id="f-cemail" placeholder="Contact Direct Email" class="form-input">
+            <input type="text" id="f-ccell" placeholder="Contact Mobile Cell" class="form-input">
             <button type="submit" class="btn-green">➕ Save Facility</button>
           </div>
+
         </form>
       </div>
       <h2 style="color: #06b6d4; font-size: 1.5rem; margin-bottom: 1.5rem;">📂 Active Facilities Directory</h2>
@@ -128,13 +129,8 @@
 
     <script>
     let currentRole = 'board';
-    const mockFacilities = [
-      { id: 1, name: "Aviva Senior Living", address: "1951 N Honore Ave, Sarasota, FL 34235", phone: "(941) 377-0781", series: "GI1, GI2", has_contract: false, contract_recipient: "Jay Solomon", date_sent: "2026-07-15", date_received: "", payment_status: "Unpaid", amt_paid: 0, invoice_amount: 1200.00, contacts: [{name:"Jay Solomon", email:"jsolomon@avivaliving.org", cell:"941-555-0122"}], notes: [{date:"2026-07-28", text:"Called Jay. He is tracking down signatures before Friday."}] },
-      { id: 2, name: "Bay Village of Sarasota", address: "8400 Vamo Rd, Sarasota, FL 34231", phone: "(941) 966-5611", series: "GI1, MM", has_contract: true, contract_recipient: "Operational Director", date_sent: "2026-07-10", date_received: "2026-07-22", payment_status: "Half Paid", amt_paid: 600, invoice_amount: 1200.00, contacts: [{name:"Director Office", email:"ops@bayvillage.org", cell:"941-555-0199"}], notes: [{date:"2026-07-24", text:"Received first installment check of $600."}] }
-    ];
-    const mockLeads = [
-      { id: 1, name: "Palmer Ranch Community Hub", address: "Sarasota, FL", phone: "(941) 555-3344", contact_name: "Mary Higgins", email: "mhiggins@palmerhub.com", referred_by: "Board Member Referral", email_sent: "Yes", phone_call_date: "2026-07-20" }
-    ];
+      const mockFacilities = [];
+    const mockLeads = [];
 
     function handleLogin(e) {
       e.preventDefault(); const code = document.getElementById('access-code').value.trim();
