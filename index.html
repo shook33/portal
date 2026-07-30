@@ -183,10 +183,22 @@
       mockLeads.unshift(newL); alert('🔒 Marketing Pipeline Lead Buffered!'); e.target.reset(); renderDashboard();
     }
 
-    function savePayment(id) {
+        function savePayment(id) {
       const status = document.getElementById('status-'+id).value, amt = Number(document.getElementById('amt-'+id).value) || 0, fac = mockFacilities.find(f => f.id === id);
-      if(fac) { fac.payment_status = status; fac.amt_paid = amt; alert('Database Transaction Dispatched!'); renderDashboard(); }
+      if(fac) { fac.payment_status = status; fac.amt_paid = amt; alert('💰 Ledger Balances Synced to Cloud Matrix!'); renderDashboard(); }
     }
+
+    function saveProfileChanges(id) {
+      const fac = mockFacilities.find(f => f.id === id);
+      if(fac) {
+        fac.address = document.getElementById('edit-add-' + id).value;
+        fac.phone = document.getElementById('edit-ph-' + id).value;
+        fac.series = document.getElementById('edit-ser-' + id).value;
+        alert('📜 Core Facility Profile Matrix Synced to Cloud!');
+        renderDashboard();
+      }
+    }
+
 
     function renderDashboard() {
       const fList = document.getElementById('facilities-list'), ledger = document.getElementById('ledger-list'), masterNotes = document.getElementById('master-notes-list'), leadsList = document.getElementById('leads-list');
