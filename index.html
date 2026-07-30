@@ -148,11 +148,16 @@
       act.style.color = '#0f172a';
     }
 
-    function populateDropdown() {
+       function populateDropdown() {
       const select = document.getElementById('n-fac-id'); if(!select) return;
-      select.innerHTML = '<option value="">-- Choose Target Facility --</option>';
-      mockFacilities.forEach(f => select.innerHTML += `<option value="${f.id}">${f.name}</option>`);
+      select.innerHTML = '<option value="" onclick="event.stopPropagation();">-- Choose Target Facility --</option>';
+      mockFacilities.forEach(f => {
+        select.innerHTML += `<option value="${f.id}" onclick="event.stopPropagation();">${f.name}</option>`;
+      });
+      select.onclick = (event) => event.stopPropagation();
+      select.onmousedown = (event) => event.stopPropagation();
     }
+
 
     function addNewFacility(e) {
       e.preventDefault();
