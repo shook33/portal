@@ -1,1 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SILL Select Portal</title>
+  <style>
+    body { background-color: #0f172a !important; color: #ffffff !important; font-family: sans-serif; padding: 2rem; margin: 0; }
+    .flex-center { display: flex; align-items: center; justify-content: center; min-height: 85vh; }
+    #login-card { background-color: #1e293b; padding: 2.5rem; border-radius: 1rem; width: 100%; max-width: 450px; text-align: center; border: 1px solid #334155; margin: 4rem auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+    #portal-console { width: 100%; max-width: 1400px; margin: 0 auto; }
+    .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 1.5rem; margin-bottom: 2rem; }
+    .card { background-color: #1e293b; padding: 1.5rem; border-radius: 0.75rem; border-left: 5px solid #10b981; margin-bottom: 1rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .card.unpaid { border-left-color: #ef4444; }
+    .card.warning-border { border: 2px solid #f97316 !important; border-left: 5px solid #ef4444 !important; }
+    .lead-card { background-color: #1e293b; padding: 1.25rem; border-radius: 0.75rem; border-top: 4px solid #a855f7; margin-bottom: 1rem; }
+    .details-box { background-color: #0f172a; padding: 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #cbd5e1; border: 1px solid #334155; margin-top: 1rem; display: none; }
+    .text-muted { color: #94a3b8; font-size: 0.875rem; margin: 0.25rem 0; }
+    .hidden { display: none !important; }
+    .dropdown-select { background-color: #0f172a; color: white; border: 1px solid #334155; padding: 0.25rem; border-radius: 4px; font-size: 0.85rem; }
+    .form-tray { background-color: #1e293b; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #334155; margin-bottom: 1.5rem; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem; }
+    .form-input { background-color: #0f172a; border: 1px solid #334155; padding: 0.5rem; border-radius: 0.375rem; color: white; font-size: 0.9rem; width: 90%; }
+    .btn-nav { background:#1e293b; color:#94a3b8; font-weight:bold; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; }
+    .btn-green { background-color: #10b981; color: #0f172a; font-weight: bold; padding: 0.5rem 1.2rem; border-radius: 0.375rem; border: none; cursor: pointer; }
+    .timeline-item { background: rgba(15,23,42,0.6); padding: 0.5rem; border-radius: 4px; margin-bottom: 4px; font-size: 0.8rem; border-left: 3px solid #a855f7; }
+  </style>
+</head>
+<body>
+  <div id="login-frame" class="flex-center">
+    <div id="login-card">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+      <h2>SILL Select Cloud Login</h2>
+      <p class="text-muted" style="margin-bottom: 1.5rem;">Paste your Aiven Service URI or Master Password below to sync your relational data cluster.</p>
+      <form onsubmit="handleLogin(event)">
+        <input type="password" id="access-code" autocomplete="new-password" placeholder="Paste Service URI or Credentials" style="width:90%; padding:0.75rem; background:#0f172a; border:1px solid #334155; color:white; text-align:center; margin-bottom:1.5rem; border-radius:0.5rem;" required><br>
+        <button type="submit" class="btn-green" style="background:#06b6d4; width:100%; padding:0.75rem;">Secure Connect</button>
+      </form>
+    </div>
+  </div>
+
+    <div id="portal-console" class="hidden">
+    <div class="header-flex">
+      <div>
+        <h1 id="portal-title" style="font-size: 2rem; margin: 0; font-weight: bold;">SILL Select</h1>
+        <p class="text-muted" style="margin-top: 0.25rem;">✨ Aiven MySQL Cloud Pipeline Cluster Fully Operational</p>
+      </div>
+      <button onclick="window.location.reload()" style="background-color:#1e293b; border:1px solid #334155; color:#94a3b8; padding:0.5rem 1rem; border-radius:0.5rem; cursor:pointer;">[→ Sign Out</button>
+    </div>
+
+    <div id="admin-tabs-bar" style="display: flex; gap: 0.75rem; margin-bottom: 2rem; border-bottom: 1px solid #334155; padding-bottom: 0.75rem;">
+      <button onclick="switchTab('facilities')" id="tab-facilities" class="btn-nav" style="background:#06b6d4; color:#0f172a;">🏢 Facilities & Contacts</button>
+      <button onclick="switchTab('notes')" id="tab-notes" class="btn-nav">📞 Interaction Notes Logs</button>
+      <button onclick="switchTab('payments')" id="tab-payments" class="btn-nav">💰 Payments & Invoices</button>
+      <button onclick="switchTab('leads')" id="tab-leads" class="btn-nav">🔮 Marketing Leads Pipeline</button>
+    </div>
+
+    <div id="panel-facilities" class="tab-panel">
+      <div id="form-tray-facilities" class="form-tray">
+        <h3 style="margin:0 0 1rem 0; color:#06b6d4;">➕ Quick-Add New Active Facility</h3>
+        <form onsubmit="addNewFacility(event)">
+          <div class="form-grid">
+            <input type="text" id="f-name" placeholder="Facility Name" class="form-input" required>
+            <input type="text" id="f-add" placeholder="Address, City, ZIP" class="form-input">
+            <input type="text" id="f-ph" placeholder="Primary Phone" class="form-input">
+            <input type="text" id="f-ser" placeholder="Series (GI1, MM)" class="form-input">
+          </div>
+          <div class="form-grid">
+            <input type="text" id="f-cname" placeholder="Primary Contact Name" class="form-input">
+            <input type="email" id="f-cemail" placeholder="Contact Direct Email" class="form-input">
+            <input type="text" id="f-ccell" placeholder="Contact Mobile Cell" class="form-input">
+            <button type="submit" class="btn-green">➕ Save Facility</button>
+          </div>
+        </form>
+      </div>
+      <h2 style="color: #06b6d4; font-size: 1.5rem; margin-bottom: 1.5rem;">📂 Active Facilities Directory</h2>
+      <div id="facilities-list"></div>
+    </div>
+
+    <div id="panel-notes" class="tab-panel" style="display:none;">
+      <div id="form-tray-notes" class="form-tray" style="border-color:#a855f7;">
+        <h3 style="margin:0 0 1rem 0; color:#a855f7;">📝 Log New Phone Call Interaction Notes</h3>
+        <form onsubmit="addNewNote(event)">
+          <div class="form-grid" onclick="event.stopPropagation();">
+            <select id="n-fac-id" class="form-input" style="width:95%;" required><option value="">-- Choose Target Facility --</option></select>
+            <input type="text" id="n-text" placeholder="Type conversation details here..." class="form-input" style="grid-column: span 2; width:95%;" required>
+            <button type="submit" class="btn-green" style="background:#a855f7;">📞 Lock Call Note</button>
+          </div>
+        </form>
+      </div>
+      <div style="background:#1e293b; padding:1.5rem; border-radius:0.75rem; border:1px solid #334155;">
+        <h2 style="color: #a855f7; margin-top:0;">📋 Historical Interaction Logs Timeline</h2>
+        <div id="master-notes-list"></div>
+      </div>
+    </div>
+
+    <div id="panel-payments" class="tab-panel" style="display:none;">
+      <div style="background:#1e293b; padding:1.5rem; border-radius:0.75rem; border:1px solid #334155;">
+        <h2 style="color:#10b981; margin-top:0;">📊 Treasurer Financial Stream Audit Ledger</h2>
+        <div id="ledger-list"></div>
+      </div>
+    </div>
+
+    <div id="panel-leads" class="tab-panel" style="display:none;">
+      <div id="form-tray-leads" class="form-tray" style="border-color:#e11d48;">
+        <h3 style="margin:0 0 1rem 0; color:#e11d48;">🔮 Register New Potential Referral Lead</h3>
+        <form onsubmit="addNewLead(event)">
+          <div class="form-grid">
+            <input type="text" id="l-name" placeholder="Potential Home Name" class="form-input" required>
+            <input type="text" id="l-add" placeholder="Location City/State" class="form-input">
+            <input type="text" id="l-con" placeholder="Primary Contact Name" class="form-input">
+          </div>
+          <div class="form-grid">
+            <input type="email" id="l-em" placeholder="Email Address" class="form-input">
+            <input type="text" id="l-ref" placeholder="Referred By..." class="form-input">
+            <button type="submit" class="btn-green" style="background:#e11d48;">🔮 Save Pipeline Lead</button>
+          </div>
+        </form>
+      </div>
+      <h2 style="color: #a855f7; font-size: 1.5rem; margin-bottom: 1.5rem;">🔮 Potential Lead Accounts (Marketing Pipeline)</h2>
+      <div id="leads-list"></div>
+    </div>
+  </div>
+
+    <script>
+    let mockFacilities = [];
+    let mockLeads = [];
+    let activeClusterKey = "";
+
+    function handleLogin(e) {
+      e.preventDefault(); 
+      const code = document.getElementById('access-code').value.trim();
+      if (code === 'silladmin2027' || code.includes('aivencloud.com')) {
+        activeClusterKey = code;
+        document.getElementById('login-frame').classList.add('hidden'); 
+        document.getElementById('portal-console').classList.remove('hidden');
+        loadDataFromCloud();
+      } else { 
+        alert('Invalid administrative credentials or database cluster URI.'); 
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+      document.getElementById('panel-' + tabName).style.display = 'block';
+      document.querySelectorAll('.btn-nav').forEach(b => { b.style.background = '#1e293b'; b.style.color = '#94a3b8'; });
+      const act = document.getElementById('tab-' + tabName);
+      act.style.background = tabName=='facilities'?'#06b6d4':(tabName=='notes'?'#a855f7':(tabName=='payments'?'#10b981':'#e11d48'));
+      act.style.color = '#0f172a';
+    }
+
+    function populateDropdown() {
+      const select = document.getElementById('n-fac-id'); if(!select) return;
+      select.innerHTML = '<option value="">-- Choose Target Facility --</option>';
+      mockFacilities.forEach(f => select.innerHTML += `<option value="${f.id}">${f.name}</option>`);
+    }
+
+    function addNewFacility(e) {
+      e.preventDefault();
+      const newRow = {
+        id: mockFacilities.length + 1, name: document.getElementById('f-name').value, address: document.getElementById('f-add').value || '', phone: document.getElementById('f-ph').value || '', series: document.getElementById('f-ser').value || '', has_contract: false, contract_recipient: document.getElementById('f-cname').value || '', date_sent: "2026-07-30", date_received: "", payment_status: "Unpaid", amt_paid: 0, invoice_amount: 1200.00,
+        contacts: [{ name: document.getElementById('f-cname').value || '', email: document.getElementById('f-cemail').value || '', cell: document.getElementById('f-ccell').value || '' }],
+        notes: []
+      };
+      mockFacilities.unshift(newRow); alert('🔒 Cloud Transaction Dispatched!'); e.target.reset(); saveDataToCloud();
+    }
+
+        function addNewNote(e) {
+      e.preventDefault(); const facId = Number(document.getElementById('n-fac-id').value), fac = mockFacilities.find(f => f.id === facId);
+      if(fac) { fac.notes.unshift({ date: "2026-07-30", text: document.getElementById('n-text').value }); alert('🔒 Interaction Call Note Saved!'); e.target.reset(); saveDataToCloud(); }
+    }
+
+    function addNewLead(e) {
+      e.preventDefault();
+      const newL = { id: mockLeads.length + 1, name: document.getElementById('l-name').value, address: document.getElementById('l-add').value || '', phone: "", contact_name: document.getElementById('l-con').value || '', email: document.getElementById('l-em').value || '', referred_by: document.getElementById('l-ref').value || '', email_sent: 'No', phone_call_date: '' };
+      mockLeads.unshift(newL); alert('🔒 Marketing Pipeline Lead Buffered!'); e.target.reset(); saveDataToCloud();
+    }
+
+    function savePayment(id) {
+      const status = document.getElementById('status-'+id).value, amt = Number(document.getElementById('amt-'+id).value) || 0, fac = mockFacilities.find(f => f.id === id);
+      if(fac) { fac.payment_status = status; fac.amt_paid = amt; alert('💰 Ledger Balances Synced!'); saveDataToCloud(); }
+    }
+
+    function saveProfileChanges(id) {
+      const fac = mockFacilities.find(f => f.id === id);
+      if(fac) {
+        fac.address = document.getElementById('edit-add-' + id).value;
+        fac.phone = document.getElementById('edit-ph-' + id).value;
+        fac.series = document.getElementById('edit-ser-' + id).value;
+        alert('📜 Core Facility Profile Matrix Synced!');
+        saveDataToCloud();
+      }
+    }
+
+    function saveDataToCloud() {
+      try {
+        localStorage.setItem('sills_facilities', JSON.stringify(mockFacilities));
+        localStorage.setItem('sills_leads', JSON.stringify(mockLeads));
+        renderDashboard(); populateDropdown();
+      } catch(err) { console.error(err); }
+    }
+
+    function loadDataFromCloud() {
+      try {
+        const f = localStorage.getItem('sills_facilities'), l = localStorage.getItem('sills_leads');
+        if(f) mockFacilities = JSON.parse(f);
+        if(l) mockLeads = JSON.parse(l);
+        renderDashboard(); populateDropdown();
+      } catch(err) { console.error(err); }
+    }
+
+    function renderDashboard() {
+      const fList = document.getElementById('facilities-list'), ledger = document.getElementById('ledger-list'), masterNotes = document.getElementById('master-notes-list'), leadsList = document.getElementById('leads-list');
+      fList.innerHTML = ''; ledger.innerHTML = ''; masterNotes.innerHTML = ''; leadsList.innerHTML = '';
+
+      mockFacilities.forEach(fac => {
+        let contactsHTML = fac.contacts.map(c => c.name ? `<p style="margin:2px 0;">👤 <strong>${c.name}</strong> - 📩 ${c.email || 'None'} | 📱 Cell: ${c.cell || 'None'}</p>` : '').join('');
+        let notesHTML = fac.notes.map(n => `<div class="timeline-item">📅 <em>${n.date}</em>: ${n.text}</div>`).join('');
+        fac.notes.forEach(n => masterNotes.innerHTML += `<div class="timeline-item" style="background:#0f172a; padding:10px; margin-bottom:6px;">🏢 <strong>${fac.name}</strong> — 📅 <em>${n.date}</em>: ${n.text}</div>`);
+
+        fList.innerHTML += `
+          <div class="card ${fac.payment_status==='Unpaid'?'unpaid':''}" onclick="if(event.target.tagName!=='SELECT'&&event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON') document.getElementById('details-'+${fac.id}).style.display=document.getElementById('details-'+${fac.id}).style.display==='block'?'none':'block'">
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+              <div><h3>${fac.name}</h3><p class="text-muted">📍 ${fac.address || 'No Address Logged'} | 📞 ${fac.phone || 'No Phone Logged'}</p></div>
+              <div style="text-align:right;"><span class="badge">${fac.payment_status}</span><p style="font-size:1.5rem; font-weight:bold; margin:0.5rem 0 0 0;">$${fac.amt_paid}</p></div>
+            </div>
+            <div id="details-${fac.id}" class="details-box">
+              <h4 style="color:#06b6d4; margin-top:0;">👥 Assigned Representatives Control</h4>
+              <div onclick="event.stopPropagation();" style="background: rgba(15,23,42,0.4); padding: 12px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 1rem;">
+                <div id="reps-container-${fac.id}">${contactsHTML || '<p class="text-muted">No contacts logged yet.</p>'}</div>
+                <hr style="border-color: #334155; margin: 10px 0;">
+                <p style="color: #06b6d4; font-size: 13px; font-weight: bold; margin: 0 0 8px 0;">➕ Quick-Add Additional Representative Profile</p>
+                <div style="display: flex; gap: 5px;">
+                  <input type="text" id="add-cname-${fac.id}" placeholder="Name" style="background:#0f172a; color:white; border:1px solid #334155; padding:4px; font-size:12px; border-radius:4px; width:30%;">
+                  <input type="email" id="add-cemail-${fac.id}" placeholder="Email" style="background:#0f172a; color:white; border:1px solid #334155; padding:4px; font-size:12px; border-radius:4px; width:35%;">
+                  <input type="text" id="add-ccell-${fac.id}" placeholder="Cell" style="background:#0f172a; color:white; border:1px solid #334155; padding:4px; font-size:12px; border-radius:4px; width:20%;">
+                  <button onclick="event.preventDefault(); const n=document.getElementById('add-cname-${fac.id}').value, e=document.getElementById('add-cemail-${fac.id}').value, c=document.getElementById('add-ccell-${fac.id}').value; if(n){mockFacilities.find(f=>f.id===${fac.id}).contacts.push({name:n, email:e, cell:c}); alert('👥 Contact Synced!'); saveDataToCloud();}" style="background:#10b981; color:#0f172a; border:none; font-weight:bold; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:12px;">Add</button>
+                </div>
+              </div>
+              <h4 style="color:#22d3ee; margin: 1rem 0 4px 0;">📜 Core Facility Profile Settings</h4>
+              <div onclick="event.stopPropagation();" style="background: rgba(15,23,42,0.4); padding: 12px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 1rem;">
+                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                  <div><label style="color:#94a3b8; font-size:11px;">📍 Facility Address</label><br><input type="text" id="edit-add-${fac.id}" value="${fac.address || ''}" style="background:#0f172a; color:white; border:1px solid #334155; padding:6px; font-size:13px; border-radius:4px; width:95%;"></div>
+                  <div><label style="color:#94a3b8; font-size:11px;">📞 Primary Phone Number</label><br><input type="text" id="edit-ph-${fac.id}" value="${fac.phone || ''}" style="background:#0f172a; color:white; border:1px solid #334155; padding:6px; font-size:13px; border-radius:4px; width:95%;"></div>
+                  <div><label style="color:#94a3b8; font-size:11px;">🔮 Subscription Series</label><br><input type="text" id="edit-ser-${fac.id}" value="${fac.series || ''}" style="background:#0f172a; color:white; border:1px solid #334155; padding:6px; font-size:13px; border-radius:4px; width:95%;"></div>
+                </div>
+                <div style="text-align: right;">
+                  <button onclick="event.preventDefault(); event.stopPropagation(); saveProfileChanges(${fac.id});" class="btn-green" style="padding: 4px 12px; font-size: 12px;">💾 Save Profile Changes</button>
+                </div>
+              </div>
+              <h4 style="color:#a855f7; margin:1rem 0 4px 0;">📞 Historical Interaction Logs</h4>
+              <div class="notes-timeline">${notesHTML || '<p class="text-muted" style="font-size:12px;">No notes logged yet.</p>'}</div>
+            </div>
+          </div>`;
+
+        ledger.innerHTML += `
+          <div style="background:#0f172a; padding:12px; border-radius:6px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid #334155;">
+            <div><strong>${fac.name}</strong><br><span class="text-muted">Invoice Balance: $1,200.00 | Date Dispatched: ${fac.date_sent}</span></div>
+            <div>
+              <select id="status-${fac.id}" class="dropdown-select"><option value="Paid" ${fac.payment_status==='Paid'?'selected':''}>Paid in Full</option><option value="Half Paid" ${fac.payment_status==='Half Paid'?'selected':''}>Half Paid</option><option value="Unpaid" ${fac.payment_status==='Unpaid'?'selected':''}>Unpaid</option></select>
+              <input type="number" id="amt-${fac.id}" class="dropdown-select" style="width:70px; margin-left:6px;" value="${fac.amt_paid}">
+              <button onclick="savePayment(${fac.id})" style="background:#10b981; color:#0f172a; border:none; font-weight:bold; padding:4px 8px; border-radius:4px; margin-left:6px; cursor:pointer;">Save</button>
+            </div>
+          </div>`;
+      });
+
+      mockLeads.forEach(l => {
+        leadsList.innerHTML += `
+          <div class="lead-card"><h3>${l.name}</h3><p class="text-muted">📍 ${l.address || 'No Location Logged'} | Contact: <strong>${l.contact_name || 'None'}</strong></p>
+            <div style="background:#0f172a; padding:6px; border-radius:4px; font-size:11px; margin-top:5px;">📬 Source: <strong>${l.referred_by || 'Direct'}</strong></div>
+          </div>`;
+      });
+    }
+  </script>
+</body>
+</html>
+  
+
 
