@@ -79,7 +79,7 @@
     <div id="panel-notes" class="tab-panel" style="display:none;">
       <div id="form-tray-notes" class="form-tray" style="border-color:#a855f7;">
         <h3 style="margin:0 0 1rem 0; color:#a855f7;">📝 Log New Phone Call Interaction Notes</h3>
-        <form onsubmit="addNewNote(event)">
+       <form onsubmit="addNewNote(event)" onclick="event.stopPropagation();">
           <div class="form-grid" onclick="event.stopPropagation();">
             <select id="n-fac-id" class="form-input" style="width:95%;" required><option value="">-- Choose Target Facility --</option></select>
             <input type="text" id="n-text" placeholder="Type conversation details here..." class="form-input" style="grid-column: span 2; width:95%;" required>
