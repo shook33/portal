@@ -126,8 +126,9 @@
     let mockLeads = [];
     let activeClusterKey = "";
 
-          let userRole = "admin";
+    let userRole = "admin";
 
+   
     function handleLogin(e) {
       e.preventDefault(); 
       const code = document.getElementById('access-code').value.trim();
@@ -154,6 +155,43 @@
         loadDataFromCloud();
       } else { 
         alert('Invalid credentials tier profile match.'); 
+      }
+    }
+
+
+
+    }
+
+    function applySecurityRestrictions() {
+      const style = document.createElement('style');
+      if (userRole === "board") {
+        style.innerHTML = `
+          .form-tray, .btn-green, button:not([onclick*="document.getElementById"]):not([onclick="window.location.reload()"]), hr { display: none !important; }
+          input, select { background: transparent !important; border: none !important; pointer-events: none !important; color: #fff !important; padding: 0 !important; width: auto !important; font-weight: bold; }
+        `;
+        document.head.appendChild(style);
+        alert('📋 Board Member Mode: Secure Read-Only Archive Directory View Activated.');
+      } else if (userRole === "treasurer") {
+        style.innerHTML = '.form-tray, button[onclick*="deleteFacility"] { display: none !important; }';
+        document.head.appendChild(style);
+        alert('📊 Treasurer Mode: Financial Stream & Directory Edit Access Active.');
+      }
+    }
+
+
+    function applySecurityRestrictions() {
+      const style = document.createElement('style');
+      if (userRole === "board") {
+        style.innerHTML = `
+          .form-tray, .btn-green, button:not([onclick*="document.getElementById"]):not([onclick="window.location.reload()"]), hr { display: none !important; }
+          input, select { background: transparent !important; border: none !important; pointer-events: none !important; color: #fff !important; padding: 0 !important; width: auto !important; font-weight: bold; }
+        `;
+        document.head.appendChild(style);
+        alert('📋 Board Member Mode: Secure Read-Only Archive Directory View Activated.');
+      } else if (userRole === "treasurer") {
+        style.innerHTML = '.form-tray, button[onclick*="deleteFacility"] { display: none !important; }';
+        document.head.appendChild(style);
+        alert('📊 Treasurer Mode: Financial Stream & Directory Edit Access Active.');
       }
     }
 
