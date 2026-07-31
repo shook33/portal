@@ -228,8 +228,20 @@
       fList.innerHTML = ''; ledger.innerHTML = ''; masterNotes.innerHTML = ''; leadsList.innerHTML = '';
 
       mockFacilities.forEach(fac => {
-        let contactsHTML = fac.contacts.map(c => c.name ? `<p style="margin:2px 0;">👤 <strong>${c.name}</strong> - 📩 ${c.email || 'None'} | 📱 Cell: ${c.cell || 'None'}</p>` : '').join('');
-        let notesHTML = fac.notes.map(n => `<div class="timeline-item">📅 <em>${n.date}</em>: ${n.text}</div>`).join('');
+          let contactsHTML = fac.contacts.map((c, idx) => {
+          if (!c.name) return '';
+          return `
+            <div onclick="event.stopPropagation();" style="display:flex; gap:10px; align-items:center; margin-bottom:6px; background:#0f172a; padding:6px; border-radius:4px; border:1px solid #334155; width:95%;">
+              <span style="color:#06b6d4; font-size:12px;">👤 Name:</span>
+              <input type="text" value="${c.name}" onchange="mockFacilities.find(f=>f.id===${fac.id}).contacts[${idx}].name=this.value; saveDataToCloud();" style="background:#1e293b; color:white; border:1px solid #334155; padding:4px; border-radius:4px; width:20%; font-size:12px;">
+              <span style="color:#06b6d4; font-size:12px;">📩 Email:</span>
+              <input type="email" value="${c.email || ''}" placeholder="Email" onchange="mockFacilities.find(f=>f.id===${fac.id}).contacts[${idx}].email=this.value; saveDataToCloud();" style="background:#1e293b; color:white; border:1px solid #334155; padding:4px; border-radius:4px; width:35%; font-size:12px;">
+              <span style="color:#06b6d4; font-size:12px;">📱 Cell:</span>
+              <input type="text" value="${c.cell || ''}" placeholder="Cell" onchange="mockFacilities.find(f=>f.id===${fac.id}).contacts[${idx}].cell=this.value; saveDataToCloud();" style="background:#1e293b; color:white; border:1px solid #334155; padding:4px; border-radius:4px; width:20%; font-size:12px;">
+            </div>
+          `;
+        }).join('');
+      let notesHTML = fac.notes.map(n => `<div class="timeline-item">📅 <em>${n.date}</em>: ${n.text}</div>`).join('');
         fac.notes.forEach(n => masterNotes.innerHTML += `<div class="timeline-item" style="background:#0f172a; padding:10px; margin-bottom:6px;">🏢 <strong>${fac.name}</strong> — 📅 <em>${n.date}</em>: ${n.text}</div>`);
 
         fList.innerHTML += `
