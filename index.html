@@ -126,16 +126,47 @@
     let mockLeads = [];
     let activeClusterKey = "";
 
+        let userRole = "admin";
+
     function handleLogin(e) {
       e.preventDefault(); 
       const code = document.getElementById('access-code').value.trim();
-      if (code === 'silladmin2027' || code.includes('aivencloud.com')) {
+      
+      if (code === 'sillboard2027') {
+        userRole = "board";
+        activeClusterKey = code;
+        document.getElementById('login-frame').classList.add('hidden'); 
+        document.getElementById('portal-console').classList.remove('hidden');
+        loadDataFromCloud();
+        applySecurityRestrictions();
+      } else if (code === 'silltreasurer2027') {
+        userRole = "treasurer";
+        activeClusterKey = code;
+        document.getElementById('login-frame').classList.add('hidden'); 
+        document.getElementById('portal-console').classList.remove('hidden');
+        loadDataFromCloud();
+        applySecurityRestrictions();
+      } else if (code === 'silladmin2027' || code.includes('aivencloud.com')) {
+        userRole = "admin";
         activeClusterKey = code;
         document.getElementById('login-frame').classList.add('hidden'); 
         document.getElementById('portal-console').classList.remove('hidden');
         loadDataFromCloud();
       } else { 
-        alert('Invalid administrative credentials or database cluster URI.'); 
+        alert('Invalid credentials tier profile match.'); 
+      }
+    }
+
+    function applySecurityRestrictions() {
+      const style = document.createElement('style');
+      if (userRole === "board") {
+        style.innerHTML = '.form-tray, .btn-green, button:not([onclick="window.location.reload()"]), input, select, hr { display: none !important; }';
+        document.head.appendChild(style);
+        alert('📋 Board Member Mode: Read-Only Archive Directory View Activated.');
+      } else if (userRole === "treasurer") {
+        style.innerHTML = '.form-tray, button[onclick*="deleteFacility"] { display: none !important; }';
+        document.head.appendChild(style);
+        alert('📊 Treasurer Mode: Financial Stream & Directory Edit Access Active.');
       }
     }
 
