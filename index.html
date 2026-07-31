@@ -196,6 +196,16 @@
       }
     }
 
+          function deleteFacility(id, event) {
+      if (event) event.stopPropagation();
+      if (confirm("🗑️ Are you absolutely sure you want to permanently remove this facility from your directory logs?")) {
+        mockFacilities = mockFacilities.filter(f => f.id !== id);
+        alert("🧼 Facility Successfully Removed from Cluster!");
+        saveDataToCloud();
+      }
+    }
+
+
     function saveDataToCloud() {
       try {
         localStorage.setItem('sills_facilities', JSON.stringify(mockFacilities));
@@ -226,7 +236,8 @@
           <div class="card ${fac.payment_status==='Unpaid'?'unpaid':''}" onclick="if(event.target.tagName!=='SELECT'&&event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON') document.getElementById('details-'+${fac.id}).style.display=document.getElementById('details-'+${fac.id}).style.display==='block'?'none':'block'">
             <div style="display:flex; justify-content:space-between; align-items:start;">
               <div><h3>${fac.name}</h3><p class="text-muted">📍 ${fac.address || 'No Address Logged'} | 📞 ${fac.phone || 'No Phone Logged'}</p></div>
-              <div style="text-align:right;"><span class="badge">${fac.payment_status}</span><p style="font-size:1.5rem; font-weight:bold; margin:0.5rem 0 0 0;">$${fac.amt_paid}</p></div>
+                         <div style="text-align:right;"><span class="badge">${fac.payment_status}</span><button onclick="deleteFacility(${fac.id}, event)" style="background:#ef4444; color:white; border:none; font-weight:bold; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:8px; cursor:pointer;">🗑️ Delete</button><p style="font-size:1.5rem; font-weight:bold; margin:0.5rem 0 0 0;">$${fac.amt_paid}</p></div>
+
             </div>
             <div id="details-${fac.id}" class="details-box">
               <h4 style="color:#06b6d4; margin-top:0;">👥 Assigned Representatives Control</h4>
