@@ -309,7 +309,7 @@
           </div>`;
       });
 
-            mockLeads.forEach(l => {
+      mockLeads.forEach(l => {
         if (!l.notes) l.notes = [];
         let leadNotesHTML = l.notes.map(n => `<div class="timeline-item">📅 <em>${n.date}</em>: ${n.text}</div>`).join('');
         
@@ -339,6 +339,10 @@
             </div>
           </div>`;
       });
+    }
+  </script>
+</body>
+</html>
 
   </script>
 </body>
