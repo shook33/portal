@@ -128,7 +128,7 @@
 
           let userRole = "admin";
 
-       function handleLogin(e) {
+        function handleLogin(e) {
       e.preventDefault(); 
       const code = document.getElementById('access-code').value.trim();
       
@@ -157,17 +157,15 @@
       }
     }
 
+
     }
 
 
 
-    function applySecurityRestrictions() {
+       function applySecurityRestrictions() {
       const style = document.createElement('style');
       if (userRole === "board") {
-        style.innerHTML = `
-          .form-tray, .btn-green, button:not([onclick*="document.getElementById"]):not([onclick="window.location.reload()"]), hr { display: none !important; }
-          input, select { background: transparent !important; border: none !important; pointer-events: none !important; color: #fff !important; padding: 0 !important; width: auto !important; font-weight: bold; }
-        `;
+        style.innerHTML = '.form-tray, .btn-green, button:not([onclick*="document.getElementById"]):not([onclick="window.location.reload()"]), hr { display: none !important; } input, select { background: transparent !important; border: none !important; pointer-events: none !important; color: #fff !important; padding: 0 !important; width: auto !important; font-weight: bold; }';
         document.head.appendChild(style);
         alert('📋 Board Member Mode: Secure Read-Only Archive Directory View Activated.');
       } else if (userRole === "treasurer") {
@@ -176,6 +174,7 @@
         alert('📊 Treasurer Mode: Financial Stream & Directory Edit Access Active.');
       }
     }
+
 
       }
     }
