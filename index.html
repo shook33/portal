@@ -126,7 +126,7 @@
     let mockLeads = [];
     let activeClusterKey = "";
 
-        let userRole = "admin";
+          let userRole = "admin";
 
     function handleLogin(e) {
       e.preventDefault(); 
@@ -157,7 +157,7 @@
       }
     }
 
-           function applySecurityRestrictions() {
+    function applySecurityRestrictions() {
       const style = document.createElement('style');
       if (userRole === "board") {
         style.innerHTML = `
@@ -171,6 +171,8 @@
         document.head.appendChild(style);
         alert('📊 Treasurer Mode: Financial Stream & Directory Edit Access Active.');
       }
+    }
+
     }
 
       }
