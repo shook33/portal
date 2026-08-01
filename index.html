@@ -4,85 +4,106 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SILL Select Portal Matrix</title>
-  <link href="https://jsdelivr.net" rel="stylesheet">
   <style>
-    body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .card-custom { background: #1e293b; border: 1px solid #334155; border-radius: 0.5rem; transition: transform 0.2s, border-color 0.2s; cursor: pointer; }
-    .card-custom:hover { transform: translateY(-2px); border-color: #06b6d4; }
+    body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+    .container { width: 100%; max-width: 1200px; padding: 2rem; margin: 0 auto; box-sizing: border-box; }
+    .login-wrapper { display: flex; justify-content: center; align-items: center; width: 100%; min-height: 100vh; }
+    .card-custom { background: #1e293b; border: 1px solid #334155; border-radius: 0.5rem; padding: 2.5rem; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); box-sizing: border-box; text-align: center; }
     .hidden { display: none !important; }
-    .form-tray { background: #111827; border-top: 2px solid #334155; padding: 1.5rem; border-radius: 0 0 0.5rem 0.5rem; margin-top: 1rem; }
+    .grid-row { display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 2rem; width: 100%; text-align: left; }
+    .grid-col { flex: 1; min-width: 300px; box-sizing: border-box; }
+    .card-facility { background: #1e293b; border: 1px solid #334155; border-radius: 0.5rem; padding: 2rem; cursor: pointer; transition: transform 0.2s, border-color 0.2s; position: relative; box-sizing: border-box; }
+    .card-facility:hover { transform: translateY(-2px); border-color: #06b6d4; }
+    .card-header-flex { display: flex; justify-content: space-between; align-items: center; }
+    .facility-title { color: #ffffff; margin: 0; font-size: 1.4rem; font-weight: bold; }
+    .badge-status { padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: bold; color: #ffffff; }
+    .bg-active { background-color: #16a34a; }
+    .bg-secure { background-color: #0284c7; }
+    .facility-desc { color: #94a3b8; margin: 1rem 0 0 0; font-size: 0.95rem; line-height: 1.5; }
+    .form-tray { background: #111827; border-top: 2px solid #334155; padding: 1.5rem; border-radius: 0 0 0.5rem 0.5rem; margin-top: 1.5rem; box-sizing: border-box; }
+    .field-group { margin-bottom: 1.25rem; text-align: left; }
+    .field-group:last-child { margin-bottom: 0; }
     .label-spec { display: block; color: #06b6d4; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    input.text-data-row { width: 100% !important; background: transparent !important; border: none !important; pointer-events: none !important; color: #ffffff !important; padding: 0 !important; font-weight: bold !important; font-size: 1.1rem !important; box-shadow: none !important; outline: none !important; display: block !important; }
+    .input-login { width: 100%; padding: 0.85rem; background: #0f172a; border: 1px solid #334155; border-radius: 0.375rem; color: #ffffff; margin-bottom: 1.5rem; font-size: 1.1rem; text-align: center; box-sizing: border-box; }
+    .input-login:focus { border-color: #06b6d4; outline: none; }
+    .btn-login { width: 100%; padding: 0.85rem; background: #06b6d4; border: none; border-radius: 0.375rem; color: #ffffff; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; box-sizing: border-box; }
+    .btn-login:hover { background: #0891b2; }
+    .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #334155; width: 100%; text-align: left; }
+    .title-main { color: #06b6d4; font-size: 2rem; margin: 0; font-weight: bold; }
+    .subtitle-main { color: #94a3b8; margin: 0; margin-top: 0.5rem; font-size: 1rem; }
+    .btn-disconnect { background: transparent; border: 1px solid #475569; color: #94a3b8; padding: 0.5rem 1.5rem; border-radius: 0.375rem; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; }
   </style>
 </head>
 <body>
 
-  <div id="login-frame" class="container d-flex justify-content-center align-items-center min-vh-100">
-    <div class="card-custom p-5 text-center shadow-lg" style="max-width: 450px; width: 100%;">
-      <h2 class="mb-3 text-info font-weight-bold">SILL Select Portal Gateway</h2>
-      <p class="text-muted mb-4">Enter your assigned credentials below to unlock your workspace environment.</p>
+  <div id="login-frame" class="login-wrapper">
+    <div class="card-custom">
+      <h2 style="color: #06b6d4; margin-top: 0; margin-bottom: 0.5rem; font-size: 1.75rem; font-weight: bold;">SILL Select Portal Gateway</h2>
+      <p style="color: #64748b; margin-bottom: 2rem; font-size: 0.95rem;">Enter your assigned credentials below to unlock your workspace environment.</p>
       <form onsubmit="handleLogin(event)">
-        <input type="password" id="access-code" autocomplete="new-password" placeholder="Enter Password Here..." class="form-control bg-dark text-white border-secondary mb-4 p-3 text-center" style="font-size: 1.1rem;" required>
-        <button type="submit" class="btn btn-info w-100 p-3 text-white font-weight-bold" style="background-color: #06b6d4; border: none; font-size: 1.1rem;">Secure Connect</button>
+        <input type="password" id="access-code" autocomplete="new-password" placeholder="Enter Password Here..." class="input-login" required>
+        <button type="submit" class="btn-login">Secure Connect</button>
       </form>
     </div>
   </div>
 
-  <div id="portal-console" class="container py-5 hidden">
-    <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary">
+  <div id="portal-console" class="container hidden">
+    <div class="header-area">
       <div>
-        <h1 class="text-info font-weight-bold m-0">SILL Administration Workspace</h1>
-        <p class="text-muted m-0 mt-1">Active Cloud Infrastructure Cluster Node Connection Management Console</p>
+        <h1 class="title-main">SILL Administration Workspace</h1>
+        <p class="subtitle-main">Active Cloud Infrastructure Cluster Node Connection Management Console</p>
       </div>
-      <button onclick="window.location.reload()" class="btn btn-outline-secondary px-4 py-2">Secure Disconnect</button>
+      <button onclick="window.location.reload()" class="btn-disconnect">Secure Disconnect</button>
     </div>
 
-    <div class="row g-4">
-      <div class="col-md-6">
-        <div class="card-custom p-4 h-100" onclick="toggleDetails('bay-village-tray')">
-          <div class="d-flex justify-content-between align-items-center">
-            <h3 class="text-white m-0">🏛️ Bay Village Core Facility</h3>
-            <span class="badge bg-success p-2">Active Production Node</span>
+    <div class="grid-row">
+      <div class="grid-col">
+        <div class="card-facility" onclick="toggleDetails('bay-village-tray')">
+          <div class="card-header-flex">
+            <h3 class="facility-title">🏛️ Bay Village Core Facility</h3>
+            <span class="badge-status bg-active">Active Production Node</span>
           </div>
-          <p class="text-muted mt-2 mb-0">Primary Operational Hub, Directory Rosters, and Facility Infrastructure Records.</p>
+          <p class="facility-desc">Primary Operational Hub, Directory Rosters, and Facility Infrastructure Records.</p>
           <div id="bay-village-tray" class="form-tray hidden" onclick="event.stopPropagation()">
-            <div class="mb-3 text-start">
+            <div class="field-group">
               <span class="label-spec">Regional Lead Director Name</span>
-              <input type="text" class="form-control-plaintext text-white font-weight-bold fs-5 p-0" value="Director Thomas Vance" readonly style="box-shadow: none; outline: none;">
+              <input type="text" class="text-data-row" value="Director Thomas Vance" readonly>
             </div>
-            <div class="mb-3 text-start">
+            <div class="field-group">
               <span class="label-spec">Secure Communication Stream</span>
-              <input type="text" class="form-control-plaintext text-white font-weight-bold fs-5 p-0" value="t.vance@sillselect.org" readonly style="box-shadow: none; outline: none;">
+              <input type="text" class="text-data-row" value="t.vance@sillselect.org" readonly>
             </div>
-            <div class="mb-3 text-start">
+            <div class="field-group">
               <span class="label-spec">Administrative Telephony Routing Line</span>
-              <input type="text" class="form-control-plaintext text-white font-weight-bold fs-5 p-0" value="+1 (555) 839-2049" readonly style="box-shadow: none; outline: none;">
+              <input type="text" class="text-data-row" value="+1 (555) 839-2049" readonly>
             </div>
-            <button class="btn btn-success btn-green w-100 mt-2 p-2">Save Record Changes</button>
+            <button class="btn-login btn-green" style="margin-top: 1rem; padding: 0.5rem;">Save Record Changes</button>
           </div>
         </div>
       </div>
 
-      <div class="col-md-6">
-        <div class="card-custom p-4 h-100" onclick="toggleDetails('aviva-tray')">
-          <div class="d-flex justify-content-between align-items-center">
-            <h3 class="text-white m-0">📊 Aviva Financial Station</h3>
-            <span class="badge bg-info p-2">Secure Data Stream</span>
+      <div class="grid-col">
+        <div class="card-facility" onclick="toggleDetails('aviva-tray')">
+          <div class="card-header-flex">
+            <h3 class="facility-title">📊 Aviva Financial Station</h3>
+            <span class="badge-status bg-secure">Secure Data Stream</span>
           </div>
-          <p class="text-muted mt-2 mb-0">Financial Accounting Node, Operational Budgeting Logs, and Ledger Files.</p>
+          <p class="facility-desc">Financial Accounting Node, Operational Budgeting Logs, and Ledger Files.</p>
           <div id="aviva-tray" class="form-tray hidden" onclick="event.stopPropagation()">
-            <div class="mb-3 text-start">
+            <div class="field-group">
               <span class="label-spec">Chief Treasury Accountant</span>
-              <input type="text" class="form-control-plaintext text-white font-weight-bold fs-5 p-0" value="Accountant Sarah Jenkins" readonly style="box-shadow: none; outline: none;">
+              <input type="text" class="text-data-row" value="Accountant Sarah Jenkins" readonly>
             </div>
-            <div class="mb-3 text-start">
+            <div class="field-group">
               <span class="label-spec">Treasury Verification Pipeline</span>
-              <input type="text" class="form-control-plaintext text-white font-weight-bold fs-5 p-0" value="s.jenkins@sillselect.org" readonly style="box-shadow: none; outline: none;">
+              <input type="text" class="text-data-row" value="s.jenkins@sillselect.org" readonly>
             </div>
-            <div class="mb-3 text-start">
+            <div class="field-group">
               <span class="label-spec">Financial Telephony Routing Line</span>
-              <input type="text" class="form-control-plaintext text-white font-weight-bold fs-5 p-0" value="+1 (555) 728-1094" readonly style="box-shadow: none; outline: none;">
+              <input type="text" class="text-data-row" value="+1 (555) 728-1094" readonly>
             </div>
-            <button class="btn btn-success btn-green w-100 mt-2 p-2">Save Record Changes</button>
+            <button class="btn-login btn-green" style="margin-top: 1rem; padding: 0.5rem;">Save Record Changes</button>
           </div>
         </div>
       </div>
@@ -102,18 +123,21 @@
         activeClusterKey = code;
         document.getElementById('login-frame').classList.add('hidden'); 
         document.getElementById('portal-console').classList.remove('hidden');
+        document.body.style.alignItems = "flex-start";
         applySecurityRestrictions();
       } else if (code === 'silltreasurer2027') {
         userRole = "treasurer";
         activeClusterKey = code;
         document.getElementById('login-frame').classList.add('hidden'); 
         document.getElementById('portal-console').classList.remove('hidden');
+        document.body.style.alignItems = "flex-start";
         applySecurityRestrictions();
       } else if (code === 'silladmin2027') {
         userRole = "admin";
         activeClusterKey = code;
         document.getElementById('login-frame').classList.add('hidden'); 
         document.getElementById('portal-console').classList.remove('hidden');
+        document.body.style.alignItems = "flex-start";
       } else { 
         alert('Invalid credentials tier profile match.'); 
       }
@@ -142,7 +166,3 @@
         document.head.appendChild(style);
         alert('📊 Treasurer Mode: Financial Stream & Directory Edit Access Active.');
       }
-    }
-  </script>
-</body>
-</html>
