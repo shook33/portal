@@ -129,33 +129,44 @@
         let userRole = "admin";
 
     function handleLogin(e) {
-      e.preventDefault(); 
-      const code = document.getElementById('access-code').value.trim();
-      
-      if (code === 'sillboard2027') {
-        userRole = "board";
-        activeClusterKey = code;
-        document.getElementById('login-frame').classList.add('hidden'); 
-        document.getElementById('portal-console').classList.remove('hidden');
-        loadDataFromCloud();
-        applySecurityRestrictions();
-      } else if (code === 'silltreasurer2027') {
-        userRole = "treasurer";
-        activeClusterKey = code;
-        document.getElementById('login-frame').classList.add('hidden'); 
-        document.getElementById('portal-console').classList.remove('hidden');
-        loadDataFromCloud();
-        applySecurityRestrictions();
-      } else if (code === 'silladmin2027' || code.includes('aivencloud.com')) {
-        userRole = "admin";
-        activeClusterKey = code;
-        document.getElementById('login-frame').classList.add('hidden'); 
-        document.getElementById('portal-console').classList.remove('hidden');
-        loadDataFromCloud();
-      } else { 
-        alert('Invalid credentials tier profile match.'); 
-      }
-    }
+  e.preventDefault(); 
+  const code = document.getElementById('access-code').value.trim();
+  
+  if (code === 'sillboard2027') {
+    userRole = "board";
+    activeClusterKey = code;
+    document.getElementById('login-frame').classList.add('hidden'); 
+    document.getElementById('portal-console').classList.remove('hidden');
+    loadDataFromCloud();
+    
+    // BOARD MULTI-TAB VISIBILITY MODE: Keeps all pages and tables visible, but restricts edits completely
+    setTimeout(() => {
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .btn-green, button[type="submit"], input[type="submit"], .btn-success, [onclick*="Save"], [onclick*="delete"], [onclick*="add"], #quick-add-form, .quick-add-container { display: none !important; }
+        input, select, textarea { pointer-events: none !important; background: transparent !important; border: none !important; color: #ffffff !important; font-weight: bold; box-shadow: none !important; }
+      `;
+      document.head.appendChild(style);
+      alert('📋 Board Member Mode: Complete Multi-Tab Read-Only Access Activated.');
+    }, 150);
+
+  } else if (code === 'silltreasurer2027') {
+    userRole = "treasurer";
+    activeClusterKey = code;
+    document.getElementById('login-frame').classList.add('hidden'); 
+    document.getElementById('portal-console').classList.remove('hidden');
+    loadDataFromCloud();
+  } else if (code === 'silladmin2027' || code.includes('aivencloud.com')) {
+    userRole = "admin";
+    activeClusterKey = code;
+    document.getElementById('login-frame').classList.add('hidden'); 
+    document.getElementById('portal-console').classList.remove('hidden');
+    loadDataFromCloud();
+  } else { 
+    alert('Invalid credentials tier profile match.'); 
+  }
+}
+
 
         function applySecurityRestrictions() {
       const style = document.createElement('style');
