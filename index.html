@@ -123,21 +123,18 @@
         activeClusterKey = code;
         document.getElementById('login-frame').classList.add('hidden'); 
         document.getElementById('portal-console').classList.remove('hidden');
-        document.body.style.alignItems = "flex-start";
         applySecurityRestrictions();
       } else if (code === 'silltreasurer2027') {
         userRole = "treasurer";
         activeClusterKey = code;
         document.getElementById('login-frame').classList.add('hidden'); 
         document.getElementById('portal-console').classList.remove('hidden');
-        document.body.style.alignItems = "flex-start";
         applySecurityRestrictions();
       } else if (code === 'silladmin2027') {
         userRole = "admin";
         activeClusterKey = code;
         document.getElementById('login-frame').classList.add('hidden'); 
         document.getElementById('portal-console').classList.remove('hidden');
-        document.body.style.alignItems = "flex-start";
       } else { 
         alert('Invalid credentials tier profile match.'); 
       }
@@ -166,3 +163,7 @@
         document.head.appendChild(style);
         alert('📊 Treasurer Mode: Financial Stream & Directory Edit Access Active.');
       }
+    }
+  </script>
+</body>
+</html>
