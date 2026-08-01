@@ -31,10 +31,10 @@
         <h1 class="text-info font-weight-bold m-0">SILL Administration Workspace</h1>
         <p class="text-muted m-0 mt-1">Active Cloud Infrastructure Cluster Node Connection Management Console</p>
       </div>
-      <button onclick="window.location.reload()" class="btn btn-outline-secondary px-4 py-2">Secure Disconnect</button>
+      <button onclick="window.location.reload()" class="btn btn-outline-secondary px-4 py-2" style="background-color: #ef4444; color: #ffffff; border: none;">Secure Disconnect</button>
     </div>
 
-    <div class="row g-4">
+    <div id="facilities-grid" class="row g-4">
       <div class="col-md-6">
         <div class="card-custom p-4 h-100" onclick="toggleDetails('bay-village-tray')">
           <div class="d-flex justify-content-between align-items-center">
@@ -45,15 +45,15 @@
           <div id="bay-village-tray" class="form-tray mt-4 hidden" onclick="event.stopPropagation()">
             <div class="mb-3">
               <label class="form-label text-info font-weight-bold">Regional Lead Director Name</label>
-              <input type="text" class="form-control text-white text-data-row" value="Director Thomas Vance">
+              <input type="text" class="form-control text-white text-data-row" id="bay-director-input" value="Director Thomas Vance">
             </div>
             <div class="mb-3">
               <label class="form-label text-info font-weight-bold">Secure Communication Stream</label>
-              <input type="text" class="form-control text-white text-data-row" value="t.vance@sillselect.org">
+              <input type="text" class="form-control text-white text-data-row" id="bay-email-input" value="t.vance@sillselect.org">
             </div>
             <div class="mb-3">
               <label class="form-label text-info font-weight-bold">Administrative Telephony Routing Line</label>
-              <input type="text" class="form-control text-white text-data-row" value="+1 (555) 839-2049">
+              <input type="text" class="form-control text-white text-data-row" id="bay-phone-input" value="+1 (555) 839-2049">
             </div>
             <button class="btn btn-success btn-green w-100 mt-2 p-2">Save Record Changes</button>
           </div>
@@ -70,23 +70,21 @@
           <div id="aviva-tray" class="form-tray mt-4 hidden" onclick="event.stopPropagation()">
             <div class="mb-3">
               <label class="form-label text-info font-weight-bold">Chief Treasury Accountant</label>
-              <input type="text" class="form-control text-white text-data-row" value="Accountant Sarah Jenkins">
+              <input type="text" class="form-control text-white text-data-row" id="aviva-accountant-input" value="Accountant Sarah Jenkins">
             </div>
             <div class="mb-3">
               <label class="form-label text-info font-weight-bold">Treasury Verification Pipeline</label>
-              <input type="text" class="form-control text-white text-data-row" value="s.jenkins@sillselect.org">
+              <input type="text" class="form-control text-white text-data-row" id="aviva-email-input" value="s.jenkins@sillselect.org">
             </div>
             <div class="mb-3">
               <label class="form-label text-info font-weight-bold">Financial Telephony Routing Line</label>
-              <input type="text" class="form-control text-white text-data-row" value="+1 (555) 728-1094">
+              <input type="text" class="form-control text-white text-data-row" id="aviva-phone-input" value="+1 (555) 728-1094">
             </div>
             <button class="btn btn-success btn-green w-100 mt-2 p-2">Save Record Changes</button>
           </div>
         </div>
       </div>
     </div>
-  </div>
-
   <script>
     let userRole = "admin";
     let activeClusterKey = "";
@@ -100,21 +98,21 @@
         activeClusterKey = code;
         document.getElementById('login-frame').classList.add('hidden'); 
         document.getElementById('portal-console').classList.remove('hidden');
-        if (typeof loadDataFromCloud === "function") { loadDataFromCloud(); }
+        loadDataFromCloud();
         applySecurityRestrictions();
       } else if (code === 'silltreasurer2027') {
         userRole = "treasurer";
         activeClusterKey = code;
         document.getElementById('login-frame').classList.add('hidden'); 
         document.getElementById('portal-console').classList.remove('hidden');
-        if (typeof loadDataFromCloud === "function") { loadDataFromCloud(); }
+        loadDataFromCloud();
         applySecurityRestrictions();
       } else if (code === 'silladmin2027' || code.includes('aivencloud.com')) {
         userRole = "admin";
         activeClusterKey = code;
         document.getElementById('login-frame').classList.add('hidden'); 
         document.getElementById('portal-console').classList.remove('hidden');
-        if (typeof loadDataFromCloud === "function") { loadDataFromCloud(); }
+        loadDataFromCloud();
       } else { 
         alert('Invalid credentials tier profile match.'); 
       }
@@ -129,10 +127,18 @@
       }
     }
 
+    function loadDataFromCloud() {
+      console.log("Initializing dynamic storage sync loops...");
+      if (typeof window.fetchCloudRecords === "function") {
+        window.fetchCloudRecords(activeClusterKey);
+      }
+    }
+
     function applySecurityRestrictions() {
       const style = document.createElement('style');
       const inputs = document.querySelectorAll('.text-data-row');
       const saveBtns = document.querySelectorAll('.btn-green');
+      
       if (userRole === "board") {
         saveBtns.forEach(btn => btn.style.setProperty('display', 'none', 'important'));
         inputs.forEach(input => {
@@ -151,3 +157,4 @@
   </script>
 </body>
 </html>
+
