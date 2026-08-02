@@ -156,8 +156,7 @@
     document.getElementById('portal-console').classList.remove('hidden');
     loadDataFromCloud();
   } else if (code === 'silladmin2027' || code.includes('aivencloud.com')) {
-    
-    userRole = "admin";
+      userRole = "admin";
     activeClusterKey = code;
     document.getElementById('login-frame').classList.add('hidden'); 
     document.getElementById('portal-console').classList.remove('hidden');
@@ -165,6 +164,7 @@
   } else { 
     alert('Invalid credentials tier profile match.'); 
   }
+
 }
 
 
