@@ -52,6 +52,7 @@
       <button onclick="switchTab('notes')" id="tab-notes" class="btn-nav">📞 Interaction Notes Logs</button>
       <button onclick="switchTab('payments')" id="tab-payments" class="btn-nav">💰 Payments & Invoices</button>
       <button onclick="switchTab('leads')" id="tab-leads" class="btn-nav">🔮 Marketing Leads Pipeline</button>
+        <button onclick="switchTab('schedule')" id="tab-schedule" class="btn-nav">📅 Master Schedule (1-13)</button>
     </div>
 
     <div id="panel-facilities" class="tab-panel">
@@ -138,17 +139,15 @@
     document.getElementById('login-frame').classList.add('hidden'); 
     document.getElementById('portal-console').classList.remove('hidden');
     loadDataFromCloud();
-    
-    // BOARD MULTI-TAB VISIBILITY MODE: Keeps all pages and tables visible, but restricts edits completely
-    setTimeout(() => {
-      const style = document.createElement('style');
-      style.innerHTML = `
-        .btn-green, button[type="submit"], input[type="submit"], .btn-success, [onclick*="Save"], [onclick*="delete"], [onclick*="add"], #quick-add-form, .quick-add-container { display: none !important; }
-        input, select, textarea { pointer-events: none !important; background: transparent !important; border: none !important; color: #ffffff !important; font-weight: bold; box-shadow: none !important; }
-      `;
-      document.head.appendChild(style);
-      alert('📋 Board Member Mode: Complete Multi-Tab Read-Only Access Activated.');
-    }, 150);
+           setTimeout(() => {
+          const style = document.createElement('style');
+          style.innerHTML = `
+            .btn-green, button[type="submit"], input[type="submit"], .btn-success, [onclick*="Save"], [onclick*="delete"], [onclick*="add"], #quick-add-form, .quick-add-container { display: none !important; }
+            input, select, textarea { pointer-events: none !important; background: transparent !important; border: none !important; color: #ffffff !important; font-weight: bold; box-shadow: none !important; }
+          `;
+          document.head.appendChild(style);
+          alert('📋 Board Member Mode: Complete Multi-Tab Read-Only Access Activated.');
+        }, 150);
 
   } else if (code === 'silltreasurer2027') {
     userRole = "treasurer";
