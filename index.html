@@ -439,31 +439,88 @@ function switchTab(tabName) {
               <h4 style="color:#a855f7; margin:1rem 0 4px 0;">📋 Historical Conversation Timeline History</h4>
               <div class="notes-timeline">${leadNotesHTML || '<p class="text-muted" style="font-size:12px;">No interactions tracked yet.</p>'}</div>
             </div>
-          </div>`;
-      });
-    }
-      // Dynamic Table Row Matrix Pipeline Initializer
-    window.addEventListener("DOMContentLoaded", () => {
-      const root = document.getElementById('schedule-matrix-rows-root');
-      if (!root) return;
-      let html = '';
-      for (let w = 1; w <= 13; w++) {
-        let bg = w % 2 === 0 ? 'background: #1e293b;' : 'background: #111827;';
-        html += `
-          <tr style="${bg} border-bottom: 1px solid #334155;">
-            <td style="padding: 1rem; font-weight: bold; text-align: center; color: #94a3b8; border-right: 1px solid #334155;">${w}</td>
-            <td style="padding: 1rem; border-right: 1px solid #334155;"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem; font-weight:bold;" placeholder="Speaker Name"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem;" placeholder="Lecture Title"><input type="text" class="table-input text-data-row" style="color:#38bdf8;" placeholder="Link URL" onclick="this.select()"></td>
-            <td style="padding: 1rem; border-right: 1px solid #334155;"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem; font-weight:bold;" placeholder="Speaker Name"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem;" placeholder="Lecture Title"><input type="text" class="table-input text-data-row" style="color:#38bdf8;" placeholder="Link URL" onclick="this.select()"></td>
-            <td style="padding: 1rem;"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem; font-weight:bold;" placeholder="Speaker Name"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem;" placeholder="Lecture Title"><input type="text" class="table-input text-data-row" style="color:#38bdf8;" placeholder="Link URL" onclick="this.select()"></td>
-          </tr>`;
-               root.innerHTML = html;
-      });
- 
-      
+</div>
 
-  </script>
+<script>
+  let userRole = "admin";
+  let activeClusterKey = "";
+
+  // Dynamic Table Row Matrix Pipeline Initializer
+  window.addEventListener("DOMContentLoaded", () => {
+    const root = document.getElementById('schedule-matrix-rows-root');
+    if (!root) return;
+    let html = '';
+    for (let w = 1; w <= 13; w++) {
+      let bg = w % 2 === 0 ? 'background: #1e293b;' : 'background: #111827;';
+      html += `
+        <tr style="${bg} border-bottom: 1px solid #334155;">
+          <td style="padding: 1rem; font-weight: bold; text-align: center; color: #94a3b8; border-right: 1px solid #334155;">${w}</td>
+          <td style="padding: 1rem; border-right: 1px solid #334155;"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem; font-weight:bold;" placeholder="Speaker Name"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem;" placeholder="Lecture Title"><input type="text" class="table-input text-data-row" style="color:#38bdf8;" placeholder="Link URL" onclick="this.select()"></td>
+          <td style="padding: 1rem; border-right: 1px solid #334155;"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem; font-weight:bold;" placeholder="Speaker Name"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem;" placeholder="Lecture Title"><input type="text" class="table-input text-data-row" style="color:#38bdf8;" placeholder="Link URL" onclick="this.select()"></td>
+          <td style="padding: 1rem;"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem; font-weight:bold;" placeholder="Speaker Name"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem;" placeholder="Lecture Title"><input type="text" class="table-input text-data-row" style="color:#38bdf8;" placeholder="Link URL" onclick="this.select()"></td>
+        </tr>`;
+    }
+    root.innerHTML = html;
+  });
+  function handleLogin(e) {
+    e.preventDefault(); 
+    const code = document.getElementById('access-code').value.trim();
+    
+    if (code === 'sillboard2027') {
+      userRole = "board";
+      activeClusterKey = code;
+      document.getElementById('login-frame').classList.add('hidden'); 
+      document.getElementById('portal-console').classList.remove('hidden');
+      applySecurityRestrictions();
+    } else if (code === 'silltreasurer2027') {
+      userRole = "treasurer";
+      activeClusterKey = code;
+      document.getElementById('login-frame').classList.add('hidden'); 
+      document.getElementById('portal-console').classList.remove('hidden');
+      applySecurityRestrictions();
+    } else if (code === 'silladmin2027') {
+      userRole = "admin";
+      activeClusterKey = code;
+      document.getElementById('login-frame').classList.add('hidden'); 
+      document.getElementById('portal-console').classList.remove('hidden');
+    } else { 
+      alert('Invalid credentials tier profile match.'); 
+    }
+  }
+
+  function toggleDetails(trayId) {
+    const tray = document.getElementById(trayId);
+    tray.classList.toggle('hidden');
+  }
+
+  function switchTab(tabName) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active-panel'));
+    document.getElementById('panel-' + tabName).classList.add('active-panel');
+    document.querySelectorAll('.btn-nav').forEach(b => { b.style.background = '#1e293b'; b.style.color = '#94a3b8'; });
+    const act = document.getElementById('tab-' + tabName);
+    act.style.background = tabName=='facilities'?'#06b6d4':(tabName=='notes'?'#a855f7':(tabName=='payments'?'#10b981':(tabName=='leads'?'#e11d48':'#06b6d4')));
+    act.style.color = '#0f172a';
+  }
+
+  function applySecurityRestrictions() {
+    const style = document.createElement('style');
+    if (userRole === "board") {
+      style.innerHTML = `
+        .btn-green, .btn-save-row, #quick-add-form, button:not(.btn-disconnect) { display: none !important; }
+        .text-data-row { pointer-events: none !important; background: transparent !important; border: none !important; color: #ffffff !important; font-weight: bold; }
+      `;
+      document.head.appendChild(style);
+      alert('📋 Board Member Mode: Complete Multi-Tab Read-Only Access Activated.');
+    } else if (userRole === "treasurer") {
+      style.innerHTML = '.btn-green, .btn-save-row, #quick-add-form { display: none !important; }';
+      document.head.appendChild(style);
+      alert('📊 Treasurer Mode: Financial Stream Read-Only Access Active.');
+    }
+  }
+</script>
 </body>
 </html>
+
 
   
 
