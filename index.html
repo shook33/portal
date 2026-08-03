@@ -31,12 +31,13 @@
     <div id="login-frame" class="flex-center">
         <div id="login-card">
             <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
-            <h2>SILL Select Cloud Login</h2>
-            <p class="text-muted" style="margin-bottom: 1.5rem;">Paste your Aiven Service URI or Master Password below to sync your relational data cluster.</p>
+                       <h2>SILL Select Cloud Login</h2>
+            <p class="text-muted" style="margin-bottom: 1.5rem;">Enter your Custom Role Password or Master Service URI to authenticate your permissions profile.</p>
             <form onsubmit="handleLogin(event)">
-                <input type="password" id="access-code" autocomplete="new-password" placeholder="Paste Service URI or Credentials" style="width:90%; padding:0.75rem; background:#0f172a; border:1px solid #334155; color:white; text-align:center; margin-bottom:1.5rem; border-radius:0.5rem;" required><br>
+                <input type="password" id="access-code" autocomplete="new-password" placeholder="Enter Access Password or URI" style="width:90%; padding:0.75rem; background:#0f172a; border:1px solid #334155; color:white; text-align:center; margin-bottom:1.5rem; border-radius:0.5rem;" required><br>
                 <button type="submit" class="btn-green" style="background:#06b6d4; width:100%; padding:0.75rem;">Secure Connect</button>
             </form>
+
         </div>
     </div>
     <div id="portal-console" class="hidden">
@@ -141,18 +142,35 @@
         let mockLeads = [];
         let mockSchedule = {}; 
         let activeClusterKey = "";
+           let userRole = "board"; // Tracks active session restrictions
+
         function handleLogin(e) {
             e.preventDefault();
             const code = document.getElementById('access-code').value.trim();
             if (code === 'silladmin2027' || code.includes('aivencloud.com')) {
+                userRole = "admin";
+                activeClusterKey = code;
+                document.getElementById('login-frame').classList.add('hidden');
+                document.getElementById('portal-console').classList.remove('hidden');
+                loadDataFromCloud();
+            } else if (code === 'Treasurer2027') {
+                userRole = "treasurer";
+                activeClusterKey = code;
+                document.getElementById('login-frame').classList.add('hidden');
+                document.getElementById('portal-console').classList.remove('hidden');
+                loadDataFromCloud();
+                switchTab('payments'); // Direct treasurers straight to their tracking page
+            } else if (code === 'sillboard2027') {
+                userRole = "board";
                 activeClusterKey = code;
                 document.getElementById('login-frame').classList.add('hidden');
                 document.getElementById('portal-console').classList.remove('hidden');
                 loadDataFromCloud();
             } else {
-                alert('Invalid administrative credentials or database cluster URI.');
+                alert('Invalid credentials or database cluster profile reference.');
             }
         }
+
         function switchTab(tabName) {
             document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
             document.getElementById('panel-' + tabName).style.display = 'block';
@@ -377,6 +395,27 @@
                     <div style="background:#0f172a; padding:6px; border-radius:4px; font-size:11px; margin-top:5px;">📬 Source: <strong>${l.referred_by || 'Direct'}</strong></div>
                 </div>`;
             });
+                       // Apply interface lock constraints based on active permission profiles
+            if (userRole === 'board') {
+                document.querySelectorAll('.form-tray').forEach(tray => tray.style.display = 'none');
+                document.querySelectorAll('button[onclick*="deleteFacility"]').forEach(btn => btn.style.display = 'none');
+                document.querySelectorAll('input, select').forEach(input => {
+                    if (input.id !== 'access-code') input.disabled = true;
+                });
+                document.querySelectorAll('button').forEach(btn => {
+                    if (btn.innerText.includes('Save') || btn.innerText.includes('Add') || btn.innerText.includes('Lock')) {
+                        btn.style.display = 'none';
+                    }
+                });
+            } else if (userRole === 'treasurer') {
+               document.querySelectorAll('.form-tray').forEach(tray => tray.style.display = 'none');
+                document.querySelectorAll('#facilities-list input, #master-notes-list input, #leads-list input').forEach(i => i.disabled = true);
+                document.querySelectorAll('button[onclick*="deleteFacility"]').forEach(btn => btn.style.display = 'none');
+            }
+                 if (userRole === 'board' || userRole === 'treasurer') {
+                    document.querySelectorAll('#panel-schedule input').forEach(input => input.disabled = true);
+                }
+
         }
     </script>
 </body>
