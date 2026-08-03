@@ -176,10 +176,11 @@
         function switchTab(tabName) {
             document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
             document.getElementById('panel-' + tabName).style.display = 'block';
-            document.querySelectorAll('.btn-nav').forEach(b => {
-                b.style.background = '#1e293b';
-                b.style.color = '#94a3b8';
-            });
+              document.querySelectorAll('.btn-nav').forEach(b => {
+       b.style.background = '#e2e8f0';
+       b.style.color = '#475569';
+   });
+
             const act = document.getElementById('tab-' + tabName);
             act.style.background = tabName=='facilities'?'#06b6d4':(tabName=='notes'?'#a855f7':(tabName=='payments'?'#10b981':(tabName=='leads'?'#e11d48':'#06b6d4')));
             act.style.color = '#0f172a';
