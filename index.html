@@ -442,13 +442,29 @@ function switchTab(tabName) {
           </div>`;
       });
     }
-  </script>
-</body>
-</html>
+      // Dynamic Table Row Matrix Pipeline Initializer
+    window.addEventListener("DOMContentLoaded", () => {
+      const root = document.getElementById('schedule-matrix-rows-root');
+      if (!root) return;
+      let html = '';
+      for (let w = 1; w <= 13; w++) {
+        let bg = w % 2 === 0 ? 'background: #1e293b;' : 'background: #111827;';
+        html += `
+          <tr style="${bg} border-bottom: 1px solid #334155;">
+            <td style="padding: 1rem; font-weight: bold; text-align: center; color: #94a3b8; border-right: 1px solid #334155;">${w}</td>
+            <td style="padding: 1rem; border-right: 1px solid #334155;"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem; font-weight:bold;" placeholder="Speaker Name"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem;" placeholder="Lecture Title"><input type="text" class="table-input text-data-row" style="color:#38bdf8;" placeholder="Link URL" onclick="this.select()"></td>
+            <td style="padding: 1rem; border-right: 1px solid #334155;"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem; font-weight:bold;" placeholder="Speaker Name"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem;" placeholder="Lecture Title"><input type="text" class="table-input text-data-row" style="color:#38bdf8;" placeholder="Link URL" onclick="this.select()"></td>
+            <td style="padding: 1rem;"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem; font-weight:bold;" placeholder="Speaker Name"><input type="text" class="table-input text-data-row" style="margin-bottom:0.25rem;" placeholder="Lecture Title"><input type="text" class="table-input text-data-row" style="color:#38bdf8;" placeholder="Link URL" onclick="this.select()"></td>
+          </tr>`;
+               root.innerHTML = html;
+      });
+ 
+      }
 
   </script>
 </body>
 </html>
+
   
 
 
