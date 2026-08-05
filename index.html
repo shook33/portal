@@ -351,13 +351,16 @@
                 if(l) mockLeads = JSON.parse(l);
                 if(s) mockSchedule = JSON.parse(s);
                 
-                if(mockFacilities.length === 0) {
+                if (mockFacilities.length === 0) {
                     mockFacilities = [
                         { id: 1, name: "Bay Village", address: "8400 Vamo Rd, Sarasota, FL 34231", phone: "941-966-5611", series: "GI 1, MM", series_count: "2", contract_sent_date: "2026-07-15", contract_received_date: "", invoice_sent_date: "2026-07-15", check_received_date: "", payment_status: "Unpaid", amt_paid: 0, invoice_amount: 2300.00, contacts: [{ name: "Primary Rep", email: "", cell: "" }], notes: [] },
                         { id: 2, name: "Aviva Senior Living", address: "1951 N Honore Ave, Sarasota, FL 34235", phone: "941-377-0781", series: "MM", series_count: "1", contract_sent_date: "2026-07-20", contract_received_date: "2026-07-28", invoice_sent_date: "2026-07-20", check_received_date: "", payment_status: "Unpaid", amt_paid: 0, invoice_amount: 1500.00, contacts: [{ name: "Director", email: "", cell: "" }], notes: [] }
                     ];
                 }
-                buildScheduleGrid(); 
+                             if (mockFacilities[0] && mockFacilities[0].invoice_amount === 1200) mockFacilities[0].invoice_amount = 2300;
+                if (mockFacilities[1] && mockFacilities[1].invoice_amount === 1200) mockFacilities[1].invoice_amount = 1500;
+   
+           buildScheduleGrid(); 
                 renderDashboard();
                 populateDropdown();
             } catch(err) {
