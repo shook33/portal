@@ -485,15 +485,26 @@
                 </div>`;
             });
 
-            mockLeads.forEach(l => {
-                leadsList.innerHTML += `
-                <div class="lead-card" style="background:#ffffff; padding:1.5rem; border-radius:0.75rem; border-top: 4px solid #0369a1; margin-bottom: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); color: #0f172a;">
-                    <h3 style="color:#0f172a; margin:0 0 0.5rem 0; font-size:1.25rem;">${l.name}</h3>
-                    <p class="text-muted" style="color:#64748b; font-size:0.9rem; margin:0 0 0.75rem 0;">📍 ${l.address || 'No Location Logged'} | Contact: <strong style="color:#0f172a;">${l.contact_name || 'None'}</strong></p>
-                                       <div style="background:#f8fafc; padding:8px 12px; border-radius:6px; font-size:0.85rem; border:1px solid #e2e8f0; color:#334155; display:inline-block;">📬 Referred By: <strong>${l.referred_by || 'Direct'}</strong></div>
+        mockLeads.forEach(l => {
+            if (!l.notes) l.notes = [];
+            let leadNotesHTML = l.notes.map(n => `<div style="font-size:0.8rem; background:#f1f5f9; padding:6px; border-left:3px solid #0369a1; border-radius:4px; margin-bottom:4px; color:#475569;">📅 <em>${n.date}</em>: ${n.text}</div>`).join('');
 
-                </div>`;
-            });
+            leadsList.innerHTML += `
+            <div class="lead-card" style="background:#ffffff; padding:1.5rem; border-radius:0.75rem; border-top: 4px solid #0369a1; margin-bottom: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); color: #0f172a;">
+                <h3 style="color:#0f172a; margin:0 0 0.5rem 0; font-size:1.25rem;">${l.name}</h3>
+                <p class="text-muted" style="color:#64748b; font-size:0.9rem; margin:0 0 0.75rem 0;">📍 ${l.address || 'No Location Logged'} | Contact: <strong style="color:#0f172a;">${l.contact_name || 'None'}</strong></p>
+                <div style="background:#f8fafc; padding:8px 12px; border-radius:6px; font-size:0.85rem; border:1px solid #e2e8f0; color:#334155; display:inline-block; margin-bottom:12px;">📬 Referred By: <strong>${l.referred_by || 'Direct'}</strong></div>
+                
+                <div style="border-top:1px dashed #cbd5e1; padding-top:10px; margin-top:5px;">
+                    <h5 style="margin:0 0 6px 0; color:#0369a1; font-size:0.85rem;">📞 Pipeline Outreach Interaction History</h5>
+                    <div style="margin-bottom:8px; max-height:120px; overflow-y:auto;">${leadNotesHTML || '<p style="color:#94a3b8; font-size:11px; margin:4px 0;">No pipeline notes logged yet.</p>'}</div>
+                    <div style="display:flex; gap:6px;">
+                        <input type="text" id="add-lnote-${l.id}" placeholder="Type conversation notes here..." style="background:#f8fafc; border:1px solid #cbd5e1; padding:5px; border-radius:4px; color:#0f172a; font-size:11px; flex-grow:1;">
+                        <button onclick="event.preventDefault(); const t=document.getElementById('add-lnote-${l.id}').value; if(t){ const lead=mockLeads.find(x=>x.id===${l.id}); if(!lead.notes)lead.notes=[]; lead.notes.unshift({date:'2026-08-04',text:t}); alert('🔮 Pipeline note logged!'); saveDataToCloud(); }" style="background:#0369a1; color:white; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">Log Note</button>
+                    </div>
+                </div>
+            </div>`;
+        });
 
             if (userRole === 'board') {
                 document.querySelectorAll('.form-tray').forEach(tray => tray.style.display = 'none');
