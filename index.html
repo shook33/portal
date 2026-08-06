@@ -330,10 +330,10 @@
         }
 
         // COMPONENT MATRIX LOOP ENGINE
-        function renderDirectoryView() {
+               // COMPONENT MATRIX LOOP ENGINE
+            function renderDirectoryView() {
             const container = document.getElementById('dynamicDirectoryList');
             const dropdownSelector = document.getElementById('quickNoteFacilityTarget');
-            
             if (!container) return;
             container.innerHTML = '';
             dropdownSelector.innerHTML = '<option value="">-- Choose Target Facility --</option>';
@@ -345,170 +345,41 @@
 
             facilityDatabase.forEach(facility => {
                 const linkedNotes = globalInteractionLogs.filter(log => log.facilityId === facility.id);
-                
                 const opt = document.createElement('option');
                 opt.value = facility.id;
                 opt.innerText = `Target: ${facility.name}`;
                 dropdownSelector.appendChild(opt);
 
-                const cardHTML = `
-                    <div class="card overdue-warning-active" data-expanded="false" id="${facility.id}" style="margin-bottom: 20px; overflow: hidden; padding: 0;">
-                        <!-- EXPANDABLE SUMMARY LINE -->
-                        <div onclick="toggleFacilityCard('${facility.id}')" style="padding: 20px; display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer; background: #ffffff;">
+                container.innerHTML += `
+                    <div class="card overdue-warning-active" id="${facility.id}" style="margin-bottom: 20px; padding: 20px; background: #ffffff;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <div>
-                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                                    <h2 style="font-size: 18px; font-weight: 700; color: var(--slate-charcoal); margin: 0;">${facility.name}</h2>
-                                    <span class="warning-badge" id="badge-${facility.id}">⚠️ DUE UPON RECEIPT</span>
-                                </div>
-                                <div style="font-size: 13px; color: var(--muted-text); display: flex; flex-direction: column; gap: 4px;">
-                                    <span>📍 ${facility.address || 'No Address Logged'} | 📞 ${facility.phone || 'No Phone Logged'}</span>
-                                    <span style="color: var(--ocean-blue); font-weight: 600;">📋 Active Series Bundle: ${facility.codes ? facility.codes : 'None Specified'} (${facility.tier == '1500' ? '1 Series' : '2 Series'})</span>
-                                </div>
+                                <h2 style="font-size: 18px; font-weight: 700; color: var(--slate-charcoal); margin: 0 0 8px 0;">${facility.name} <span class="warning-badge">⚠️ DUE UPON RECEIPT</span></h2>
+                                <div style="font-size: 13px; color: var(--muted-text);">📍 ${facility.address || 'No Address Logged'} | 📞 ${facility.phone || 'No Phone Logged'}</div>
                             </div>
                             <div style="text-align: right;">
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; justify-content: flex-end;">
-                                    <span style="font-size: 13px; font-weight: 600; color: #475569; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">${facility.paymentStatus}</span>
-                                    <button type="button" class="btn delete-action-btn" style="background: #ef4444; padding: 4px 8px; font-size: 11px; border-radius: 4px;" onclick="event.stopPropagation(); deleteFacilityRecord('${facility.id}')">🗑️ Permanent Delete</button>
-                                </div>
-                                <div style="font-size: 20px; font-weight: 700; color: var(--slate-charcoal);">
-                                    $${facility.amountPaid} <span style="font-size: 13px; font-weight: 400; color: var(--muted-text);">paid of $${facility.tier}</span>
-                                </div>
+                                <span style="font-size: 13px; font-weight: 600; color: #475569; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">${facility.paymentStatus}</span>
+                                <button type="button" class="btn" style="background: #ef4444; padding: 4px 8px; font-size: 11px; margin-left: 8px;" onclick="deleteFacilityRecord('${facility.id}')">🗑️ Delete</button>
                             </div>
                         </div>
-
-                        <!-- EXTENDED ACCORDION CONTROL CORE PANEL -->
-                        <div class="details-expanded-panel" style="display: none; padding: 20px; border-top: 1px solid var(--border-gray); background: #fafafa;">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 20px;">
-                                <div style="background: #ffffff; border: 1px solid var(--border-gray); border-radius: 6px; padding: 16px;">
-                                    <div style="font-weight: 700; font-size: 14px; color: var(--ocean-blue); margin-bottom: 12px;">📝 Contract Tracking Milestones</div>
-                                    <div style="margin-bottom: 12px;">
-                                        <label>Date Contract Dispatched Sent:</label>
-                                        <input type="date" class="block-member" value="${facility.contractSent}" onchange="updateFacilityField('${facility.id}', 'contractSent', this.value)">
-                                    </div>
-                                    <div>
-                                        <label>Date Signed Contract Received Back:</label>
-                                        <input type="date" class="block-member" value="${facility.contractReceived}" onchange="updateFacilityField('${facility.id}', 'contractReceived', this.value)">
-                                    </div>
-                                </div>
-                                <div style="background: #ffffff; border: 1px solid var(--border-gray); border-radius: 6px; padding: 16px;">
-                                    <div style="font-weight: 700; font-size: 14px; color: var(--ocean-blue); margin-bottom: 12px;">📋 Core Profile Metadata Info</div>
-                                    <div style="margin-bottom: 12px;">
-                                        <label>📍 Street Address:</label>
-                                        <input type="text" class="block-member" value="${facility.address}" onchange="updateFacilityField('${facility.id}', 'address', this.value)">
-                                    </div>
-                                    <div style="margin-bottom: 12px;">
-                                        <label>📞 Phone:</label>
-                                        <input type="text" class="block-member" value="${facility.phone}" onchange="updateFacilityField('${facility.id}', 'phone', this.value)">
-                                    </div>
-                                    <div>
-                                        <label>🗂️ Content Series Codes:</label>
-                                        <input type="text" class="block-member" value="${facility.codes}" onchange="updateFacilityField('${facility.id}', 'codes', this.value)">
-                                    </div>
-                                </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; border-top: 1px dashed var(--border-gray); padding-top: 16px;">
+                            <div>
+                                <label>Date Contract Dispatched Sent:</label>
+                                <input type="date" value="${facility.contractSent}" onchange="updateFacilityField('${facility.id}', 'contractSent', this.value)">
                             </div>
-                            <div style="background: #ffffff; border: 1px solid var(--border-gray); border-radius: 6px; padding: 16px; margin-bottom: 16px;">
-                                <div style="font-weight: 700; font-size: 14px; color: var(--ocean-blue); margin-bottom: 12px;">👥 Assigned Representatives</div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr 1fr; gap: 8px;">
-                                    <div><label>👤 Rep Name:</label><input type="text" class="block-member" value="${facility.repName}" onchange="updateFacilityField('${facility.id}', 'repName', this.value)"></div>
-                                    <div><label>💼 Position:</label><input type="text" class="block-member" value="${facility.repPosition}" maxlength="75" onchange="updateFacilityField('${facility.id}', 'repPosition', this.value)"></div>
-                                    <div><label>📩 Email:</label><input type="text" class="block-member" value="${facility.repEmail}" onchange="updateFacilityField('${facility.id}', 'repEmail', this.value)"></div>
-                                    <div><label>📱 Cell:</label><input type="text" placeholder="Mobile Input Link" readonly style="background:#f1f5f9; color:#94a3b8;"></div>
-                                </div>
-                                <div id="extra-reps-box-${facility.id}">
-                                    ${facility.extraStaff.map((staff, sIdx) => `
-                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr 1fr auto; gap: 8px; margin-top:8px; align-items:center;">
-                                            <input type="text" value="${staff.name}" readonly style="background:#f8fafc;">
-                                            <input type="text" value="${staff.pos}" readonly style="background:#f8fafc;">
-                                            <input type="text" value="${staff.email}" readonly style="background:#f8fafc;">
-                                            <input type="text" value="${staff.cell}" readonly style="background:#f8fafc;">
-                                            <button class="btn delete-action-btn" style="background:#ef4444; padding:4px 8px; font-size:11px;" onclick="removeExtraStaff('${facility.id}', ${sIdx})">🗑️</button>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-
-                            <div class="admin-only-element" style="background-color: #f1f5f9; border: 1px solid var(--border-gray); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
-                                <div style="font-weight: 700; font-size: 13px; color: var(--ocean-blue); margin-bottom: 8px;">➕ Add Extra Staff Contact</div>
-                                <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr 1fr auto; gap: 8px; align-items: flex-end;">
-                                    <div><input type="text" id="addStaffName-${facility.id}" placeholder="Full Name"></div>
-                                    <div><input type="text" id="addStaffPos-${facility.id}" placeholder="Position Title" maxlength="75"></div>
-                                    <div><input type="email" id="addStaffEmail-${facility.id}" placeholder="Email"></div>
-                                    <div><input type="text" id="addStaffCell-${facility.id}" placeholder="Cell"></div>
-                                    <button type="button" class="btn" style="background-color: var(--ocean-blue); padding: 6px 14px;" onclick="addExtraStaffRow('${facility.id}')">Add</button>
-                                </div>
-                            </div>
-
-                            <div style="background: #ffffff; border: 1px solid var(--border-gray); border-radius: 6px; padding: 16px;">
-                                <div style="font-weight: 700; font-size: 14px; color: var(--ocean-blue); margin-bottom: 12px;">📢 Historical Facility Interaction Logs</div>
-                                <div style="display:flex; flex-direction:column; gap:8px;">
-                                    ${linkedNotes.map(n => `
-                                        <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid var(--border-gray); border-radius: 6px; padding: 8px 12px; font-size:13px;">
-                                            <span><strong style="color:#64748b;">🗓️ ${n.date}:</strong> ${n.content}</span>
-                                        </div>
-                                    `).join('')}
-                                    ${linkedNotes.length === 0 ? '<span style="color:var(--muted-text); font-style:italic; font-size:13px;">No logged conversations. Use quick-adder tool below.</span>' : ''}
-                                </div>
+                            <div>
+                                <label>Date Signed Contract Received Back:</label>
+                                <input type="date" value="${facility.contractReceived}" onchange="updateFacilityField('${facility.id}', 'contractReceived', this.value)">
                             </div>
                         </div>
                     </div>
                 `;
-                container.innerHTML += cardHTML;
             });
-
-            // Role restrictions adjustment subroutines
-            if (activeUserRole !== "silladmin2027") {
-                document.querySelectorAll('.admin-only-element').forEach(e => e.style.display = 'none');
-                document.querySelectorAll('.delete-action-btn').forEach(b => b.style.display = 'none');
-                if (activeUserRole === "sillboard2027") {
-                    document.querySelectorAll('.block-member').forEach(i => i.disabled = true);
-                }
-            }
-        }
-
-        function addExtraStaffRow(facilityId) {
-            const nameEl = document.getElementById(`addStaffName-${facilityId}`);
-            if (!nameEl.value.trim()) { alert('Staff name is required.'); return; }
-            const index = facilityDatabase.findIndex(f => f.id === facilityId);
-            if (index !== -1) {
-                facilityDatabase[index].extraStaff.push({
-                    name: nameEl.value.trim(),
-                    pos: document.getElementById(`addStaffPos-${facilityId}`).value.trim(),
-                    email: document.getElementById(`addStaffEmail-${facilityId}`).value.trim(),
-                    cell: document.getElementById(`addStaffCell-${facilityId}`).value.trim()
-                });
-                localStorage.setItem('sill_facilities_db', JSON.stringify(facilityDatabase));
-                renderDirectoryView();
-            }
-        }
-
-        function removeExtraStaff(facilityId, staffIndex) {
-            const index = facilityDatabase.findIndex(f => f.id === facilityId);
-            if (index !== -1) {
-                facilityDatabase[index].extraStaff.splice(staffIndex, 1);
-                localStorage.setItem('sill_facilities_db', JSON.stringify(facilityDatabase));
-                renderDirectoryView();
-            }
-        }
-
-        function saveQuickNote() {
-            const content = document.getElementById('quickNoteContent').value.trim();
-            const targetId = document.getElementById('quickNoteFacilityTarget').value;
-            if (!content || !targetId) { alert('Please enter a note and pick a target facility.'); return; }
-            
-            globalInteractionLogs.unshift({
-                date: new Date().toISOString().split('T')[0],
-                facilityId: targetId,
-                content: content
-            });
-            localStorage.setItem('sill_global_logs', JSON.stringify(globalInteractionLogs));
-            renderDirectoryView();
-            document.getElementById('quickNoteContent').value = '';
         }
 
         function deleteFacilityRecord(facilityId) {
             if (confirm("Are you sure you want to permanently delete this facility profile?")) {
                 facilityDatabase = facilityDatabase.filter(f => f.id !== facilityId);
-                globalInteractionLogs = globalInteractionLogs.filter(log => log.facilityId !== facilityId);
                 localStorage.setItem('sill_facilities_db', JSON.stringify(facilityDatabase));
                 renderDirectoryView();
             }
@@ -516,3 +387,4 @@
     </script>
 </body>
 </html>
+ 
