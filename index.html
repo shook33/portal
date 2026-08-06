@@ -3,305 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrative Portal</title>
+    <title>Facilities Directory App</title>
     <style>
-    /* 🎨 BRAND CONFIGURATIONS */
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f8fafc; color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; }
-    :root { --ocean-blue: #0369a1; --slate-charcoal: #0f172a; --white: #ffffff; --border-gray: #cbd5e1; --muted-text: #64748b; }
-    
-    /* 🗂️ SIDEBAR & RESPONSIVE GRID LAYOUTS */
-    .app-container { display: grid; grid-template-columns: 260px 1fr; flex-grow: 1; min-width: 1200px; }
-    aside { background-color: var(--white); border-right: 1px solid var(--border-gray); padding: 24px; display: flex; flex-direction: column; gap: 8px; }
-    .nav-link { display: flex; align-items: center; padding: 10px 14px; color: var(--slate-charcoal); text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 14px; transition: all 0.2s; }
-    .nav-link:hover, .nav-link.active { background-color: #f0f9ff; color: var(--ocean-blue); font-weight: 600; }
-    main { padding: 32px; overflow-y: auto; max-width: 1400px; margin: 0 auto; width: 100%; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: #f8fafc; padding: 32px; color: #0f172a; }
+        :root { --ocean-blue: #0369a1; --slate-charcoal: #0f172a; --white: #ffffff; --border-gray: #cbd5e1; --muted-text: #64748b; }
+        
+        .card { background-color: var(--white); border: 1px solid var(--border-gray); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .warning-badge { background-color: #ffedd5; color: #ea580c; border: 1px solid #fed7aa; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+        
+        @keyframes borderPulse { 0% { border-color: var(--border-gray); } 50% { border-color: #f97316; box-shadow: 0 0 8px rgba(249, 115, 22, 0.2); } 100% { border-color: var(--border-gray); } }
+        .overdue-warning-active { animation: borderPulse 2s infinite ease-in-out; border-width: 2px !important; }
 
-    /* 🧱 INTERFACE OBJECT WRAPPERS */
-    .card { background-color: var(--white); border: 1px solid var(--border-gray); border-radius: 8px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .warning-badge { background-color: #ffedd5; color: #ea580c; border: 1px solid #fed7aa; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    
-    /* ✏️ FORM INPUT FRAME RESTRAINTS */
-    input[type="text"], input[type="date"], select { width: 100%; padding: 10px 12px; border: 1px solid var(--border-gray); border-radius: 6px; font-size: 14px; color: var(--slate-charcoal); background-color: var(--white); outline: none; }
-    input:focus, select:focus { border-color: var(--ocean-blue); box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.1); }
-    label { display: block; font-size: 13px; font-weight: 600; color: var(--ocean-blue); margin-bottom: 6px; }
-    .btn { color: #ffffff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; background-color: var(--ocean-blue); transition: opacity 0.15s; }
-    .btn:hover { opacity: 0.9; }
-    
-    /* 🧡 ANIMATED TIMELINE ALERTS */
-    @keyframes borderPulse { 0% { border-color: var(--border-gray); } 50% { border-color: #f97316; box-shadow: 0 0 12px rgba(249, 115, 22, 0.25); } 100% { border-color: var(--border-gray); } }
-    .overdue-warning-active { animation: borderPulse 2s infinite ease-in-out; border-width: 2px !important; }
-</style>
-
+        input[type="text"], input[type="date"], select { width: 100%; padding: 8px 12px; border: 1px solid var(--border-gray); border-radius: 6px; font-size: 13px; color: var(--slate-charcoal); }
+        label { display: block; font-size: 12px; font-weight: 600; color: var(--ocean-blue); margin-bottom: 4px; }
+        .btn { color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    </style>
 </head>
 <body>
 
-    <!-- TOP SIMULATION SECURITY GATEKEEPER BAR -->
-    <div style="background-color: #1e293b; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-        <div><strong>Workspace Portal Engine</strong></div>
-        <div>
-            <label style="color:white; display:inline; margin-right:8px;">Signed in as:</label>
-            <select id="profileSwitcher" style="width:auto; padding:4px 8px; background:#334155; color:white; border:1px solid #475569;" onchange="applySecurityProfile(this.value)">
-                <option value="silladmin2027">silladmin2027 (Admin / You)</option>
-                <option value="Treasurer2027">Treasurer2027 (Treasurer Profile)</option>
-                <option value="sillboard2027">sillboard2027 (Board Member Profile)</option>
-            </select>
+    <!-- APP HEADER TITLE -->
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
+        <span style="font-size: 22px;">📁</span>
+        <h1 style="font-size: 24px; font-weight: 700; color: var(--ocean-blue); margin: 0;">Facilities Directory</h1>
+    </div>
+    <!-- UNIVERSAL CREATION CARD (FOR ADDING BLANK NEW RECORDS FROM SCRATCH) -->
+    <div class="card" style="border-top: 4px solid var(--ocean-blue); margin-bottom: 32px;">
+        <div style="font-weight: 700; font-size: 15px; color: var(--ocean-blue); margin-bottom: 16px; display: flex; align-items: center; gap: 6px;">
+            <span>🏢</span> Quick-Add New Active Facility Profile
+        </div>
+        
+        <!-- ROW 1: PRIMARY ASSET DATA IDENTIFIERS -->
+        <div style="display: grid; grid-template-columns: 1.5fr 1.5fr 1.2fr 1.2fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+                <label>Facility Name:</label>
+                <input type="text" id="createName" placeholder="e.g. Bay Village">
+            </div>
+            <div>
+                <label>Street Address:</label>
+                <input type="text" id="createAddress" placeholder="Address, City, ZIP">
+            </div>
+            <div>
+                <label>Primary Phone Number:</label>
+                <input type="text" id="createPhone" placeholder="941-000-0000">
+            </div>
+            <div>
+                <label>Active Operational Tier:</label>
+                <select id="createTier">
+                    <option value="1500">1 Series Subscription ($1,500)</option>
+                    <option value="2300">2 Series Bundle Subscription ($2,300)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ROW 2: CORE CONTACT METADATA TRACKERS -->
+        <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr 1.5fr; gap: 12px; margin-bottom: 16px;">
+            <div>
+                <label>Series Subscribed Codes:</label>
+                <input type="text" id="createCodes" placeholder="e.g. MM, GI1, GI2">
+            </div>
+            <div>
+                <label>Primary Contact Name:</label>
+                <input type="text" id="createRepName" placeholder="Rep Full Name">
+            </div>
+            <div>
+                <label>Contact Position/Role:</label>
+                <input type="text" id="createRepPosition" placeholder="e.g. Life Director" maxlength="75">
+            </div>
+            <div>
+                <label>Contact Email Address:</label>
+                <input type="text" id="createRepEmail" placeholder="email@facility.org">
+            </div>
+        </div>
+
+        <!-- SUBMIT / COMMIT TRIGGER BUTTON -->
+        <div style="display: flex; justify-content: flex-end;">
+            <button type="button" class="btn" style="background-color: var(--ocean-blue); display: flex; align-items: center; gap: 6px;" onclick="createNewFacilityRecord()">
+                💾 Save Facility Record
+            </button>
         </div>
     </div>
 
-    <!-- MAIN APP GRAPHICAL WRAPPER -->
-    <div class="app-container">
-        <!-- GLOBAL SIDEBAR NAVIGATION TABS -->
-        <aside>
-            <div style="font-weight:700; color:var(--ocean-blue); margin-bottom:20px; font-size:16px;">SILL ARCHITECTURE</div>
-            <a href="#" class="nav-link active" onclick="switchView('facilities-view')">🏢 Facilities Directory</a>
-            <a href="#" class="nav-link" onclick="switchView('financial-view')">💳 Payment Stream Ledger</a>
-            <a href="#" class="nav-link" onclick="switchView('marketing-view')">📣 Marketing Pipeline</a>
-        </aside>
+    <!-- DYNAMICALLY BUILT TRACKING LIST CONTAINER WRAPPER -->
+    <div id="dynamicDirectoryList"></div>
+    </div>
+    <!-- DIRECTORY CONTAINER END -->
 
-        <!-- MAIN WINDOW DISPLAY SPACE -->
-        <main>
-            <!-- ==================================================== -->
-            <!-- 1. MARKETING PIPELINE VIEW LAYER (Hidden by Default) -->
-            <!-- ==================================================== -->
-            <div id="marketing-view" style="display: none;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
-                    <span style="font-size: 22px;">📣</span>
-                    <h1 style="font-size: 24px; font-weight: 700; color: var(--ocean-blue); margin: 0;">Marketing Pipeline</h1>
-                </div>
-                
-                <div class="card" style="border-top: 4px solid var(--ocean-blue);">
-                    <div style="font-weight: 700; font-size: 15px; color: var(--ocean-blue); margin-bottom: 12px;">📊 Marketing Lead Registry Directory</div>
-                    <p style="color: var(--muted-text); font-size: 13px; font-style: italic;">
-                        Pipeline leads and referred-by registry tracking parameters load dynamically here.
-                    </p>
+    <!-- QUICK-ADD NOTES ENTRY BLOCK (Anchored at page bottom) -->
+    <div class="card" style="border-top: 4px solid var(--slate-charcoal); margin-top: 32px;">
+        <div style="font-weight: 700; font-size: 15px; color: var(--slate-charcoal); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <span>📝</span> Quick-Add New Activity Log Entry
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: grid; grid-template-columns: 1fr 250px; gap: 12px;">
+                <input type="text" id="quickNoteContent" placeholder="Type historical log or call details here...">
+                <div>
+                    <select id="quickNoteFacilityTarget">
+                        <option value="">-- Choose Target Facility --</option>
+                    </select>
                 </div>
             </div>
-
-            <!-- ==================================================== -->
-            <!-- 2. PAYMENT STREAM LEDGER VIEW LAYER (Hidden by Default) -->
-            <!-- ==================================================== -->
-            <div id="financial-view" style="display: none;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
-                    <span style="font-size: 22px;">💳</span>
-                    <h1 style="font-size: 24px; font-weight: 700; color: var(--ocean-blue); margin: 0;">Payment Stream Ledger</h1>
-                </div>
-                
-                <div class="card" style="border-top: 4px solid var(--ocean-blue);">
-                    <div style="font-weight: 700; font-size: 15px; color: var(--ocean-blue); margin-bottom: 12px;">📊 Central Financial Stream Pane</div>
-                    <p style="color: var(--muted-text); font-size: 13px; font-style: italic;">
-                        Master invoice pipelines and payment tracking data grids load dynamically here.
-                    </p>
-                </div>
+            
+            <div style="display: flex; justify-content: flex-end;">
+                <button type="button" class="btn" style="background-color: var(--slate-charcoal);" onclick="saveQuickNote()">
+                    ⚡ Log Entry to Timeline
+                </button>
             </div>
-
-            <!-- ==================================================== -->
-            <!-- 3. MAIN FACILITIES DIRECTORY VIEW LAYER (Visible)   -->
-            <!-- ==================================================== -->
-            <div id="facilities-view">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
-                    <span style="font-size: 22px;">🏢</span>
-                    <h1 style="font-size: 24px; font-weight: 700; color: var(--ocean-blue); margin: 0;">Facilities Directory</h1>
-                </div>
-                <!-- DYNAMIC FACILITY CREATION HUB -->
-                <div class="card" id="adminCreationCard" style="border-top: 4px solid var(--ocean-blue); margin-bottom: 32px;">
-                    <div style="font-weight: 700; font-size: 15px; color: var(--ocean-blue); margin-bottom: 16px; display: flex; align-items: center; gap: 6px;">
-                        <span>🏢</span> Quick-Add New Active Facility Profile
-                    </div>
-                    
-                    <!-- GRID DATA FIELDS ROW 1 -->
-                    <div style="display: grid; grid-template-columns: 1.5fr 1.5fr 1.2fr 1.2fr; gap: 12px; margin-bottom: 12px;">
-                        <div>
-                            <label>Facility Name:</label>
-                            <input type="text" id="createName" placeholder="e.g. Bay Village">
-                        </div>
-                        <div>
-                            <label>Street Address:</label>
-                            <input type="text" id="createAddress" placeholder="Address, City, ZIP">
-                        </div>
-                        <div>
-                            <label>Primary Phone Number:</label>
-                            <input type="text" id="createPhone" placeholder="941-000-0000">
-                        </div>
-                        <div>
-                            <label>Active Operational Tier:</label>
-                            <select id="createTier">
-                                <option value="1500">1 Series Subscription ($1,500)</option>
-                                <option value="2300">2 Series Bundle Subscription ($2,300)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- GRID DATA FIELDS ROW 2 -->
-                    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr 1.5fr; gap: 12px; margin-bottom: 16px;">
-                        <div>
-                            <label>Series Subscribed Codes:</label>
-                            <input type="text" id="createCodes" placeholder="e.g. MM, GI1, GI2">
-                        </div>
-                        <div>
-                            <label>Primary Contact Name:</label>
-                            <input type="text" id="createRepName" placeholder="Rep Full Name">
-                        </div>
-                        <div>
-                            <label>Contact Position/Role:</label>
-                            <input type="text" id="createRepPosition" placeholder="e.g. Life Director" maxlength="75">
-                        </div>
-                        <div>
-                            <label>Contact Email Address:</label>
-                            <input type="text" id="createRepEmail" placeholder="email@facility.org">
-                        </div>
-                    </div>
-
-                    <!-- TRIGGER ACTION BLOCK -->
-                    <div style="display: flex; justify-content: flex-end;">
-                        <button type="button" class="btn" onclick="createNewFacilityRecord()">
-                            💾 Save Facility Record
-                        </button>
-                    </div>
-                </div>
-
-                <!-- LAYOUT TARGET FOR GENERATED DYNAMIC WORKSPACE CARDS -->
-                <div id="dynamicDirectoryList"></div>
-            </div> <!-- END FACILITIES VIEW VIEWPORT CONTAINER -->
-            <!-- QUICK-ADD NOTES ENTRY BLOCK (Anchored at page bottom) -->
-            <div class="card" style="border-top: 4px solid var(--slate-charcoal); margin-top: 32px;">
-                <div style="font-weight: 700; font-size: 15px; color: var(--slate-charcoal); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                    <span>📝</span> Quick-Add New Activity Log Entry
-                </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <div style="display: grid; grid-template-columns: 1fr 250px; gap: 12px;">
-                        <input type="text" id="quickNoteContent" placeholder="Type historical log or call details here...">
-                        <div>
-                            <select id="quickNoteFacilityTarget">
-                                <option value="">-- Choose Target Facility --</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; justify-content: flex-end;">
-                        <button type="button" class="btn" style="background-color: var(--slate-charcoal);" onclick="saveQuickNote()">
-                            ⚡ Log Entry to Timeline
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        </main>
-    </div> <!-- END APP CONTAINER -->
-
-    <!-- BACKGROUND WORKSPACE ACTION SCRIPTS -->
+        </div>
+    </div>
+    <!-- DYNAMIC SYSTEM STORAGE ENGINE -->
     <script>
-        // Core data structures for session states
+        // Initialize dynamic database state array structure
         let facilityDatabase = JSON.parse(localStorage.getItem('sill_facilities_db')) || [];
         let globalInteractionLogs = JSON.parse(localStorage.getItem('sill_global_logs')) || [];
-        let activeUserRole = "silladmin2027"; // Default simulation role assignment
 
-        // Trigger layout initialization engine
+        // Run render engine on initialization setup
         document.addEventListener("DOMContentLoaded", function() {
             renderDirectoryView();
         });
 
-        // TAB SWITCHING REGISTRATION ENGINE
-        function switchView(targetViewId) {
-            // Hide all layout view layers completely
-            document.getElementById('facilities-view').style.display = 'none';
-            document.getElementById('financial-view').style.display = 'none';
-            document.getElementById('marketing-view').style.display = 'none';
-            
-            // Un-hide targeted container layout
-            document.getElementById(targetViewId).style.display = 'block';
-
-            // Manage active highlights on sidebar buttons smoothly
-            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-            
-            // Find active link matching trigger context action
-            const activeLinkMap = {
-                'facilities-view': 0,
-                'financial-view': 1,
-                'marketing-view': 2
-            };
-            document.querySelectorAll('.nav-link')[activeLinkMap[targetViewId]].classList.add('active');
-            
-            // Run three-tier rule restrictions on view shifts
-            enforceActiveSecurityLayout();
-        }
-        // THREE-TIER PROFILE PERMISSION LAYOUT CONTROLLER
-        function applySecurityProfile(selectedProfile) {
-            activeUserRole = selectedProfile;
-            
-            // Treasurer Role Redirect Rule: Instant screen focus shift to financials
-            if (activeUserRole === "Treasurer2027") {
-                switchView('financial-view');
-            } else {
-                enforceActiveSecurityLayout();
-            }
-        }
-
-        function enforceActiveSecurityLayout() {
-            const adminFormCard = document.getElementById('adminCreationCard');
-            const mainContainer = document.getElementById('dynamicDirectoryList');
-            
-            // Reset visibility settings
-            if (adminFormCard) adminFormCard.style.display = 'block';
-
-            // Profile State Loop 1: Admin Profile (Unrestricted Access)
-            if (activeUserRole === "silladmin2027") {
-                if (adminFormCard) adminFormCard.style.display = 'block';
-                if (mainContainer) {
-                    mainContainer.style.pointerEvents = 'auto';
-                    mainContainer.style.opacity = '1';
-                }
-            } 
-            // Profile State Loop 2: Treasurer Profile (Financial Stream Pane Freeze Only)
-            else if (activeUserRole === "Treasurer2027") {
-                if (adminFormCard) adminFormCard.style.display = 'none'; // Lock creation rights
-                // Note: The financial pane ledger logic will unfreeze inside the render loop
-            } 
-            // Profile State Loop 3: Board Member Profile (Total Read-Only Presentation Profile)
-            else if (activeUserRole === "sillboard2027") {
-                if (adminFormCard) adminFormCard.style.display = 'none'; // Lock creation rights
-                if (mainContainer) {
-                    mainContainer.style.pointerEvents = 'none'; // Completely freeze screen inputs
-                    mainContainer.style.opacity = '0.85';       // Visual anchor profile cue
-                }
-                // Hide action tabs or buttons dynamically across sections
-                document.querySelectorAll('.btn').forEach(b => b.style.display = 'none');
-            }
-            
-            // Refresh display grids under active profile rules
-            renderDirectoryView();
-        }
-
-        // COMPACT DISPLAY ACCORDION ENGINE
-        function toggleFacilityCard(cardElementId) {
-            const card = document.getElementById(cardElementId);
-            if (!card) return;
-            const detailsPanel = card.querySelector('.details-expanded-panel');
-            const isExpanded = card.getAttribute('data-expanded') === 'true';
-            
-            if (isExpanded) {
-                card.setAttribute('data-expanded', 'false');
-                detailsPanel.style.display = 'none';
-            } else {
-                card.setAttribute('data-expanded', 'true');
-                detailsPanel.style.display = 'block';
-            }
-        }
-
-        // ENGINE DATA CONTEXT VARIABLE UPDATE COMMITS
-        function updateFacilityField(facilityId, fieldKey, updatedValue) {
-            const index = facilityDatabase.findIndex(f => f.id === facilityId);
-            if (index !== -1) {
-                facilityDatabase[index][fieldKey] = updatedValue;
-                localStorage.setItem('sill_facilities_db', JSON.stringify(facilityDatabase));
-            }
-        }
-        // NEW FACILITY SCHEMA DATA INITIALIZATION CONTEXT
+        // CREATE NEW BLANK INSTANCE INTERFACE MAPPER
         function createNewFacilityRecord() {
             const name = document.getElementById('createName').value.trim();
-            if (!name) { alert('Please provide a Facility Name to initialize a profile.'); return; }
+            if (!name) {
+                alert('Please provide a Facility Name to initialize a workspace container.');
+                return;
+            }
 
+            // Structure a completely fresh database data object item element
             const newFacility = {
                 id: 'fac_' + Date.now(),
                 name: name,
@@ -321,10 +151,10 @@
             };
 
             facilityDatabase.push(newFacility);
-            localStorage.setItem('sill_facilities_db', JSON.stringify(facilityDatabase));
+            syncDatabaseToLocalStorage();
             renderDirectoryView();
 
-            // Reset creation panel inputs
+            // Clear input fields completely back to standard baseline
             document.getElementById('createName').value = '';
             document.getElementById('createAddress').value = '';
             document.getElementById('createPhone').value = '';
@@ -334,62 +164,213 @@
             document.getElementById('createRepEmail').value = '';
         }
 
-        // COMPONENT MATRIX LOOP ENGINE
-               // COMPONENT MATRIX LOOP ENGINE
-            function renderDirectoryView() {
+        // PERSISTENCE STORAGE CONTROLLER SYNCS
+        function syncDatabaseToLocalStorage() {
+            localStorage.setItem('sill_facilities_db', JSON.stringify(facilityDatabase));
+            localStorage.setItem('sill_global_logs', JSON.stringify(globalInteractionLogs));
+        }
+
+        // ACCORDION DISPLAY TOGGLE STATE MECHANISM
+        function toggleFacilityCard(cardElementId) {
+            const card = document.getElementById(cardElementId);
+            if (!card) return;
+            const detailsPanel = card.querySelector('.details-expanded-panel');
+            const isExpanded = card.getAttribute('data-expanded') === 'true';
+            
+            if (isExpanded) {
+                card.setAttribute('data-expanded', 'false');
+                detailsPanel.style.display = 'none';
+            } else {
+                card.setAttribute('data-expanded', 'true');
+                detailsPanel.style.display = 'block';
+            }
+        }
+
+        // UPDATE AN ACTIVE INSTANCE FIELD VALUE
+        function updateFacilityField(facilityId, fieldKey, updatedValue) {
+            const index = facilityDatabase.findIndex(f => f.id === facilityId);
+            if (index !== -1) {
+                facilityDatabase[index][fieldKey] = updatedValue;
+                syncDatabaseToLocalStorage();
+            }
+        }
+        // DYNAMIC RENDERING COMPONENT LAYOUT ARCHITECTURE LOOP
+        function renderDirectoryView() {
             const container = document.getElementById('dynamicDirectoryList');
             const dropdownSelector = document.getElementById('quickNoteFacilityTarget');
-            if (!container) return;
+            
             container.innerHTML = '';
             dropdownSelector.innerHTML = '<option value="">-- Choose Target Facility --</option>';
 
             if (facilityDatabase.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--muted-text); font-style:italic;">No active facility workspaces initiated. Use the form above to build out your records from scratch.</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--muted-text); font-style:italic;">No active facility workspaces initiated. Use the configuration form above to add your facilities.</div>`;
                 return;
             }
 
             facilityDatabase.forEach(facility => {
                 const linkedNotes = globalInteractionLogs.filter(log => log.facilityId === facility.id);
+                
                 const opt = document.createElement('option');
                 opt.value = facility.id;
                 opt.innerText = `Target: ${facility.name}`;
                 dropdownSelector.appendChild(opt);
 
-                container.innerHTML += `
-                    <div class="card overdue-warning-active" id="${facility.id}" style="margin-bottom: 20px; padding: 20px; background: #ffffff;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                const cardHTML = `
+                    <div class="card overdue-warning-active" data-expanded="false" id="${facility.id}" style="margin-bottom: 20px; overflow: hidden; padding: 0;">
+                        <!-- COMPACT SUMMARY BAR -->
+                        <div onclick="toggleFacilityCard('${facility.id}')" style="padding: 20px; display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer; background: #ffffff;">
                             <div>
-                                <h2 style="font-size: 18px; font-weight: 700; color: var(--slate-charcoal); margin: 0 0 8px 0;">${facility.name} <span class="warning-badge">⚠️ DUE UPON RECEIPT</span></h2>
-                                <div style="font-size: 13px; color: var(--muted-text);">📍 ${facility.address || 'No Address Logged'} | 📞 ${facility.phone || 'No Phone Logged'}</div>
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                    <h2 style="font-size: 18px; font-weight: 700; color: var(--slate-charcoal); margin: 0;">${facility.name}</h2>
+                                    <span class="warning-badge">⚠️ DUE UPON RECEIPT</span>
+                                </div>
+                                <div style="font-size: 13px; color: var(--muted-text); display: flex; flex-direction: column; gap: 4px;">
+                                    <span>📍 ${facility.address || 'No Address Logged'} | 📞 ${facility.phone || 'No Phone Logged'}</span>
+                                    <span style="color: var(--ocean-blue); font-weight: 600;">📋 Active Series Bundle: ${facility.codes ? facility.codes : 'None Specified'} (${facility.tier == '1500' ? '1 Series' : '2 Series'})</span>
+                                </div>
                             </div>
                             <div style="text-align: right;">
-                                <span style="font-size: 13px; font-weight: 600; color: #475569; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">${facility.paymentStatus}</span>
-                                <button type="button" class="btn" style="background: #ef4444; padding: 4px 8px; font-size: 11px; margin-left: 8px;" onclick="deleteFacilityRecord('${facility.id}')">🗑️ Delete</button>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; justify-content: flex-end;">
+                                    <span style="font-size: 13px; font-weight: 600; color: #475569; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">${facility.paymentStatus}</span>
+                                    <button type="button" class="btn" style="background: #ef4444; padding: 4px 8px; font-size: 11px; border-radius: 4px;" onclick="event.stopPropagation(); deleteFacilityRecord('${facility.id}')">🗑️ Permanent Delete</button>
+                                </div>
+                                <div style="font-size: 20px; font-weight: 700; color: var(--slate-charcoal);">
+                                    $${facility.amountPaid} <span style="font-size: 13px; font-weight: 400; color: var(--muted-text);">paid of $${facility.tier}</span>
+                                </div>
                             </div>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; border-top: 1px dashed var(--border-gray); padding-top: 16px;">
-                            <div>
-                                <label>Date Contract Dispatched Sent:</label>
-                                <input type="date" value="${facility.contractSent}" onchange="updateFacilityField('${facility.id}', 'contractSent', this.value)">
+
+                        <!-- EXPANDED DETAILED WORKSPACE GRID -->
+                        <div class="details-expanded-panel" style="display: none; padding: 20px; border-top: 1px solid var(--border-gray); background: #fafafa;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 20px;">
+                                <div style="background: #ffffff; border: 1px solid var(--border-gray); border-radius: 6px; padding: 16px;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ocean-blue); margin-bottom: 12px;">📝 Contract Tracking Milestones</div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label>Date Contract Dispatched Sent:</label>
+                                        <input type="date" value="${facility.contractSent}" onchange="updateFacilityField('${facility.id}', 'contractSent', this.value)">
+                                    </div>
+                                    <div>
+                                        <label>Date Signed Contract Received Back:</label>
+                                        <input type="date" value="${facility.contractReceived}" onchange="updateFacilityField('${facility.id}', 'contractReceived', this.value)">
+                                    </div>
+                                </div>
+                                <div style="background: #ffffff; border: 1px solid var(--border-gray); border-radius: 6px; padding: 16px;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ocean-blue); margin-bottom: 12px;">📋 Core Profile Metadata Info</div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label>📍 Street Address:</label>
+                                        <input type="text" value="${facility.address}" onchange="updateFacilityField('${facility.id}', 'address', this.value)">
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label>📞 Phone:</label>
+                                        <input type="text" value="${facility.phone}" onchange="updateFacilityField('${facility.id}', 'phone', this.value)">
+                                    </div>
+                                    <div>
+                                        <label>🗂️ Content Series Codes:</label>
+                                        <input type="text" value="${facility.codes}" onchange="updateFacilityField('${facility.id}', 'codes', this.value)">
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label>Date Signed Contract Received Back:</label>
-                                <input type="date" value="${facility.contractReceived}" onchange="updateFacilityField('${facility.id}', 'contractReceived', this.value)">
+                            <div style="background: #ffffff; border: 1px solid var(--border-gray); border-radius: 6px; padding: 16px; margin-bottom: 16px;">
+                                <div style="font-weight: 700; font-size: 14px; color: var(--ocean-blue); margin-bottom: 12px;">👥 Assigned Representatives</div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr 1fr; gap: 8px;">
+                                    <div><label>👤 Rep Name:</label><input type="text" value="${facility.repName}" onchange="updateFacilityField('${facility.id}', 'repName', this.value)"></div>
+                                    <div><label>💼 Position:</label><input type="text" value="${facility.repPosition}" maxlength="75" onchange="updateFacilityField('${facility.id}', 'repPosition', this.value)"></div>
+                                    <div><label>📩 Email:</label><input type="text" value="${facility.repEmail}" onchange="updateFacilityField('${facility.id}', 'repEmail', this.value)"></div>
+                                    <div><label>📱 Cell:</label><input type="text" placeholder="Mobile Input Link" readonly style="background:#f1f5f9; color:#94a3b8;"></div>
+                                </div>
+                                <div id="extra-reps-box-${facility.id}">
+                                    ${facility.extraStaff.map((staff, sIdx) => `
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr 1fr auto; gap: 8px; margin-top:8px; align-items:center;">
+                                            <input type="text" value="${staff.name}" readonly style="background:#f8fafc;">
+                                            <input type="text" value="${staff.pos}" readonly style="background:#f8fafc;">
+                                            <input type="text" value="${staff.email}" readonly style="background:#f8fafc;">
+                                            <input type="text" value="${staff.cell}" readonly style="background:#f8fafc;">
+                                            <button class="btn" style="background:#ef4444; padding:4px 8px; font-size:11px;" onclick="removeExtraStaff('${facility.id}', ${sIdx})">🗑️</button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <div style="background-color: #f1f5f9; border: 1px solid var(--border-gray); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
+                                <div style="font-weight: 700; font-size: 13px; color: var(--ocean-blue); margin-bottom: 8px;">➕ Add Extra Staff Contact</div>
+                                <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr 1fr auto; gap: 8px; align-items: flex-end;">
+                                    <div><input type="text" id="addStaffName-${facility.id}" placeholder="Full Name"></div>
+                                    <div><input type="text" id="addStaffPos-${facility.id}" placeholder="Position Title" maxlength="75"></div>
+                                    <div><input type="email" id="addStaffEmail-${facility.id}" placeholder="Email"></div>
+                                    <div><input type="text" id="addStaffCell-${facility.id}" placeholder="Cell"></div>
+                                    <button type="button" class="btn" style="background-color: var(--ocean-blue); padding: 6px 14px;" onclick="addExtraStaffRow('${facility.id}')">Add</button>
+                                </div>
+                            </div>
+
+                            <div style="background: #ffffff; border: 1px solid var(--border-gray); border-radius: 6px; padding: 16px;">
+                                <div style="font-weight: 700; font-size: 14px; color: var(--ocean-blue); margin-bottom: 12px;">📢 Historical Facility Interaction Logs</div>
+                                <div style="display:flex; flex-direction:column; gap:8px;">
+                                    ${linkedNotes.map(n => `
+                                        <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid var(--border-gray); border-radius: 6px; padding: 8px 12px; font-size:13px;">
+                                            <span><strong style="color:#64748b;">🗓️ ${n.date}:</strong> ${n.content}</span>
+                                        </div>
+                                    `).join('')}
+                                    ${linkedNotes.length === 0 ? '<span style="color:var(--muted-text); font-style:italic; font-size:13px;">No logged conversations. Use quick-adder tool below.</span>' : ''}
+                                </div>
                             </div>
                         </div>
                     </div>
                 `;
+                container.innerHTML += cardHTML;
             });
         }
 
+        function addExtraStaffRow(facilityId) {
+            const nameEl = document.getElementById(`addStaffName-${facilityId}`);
+            if (!nameEl.value.trim()) { alert('Staff name is required.'); return; }
+            
+            const index = facilityDatabase.findIndex(f => f.id === facilityId);
+            if (index !== -1) {
+                facilityDatabase[index].extraStaff.push({
+                    name: nameEl.value.trim(),
+                    pos: document.getElementById(`addStaffPos-${facilityId}`).value.trim(),
+                    email: document.getElementById(`addStaffEmail-${facilityId}`).value.trim(),
+                    cell: document.getElementById(`addStaffCell-${facilityId}`).value.trim()
+                });
+                syncDatabaseToLocalStorage();
+                renderDirectoryView();
+            }
+        }
+
+        function removeExtraStaff(facilityId, staffIndex) {
+            const index = facilityDatabase.findIndex(f => f.id === facilityId);
+            if (index !== -1) {
+                facilityDatabase[index].extraStaff.splice(staffIndex, 1);
+                syncDatabaseToLocalStorage();
+                renderDirectoryView();
+            }
+        }
+
+        function saveQuickNote() {
+            const content = document.getElementById('quickNoteContent').value.trim();
+            const targetId = document.getElementById('quickNoteFacilityTarget').value;
+            
+            if (!content || !targetId) { alert('Please enter a note and pick a target facility.'); return; }
+            
+            globalInteractionLogs.unshift({
+                date: new Date().toISOString().split('T')[0],
+                facilityId: targetId,
+                content: content
+            });
+            
+            syncDatabaseToLocalStorage();
+            renderDirectoryView();
+            document.getElementById('quickNoteContent').value = '';
+        }
+
         function deleteFacilityRecord(facilityId) {
-            if (confirm("Are you sure you want to permanently delete this facility profile?")) {
+            if (confirm("Are you sure you want to permanently delete this facility template instance?")) {
                 facilityDatabase = facilityDatabase.filter(f => f.id !== facilityId);
-                localStorage.setItem('sill_facilities_db', JSON.stringify(facilityDatabase));
+                globalInteractionLogs = globalInteractionLogs.filter(log => log.facilityId !== facilityId);
+                syncDatabaseToLocalStorage();
                 renderDirectoryView();
             }
         }
     </script>
 </body>
 </html>
- 
