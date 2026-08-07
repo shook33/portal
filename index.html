@@ -429,13 +429,21 @@
                     </div>
                     <div id="details-${fac.id}" class="details-box">
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:15px;">
-                            <div style="background:#ffffff; padding:12px; border-radius:6px; border:1px solid #cbd5e1;">
-                                <h5 style="margin:0 0 8px 0; color:#0369a1; font-size:0.9rem;">📝 Contract Tracking Milestones</h5>
-                                <label style="font-size:11px; color:#64748b;">📅 Date Contract Dispatched Sent:</label>
-                                <input type="date" id="edit-csent-${fac.id}" value="${fac.contract_sent_date || ''}" class="table-input" onchange="mockFacilities.find(f=>f.id===${fac.id}).contract_sent_date=this.value; saveDataToCloud();">
-                                <label style="font-size:11px; color:#64748b; margin-top:5px; display:block;">📂 Date Signed Contract Received Back:</label>
-                                <input type="date" id="edit-crec-${fac.id}" value="${fac.contract_received_date || ''}" class="table-input" onchange="mockFacilities.find(f=>f.id===${fac.id}).contract_received_date=this.value; saveDataToCloud();">
-                            </div>
+  
+<div style="background:#ffffff; padding:12px; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:12px;">
+    <h5 style="margin:0 0 8px 0; color:#0369a1; font-size:0.9rem;">📝 Contract Tracking Milestones</h5>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px;">
+            <label style="font-size:11px; color:#64748b; display:block; margin-bottom:4px;">Date Contract Dispatched Sent:</label>
+            <input type="date" id="edit-csent-${fac.id}" value="${fac.contract_sent_date || ''}" class="table-input" style="width:100%; padding:4px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_sent_date=this.value">
+        </div>
+        <div style="flex: 1; min-width: 200px;">
+            <label style="font-size:11px; color:#64748b; display:block; margin-bottom:4px;">Date Signed Contract Received Back:</label>
+            <input type="date" id="edit-crec-${fac.id}" value="${fac.contract_received_date || ''}" class="table-input" style="width:100%; padding:4px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_received_date=this.value">
+        </div>
+    </div>
+</div>
+                           </div>
                             <div style="background:#ffffff; padding:12px; border-radius:6px; border:1px solid #cbd5e1;">
                                 <h5 style="margin:0 0 8px 0; color:#0369a1; font-size:0.9rem;">📜 Core Profile Metadata Info</h5>
                                 <label style="font-size:11px; color:#64748b;">📍 Street Address Box:</label><input type="text" id="edit-add-${fac.id}" value="${fac.address || ''}" class="table-input">
