@@ -437,13 +437,16 @@
                             <div style="font-weight: 700; color: #0f172a; font-size: 16px; margin-bottom: 3px;">${fac.name}</div>
                             <div style="font-size: 12px; color: #64748b;">📍 ${fac.address || 'No Address'} | 📞 ${fac.phone || 'No Phone'}</div>
                         </td>
+                                          <!-- LIVE INTERACTIVE PRIMARY CONTACT FIELD -->
                         <td style="padding: 14px 18px; vertical-align: middle;">
-                            <div style="font-weight: 600; color: #334155; font-size: 14px;">${primaryContact.name}</div>
-                            <div style="font-size: 12px; color: #64748b;">${primaryContact.email}</div>
+                            <input type="text" value="${primaryContact.name === 'Unassigned' ? '' : primaryContact.name}" placeholder="Type Contact Name..." style="padding: 6px 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 4px; width: 90%; font-weight: 600; color: #334155; background: #fafafa;" onchange="const f=mockFacilities.find(fac=>fac.id==='${fac.id}'); if(f){ f.rep_name=this.value; f.primary_contact_name=this.value; f.rep=this.value; } saveDataToCloud();">
+                            <div style="font-size: 11px; color: #64748b; margin-top: 4px; padding-left: 2px;">${primaryContact.email || 'No email saved'}</div>
                         </td>
+                        <!-- LIVE INTERACTIVE SERIES BUNDLE FIELD -->
                         <td style="padding: 14px 18px; vertical-align: middle;">
-                            <span style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${fac.series || 'None'}</span>
+                            <input type="text" value="${fac.series || ''}" placeholder="None" style="padding: 6px 8px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 80%; text-align: center; font-weight: 700; color: #0369a1; background: #e0f2fe;" onchange="const f=mockFacilities.find(fac=>fac.id==='${fac.id}'); if(f){ f.series=this.value; } saveDataToCloud();">
                         </td>
+
                         <td style="padding: 14px 18px; vertical-align: middle;">
                             <input type="date" value="${fac.contract_sent_date || ''}" style="padding: 6px 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_sent_date=this.value; saveDataToCloud();">
                         </td>
