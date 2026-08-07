@@ -410,11 +410,17 @@
                         <tbody>
             `;
 
-            mockFacilities.forEach(fac => {
-                const isPaid = fac.payment_status === "Paid";
-                const badgeStyle = isPaid ? "background: #dcfce7; color: #15803d;" : "background: #fee2e2; color: #ef4444;";
-             const primaryContact = { name: fac.rep_name || 'Unassigned', email: fac.rep_email || '' };
+               mockFacilities.forEach(fac => {
+                const isPaid = fac.payment_status === "Paid" || fac.payment_status === "Paid in Full";
+                const isHalf = fac.payment_status === "Half Paid" || fac.payment_status === "Half Payment";
+                let badgeStyle = "background: #fee2e2; color: #ef4444;";
+                if (isPaid) badgeStyle = "background: #dcfce7; color: #15803d;";
+                if (isHalf) badgeStyle = "background: #fef9c3; color: #a16207;";
+
+                const primaryContact = { name: fac.rep_name || 'Unassigned', email: fac.rep_email || '' };
+
                 tableHTML += `
+                    <!-- STREAMLINED COMPACT DATA ROW -->
                     <tr style="border-bottom: 1px solid #e2e8f0; background: #ffffff;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='#ffffff'">
                         <td style="padding: 12px 16px; vertical-align: middle;">
                             <div style="font-weight: 700; color: #0f172a; font-size: 14px; margin-bottom: 2px;">${fac.name}</div>
@@ -428,28 +434,47 @@
                             <span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 11px;">${fac.series || 'None'}</span>
                         </td>
                         <td style="padding: 12px 16px; vertical-align: middle;">
-                            <input type="date" value="${fac.contract_sent_date || ''}" style="padding: 4px 8px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_sent_date=this.value; saveDataToCloud();">
+                            <input type="date" value="${fac.contract_sent_date || ''}" style="padding: 4px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_sent_date=this.value; saveDataToCloud();">
                         </td>
                         <td style="padding: 12px 16px; vertical-align: middle;">
-                            <input type="date" value="${fac.contract_received_date || ''}" style="padding: 4px 8px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_received_date=this.value; saveDataToCloud();">
+                            <input type="date" value="${fac.contract_received_date || ''}" style="padding: 4px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_received_date=this.value; saveDataToCloud();">
                         </td>
+                        <!-- EXPANDED STANDING FINANCIAL STREAM FIELDS -->
                         <td style="padding: 12px 16px; vertical-align: middle;">
-                            <span style="font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; ${badgeStyle}">${fac.payment_status || 'Unpaid'}</span>
+                            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+                                    <span style="color:#64748b;">Inv Sent:</span>
+                                    <input type="date" value="${fac.invoice_sent_date || ''}" style="padding: 2px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 3px; width: 105px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').invoice_sent_date=this.value; saveDataToCloud();">
+                                </div>
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+                                    <span style="color:#64748b;">Chk Rec'd:</span>
+                                    <input type="date" value="${fac.check_received_date || ''}" style="padding: 2px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 3px; width: 105px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').check_received_date=this.value; saveDataToCloud();">
+                                </div>
+                                <div style="margin-top: 2px;">
+                                    <select style="font-size: 11px; padding: 2px; font-weight: 700; border-radius: 4px; width: 100%; ${badgeStyle}" onchange="mockFacilities.find(f=>f.id==='${fac.id}').payment_status=this.value; saveDataToCloud(); renderDashboard();">
+                                        <option value="Unpaid" ${fac.payment_status === 'Unpaid' ? 'selected' : ''}>❌ Unpaid</option>
+                                        <option value="Half Payment" ${isHalf ? 'selected' : ''}>🌗 Half Payment</option>
+                                        <option value="Paid in Full" ${isPaid ? 'selected' : ''}>✅ Paid in Full</option>
+                                    </select>
+                                </div>
+                            </div>
                         </td>
                         <td style="padding: 12px 16px; vertical-align: middle; text-align: center;">
-                            <button type="button" class="btn" style="background: #e2e8f0; color: #0f172a; padding: 4px 8px; font-size: 11px; border-radius: 4px; font-weight: 500;" onclick="toggleLogDrawer('${fac.id}')">🔎 Log</button>
+                            <button type="button" class="btn" style="background: #e2e8f0; color: #0f172a; padding: 6px 10px; font-size: 11px; border-radius: 4px; font-weight: 600;" onclick="event.stopPropagation(); const d = document.getElementById('row-drawer-${fac.id}'); d.style.display = d.style.display === 'none' ? 'table-row' : 'none';">🔎 Log</button>
                         </td>
                     </tr>
-                    <tr id="drawer-${fac.id}" style="display: none; background: #fafafa; border-bottom: 1px solid #e2e8f0;">
-                        <td colspan="7" style="padding: 16px 24px;">
-                            <div style="font-weight: 700; font-size: 13px; color: #0369a1; margin-bottom: 8px;">📢 Historical Logs & Interaction Timeline</div>
-                            <div id="log-content-${fac.id}" style="font-size: 12px; color: #334155; display:flex; flex-direction:column; gap:4px;">
-                                <span style="font-style:italic; color:#64748b;">Loading active log stream...</span>
+                    <!-- LOCAL INLINE INTERACTION DRAWER CONTAINER -->
+                    <tr id="row-drawer-${fac.id}" style="display: none; background: #fafafa; border-bottom: 1px solid #cbd5e1;">
+                        <td colspan="7" style="padding: 14px 20px;">
+                            <div style="font-weight: 700; font-size: 12px; color: #0369a1; margin-bottom: 6px;">📢 Historical Facility Interaction Logs & Timeline</div>
+                            <div style="font-size: 12px; color: #334155; max-height: 120px; overflow-y: auto; background: #ffffff; border: 1px solid #e2e8f0; padding: 8px; border-radius: 4px;">
+                                ${fac.notes && fac.notes.length > 0 ? fac.notes.map(n => `<div style="padding: 2px 0; border-bottom: 1px dashed #f1f5f9;">🗓️ <strong>${n.date || 'Log'}:</strong> ${n.text || n}</div>`).join('') : '<span style="color:#94a3b8; font-style:italic;">No custom local notes recorded. Use the Quick-Adder tool panel below to log activity.</span>'}
                             </div>
                         </td>
                     </tr>
                 `;
             });
+
 
             tableHTML += `</tbody></table></div>`;
             fList.innerHTML = tableHTML;
