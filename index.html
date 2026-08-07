@@ -415,7 +415,9 @@
                         </thead>
                         <tbody>
             `;
-        
+
+                        mockFacilities.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
                    mockFacilities.forEach(fac => {
                 const isPaid = fac.payment_status === "Paid" || fac.payment_status === "Paid in Full";
                 const isHalf = fac.payment_status === "Half Paid" || fac.payment_status === "Half Payment";
@@ -424,8 +426,9 @@
                 if (isHalf) badgeStyle = "background: #fef9c3; color: #a16207;";
 
                 const primaryContact = { 
-                    name: fac.rep_name || fac.primary_contact_name || 'Unassigned', 
-                    email: fac.rep_email || fac.primary_contact_email || '' 
+                            name: fac.rep_name || fac.primary_contact_name || fac.rep || fac.contact_name || 'Unassigned',
+                    email: fac.rep_email || fac.primary_contact_email || fac.email || ''
+
                 };
 
                 tableHTML += `
