@@ -224,11 +224,13 @@
                 fac.notes.unshift({ date: new Date().toLocaleDateString(), text: text });
                 saveDataToCloud();
                 renderDashboard();
-                            filterNotesByFacility();
+                          
 
             }
             e.target.reset();
         }
+                if (typeof filterNotesByFacility === "function") { try { filterNotesByFacility(); } catch(e){} }
+
 
         function addNewLead(e) {
             e.preventDefault();
