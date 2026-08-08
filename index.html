@@ -362,14 +362,34 @@
             tableHTML += `</tbody></table></div>`;
             fList.innerHTML = tableHTML;
 
-            // RE-RENDER RUNNING CALL LOG TIMELINES
-            mockFacilities.forEach(f => {
-                if (f.notes) {
-                    f.notes.forEach(note => {
-                        masterNotes.innerHTML += `<div class="timeline-item">🗓️ <strong>${f.name} (${note.date || 'Log'}):</strong> ${note.text || note}</div>`;
-                    });
-                }
-            });
+            masterNotes.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 14px;">Please select a facility from the dropdown box above to review its historical note timeline.</span>';
+        function filterNotesByFacility() {
+            const selectedId = document.getElementById('n-fac-id').value;
+            const masterNotes = document.getElementById('master-notes-list');
+            if (!masterNotes) return;
+            masterNotes.innerHTML = '';
+
+            const matchedFac = mockFacilities.find(f => f.id === selectedId);
+            
+            if (matchedFac && matchedFac.notes && matchedFac.notes.length > 0) {
+                let notesHTML = `<div style="max-height: 400px; overflow-y: auto; padding-right: 8px; border: 1px solid #cbd5e1; background: #f8fafc; padding: 12px; border-radius: 6px;">`;
+                
+                matchedFac.notes.forEach(note => {
+                    notesHTML += `
+                        <div class="timeline-item" style="padding: 12px; font-size: 14px; margin-bottom: 8px; background: #ffffff; line-height: 1.5; border-left: 4px solid #0369a1; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                            🗓️ <strong>${note.date || 'Log'}:</strong> ${note.text || note}
+                        </div>`;
+                });
+                
+                notesHTML += `</div>`;
+                masterNotes.innerHTML = notesHTML;
+            } else if (selectedId === "") {
+                masterNotes.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 14px;">Please select a facility from the dropdown box above to review its historical note timeline.</span>';
+            } else {
+                masterNotes.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 14px;">No phone call logs recorded for this facility yet.</span>';
+            }
+        }
+
 
             // RE-RENDER TREASURER AUDIT LEDGER MATRIX
             mockFacilities.forEach(f => {
