@@ -224,6 +224,8 @@
                 fac.notes.unshift({ date: new Date().toLocaleDateString(), text: text });
                 saveDataToCloud();
                 renderDashboard();
+                            filterNotesByFacility();
+
             }
             e.target.reset();
         }
