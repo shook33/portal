@@ -185,6 +185,105 @@
             mockLeads.forEach((lead, index) => { leadsList.innerHTML += `<div class="lead-card"><div style="display:flex; justify-content:space-between; align-items:center;"><strong>🔮 ${lead.name}</strong><button onclick="deleteLeadRecord(${index})" style="background:#fee2e2; color:#ef4444; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">❌ Remove</button></div><div class="text-muted" style="margin-top:6px;">📍 Location: ${lead.address || 'Not specified'} |👤 Contact: ${lead.rep || 'None assigned'}</div></div>`; });
             if (typeof populateDropdown === "function") populateDropdown();
         }
+            function handleLogin(event) {
+            event.preventDefault();
+            const code = document.getElementById('access-code').value.trim();
+            if (code === "sillselect2026" || code === "select" || code === "admin") {
+                document.getElementById('login-frame').classList.add('hidden');
+                document.getElementById('portal-console').classList.remove('hidden');
+                loadDataFromCloud();
+            } else {
+                alert("⚠️ Invalid Access Password Profile. Please re-enter.");
+            }
+        }
+
+        function switchTab(tabName) {
+            const panels = document.querySelectorAll('.tab-panel');
+            const buttons = document.querySelectorAll('.btn-nav');
+            panels.forEach(p => p.style.display = 'none');
+            buttons.forEach(b => { b.style.background = '#e2e8f0'; b.style.color = '#475569'; });
+            
+            document.getElementById('panel-' + tabName).style.display = 'block';
+            document.getElementById('tab-' + tabName).style.background = '#0369a1';
+            document.getElementById('tab-' + tabName).style.color = '#ffffff';
+        }
+
+        function loadDataFromCloud() {
+            const savedFac = localStorage.getItem('sill_facilities');
+            const savedLeads = localStorage.getItem('sill_leads');
+            if (savedFac) {
+                mockFacilities = JSON.parse(savedFac);
+            } else {
+                mockFacilities = [
+                    { id: '1', name: 'Aviva Senior Living', address: '1951 N Honore Ave, Sarasota, FL', phone: '941-377-0781', series: 'MM', rep_name: 'Maria Leonardo', rep_email: 'maria@aviva.com', contract_sent_date: '2026-07-20', contract_received_date: '2026-07-28', invoice_sent_date: '', check_received_date: '', payment_status: 'Unpaid', notes: [] },
+                    { id: '2', name: 'Bay Village', address: '8400 Vamo Rd, Sarasota, FL', phone: '941-966-5611', series: 'GI 1, MM', rep_name: 'John Davis', rep_email: 'jdavis@bayvillage.org', contract_sent_date: '2026-07-15', contract_received_date: '', invoice_sent_date: '', check_received_date: '', payment_status: 'Unpaid', notes: [] }
+                ];
+            }
+            if (savedLeads) mockLeads = JSON.parse(savedLeads);
+            renderDashboard();
+        }
+
+        function saveDataToCloud() {
+            localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
+            localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
+        }
+
+        function addNewFacility(e) {
+            e.preventDefault();
+            const count = document.getElementById('f-series-count').value;
+            const newFac = {
+                id: Date.now().toString(),
+                name: document.getElementById('f-name').value,
+                address: document.getElementById('f-add').value || '',
+                phone: document.getElementById('f-ph').value || '',
+                series: document.getElementById('f-series-names').value || (count === "2" ? "2 Series" : "1 Series"),
+                series_count: count,
+                rep_name: document.getElementById('f-cname').value || '',
+                rep_email: document.getElementById('f-cemail') ? document.getElementById('f-cemail').value : '',
+                contract_sent_date: '', contract_received_date: '', invoice_sent_date: '', check_received_date: '',
+                payment_status: 'Unpaid', notes: []
+            };
+            mockFacilities.push(newFac);
+            saveDataToCloud();
+            renderDashboard();
+            e.target.reset();
+        }
+
+        function addNewNote(e) {
+            e.preventDefault();
+            const facId = document.getElementById('n-fac-id').value;
+            const text = document.getElementById('n-text').value;
+            const fac = mockFacilities.find(f => f.id === facId);
+            if (fac) {
+                if (!fac.notes) fac.notes = [];
+                fac.notes.unshift({ date: new Date().toLocaleDateString(), text: text });
+                saveDataToCloud();
+                renderDashboard();
+                filterNotesByFacility();
+            }
+            e.target.reset();
+        }
+
+        function populateDropdown() {
+            const dropdown = document.getElementById('n-fac-id');
+            if (!dropdown) return;
+            dropdown.innerHTML = '<option value="">-- Choose Target Facility --</option>';
+            mockFacilities.forEach(f => {
+                dropdown.innerHTML += `<option value="${f.id}">${f.name}</option>`;
+            });
+        }
+
+        function deleteLeadRecord(idx) {
+            mockLeads.splice(idx, 1);
+            saveDataToCloud();
+            renderDashboard();
+        }
+
+        function updateEstimatedPricingLabel() {
+            const val = document.getElementById('f-series-count').value;
+            document.getElementById('price-est-label').innerText = val === "2" ? "Estimated Standard Invoice: $2,300.00 (Due upon receipt)" : "Estimated Standard Invoice: $1,500.00 (Due upon receipt)";
+        }
+
     </script>
 </body>
 </html>
