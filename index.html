@@ -98,7 +98,7 @@
                 <div id="ledger-list"></div> 
             </div> 
         </div> 
-           <div id="panel-leads" class="tab-panel" style="display:none;"> 
+        <div id="panel-leads" class="tab-panel" style="display:none;"> 
             <!-- ➕ PIPELINE ENTRY FORM TRAY PANEL -->
             <div id="form-tray-leads" class="form-tray"> 
                 <h3 style="margin:0 0 1rem 0; color:#0369a1; font-weight: 700;">🔮 Register New Potential Referral Lead</h3> 
@@ -110,14 +110,19 @@
                     </div> 
                     <div class="form-grid"> 
                         <input type="email" id="l-em" placeholder="Email Address" class="form-input"> 
+                        <input type="text" id="l-ph" placeholder="Primary Phone Number" class="form-input"> 
                         <input type="text" id="l-ref" placeholder="Referred By..." class="form-input"> 
-                        <button type="submit" class="btn-green">🔮 Save Pipeline Lead</button> 
                     </div> 
+                    <div class="form-grid" style="margin-top: 0.5rem;">
+                        <input type="text" id="l-notes" placeholder="Add initial notes or context here..." class="form-input" style="grid-column: span 2; width: 95%;">
+                        <button type="submit" class="btn-green" style="height: 100%;">🔮 Save Pipeline Lead</button> 
+                    </div>
                 </form> 
             </div> 
             <h2 style="color: #0369a1; font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700;">🔮 Potential Lead Accounts (Marketing Pipeline)</h2> 
             <div id="leads-list"></div> 
         </div> 
+
 
         <div id="panel-schedule" class="tab-panel" style="display:none;">
             <div style="background:#ffffff; padding:1.5rem; border-radius:0.75rem; border:1px solid #cbd5e1; text-align: center;">
@@ -158,7 +163,7 @@
                 alert("⚠️ Invalid Access Password Profile. Please re-enter.");
             }
         }
-        function addNewLead(e) {
+           function addNewLead(e) {
             e.preventDefault();
             if (userRole === "board") return;
             mockLeads.push({
@@ -166,12 +171,15 @@
                 address: document.getElementById('l-add').value || '',
                 rep: document.getElementById('l-con').value || '',
                 email: document.getElementById('l-em').value || '',
-                source: document.getElementById('l-ref').value || ''
+                phone: document.getElementById('l-ph').value || 'No Phone Saved',
+                source: document.getElementById('l-ref').value || '',
+                notes: document.getElementById('l-notes').value || 'No text context recorded yet.'
             });
             saveDataToCloud();
             renderDashboard();
             e.target.reset();
         }
+
 
         function switchTab(tabName) {
             const panels = document.querySelectorAll('.tab-panel');
@@ -304,6 +312,20 @@
                 const bal = total - paid;
                 if (ledger) ledger.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px dashed #cbd5e1; font-size:13px;"><strong>📊 ${f.name} Continuous Stream:</strong> <span>Subscription Baseline: $${total} | Total Extracted Receipts: <span style="color:green;font-weight:bold;">$${paid}</span> | Outstanding Balance Matrix: <span style="color:red;font-weight:bold;">$${bal}</span></span></div>`;
             });
+                        mockLeads.forEach((lead, index) => {
+                if (leadsList) leadsList.innerHTML += `
+                    <div class="lead-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="font-size:15px; color:#0369a1;">🔮 ${lead.name}</strong>
+                            <button onclick="deleteLeadRecord(${index})" style="background:#fee2e2; color:#ef4444; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">❌ Remove</button>
+                        </div>
+                        <div class="text-muted" style="margin-top:6px;">📍 Location: ${lead.address || 'Not specified'} | 👤 Contact: ${lead.rep || 'None assigned'}</div>
+                        <div class="text-muted" style="margin-size:13px;">📞 Phone: ${lead.phone || 'N/A'} | 📩 Email: ${lead.email || 'N/A'} | 🤝 Referral: ${lead.source || 'Direct'}</div>
+                        <div style="margin-top: 8px; padding: 8px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; border-left: 3px solid #cbd5e1; font-style: italic;">📝 Notes: ${lead.notes}</div>
+                    </div>
+                `;
+            });
+
             if (typeof populateDropdown === "function") populateDropdown();
         }
     </script>
