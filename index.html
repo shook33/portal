@@ -101,7 +101,8 @@
             </div> 
         </div> 
 
-        <div id="panel-leads" class="tab-panel" style="display:none;"> 
+             <div id="panel-leads" class="tab-panel" style="display:none;"> 
+            <!-- ➕ PIPELINE ENTRY FORM TRAY PANEL -->
             <div id="form-tray-leads" class="form-tray"> 
                 <h3 style="margin:0 0 1rem 0; color:#0369a1; font-weight: 700;">🔮 Register New Potential Referral Lead</h3> 
                 <form onsubmit="addNewLead(event)"> 
@@ -115,13 +116,38 @@
                         <input type="text" id="l-ph" placeholder="Primary Phone Number" class="form-input"> 
                         <input type="text" id="l-ref" placeholder="Referred By..." class="form-input"> 
                     </div> 
-                    <div class="form-grid" style="margin-top: 0.5rem;">
-                        <input type="text" id="l-notes" placeholder="Add initial notes or context here..." class="form-input" style="grid-column: span 2; width: 95%;">
-                        <button type="submit" class="btn-green" style="height: 100%;">🔮 Save Pipeline Lead</button> 
+                    <div style="text-align: right; border-top: 1px solid #cbd5e1; padding-top: 14px; margin-top: 10px;">
+                        <button type="submit" class="btn-green" style="padding: 10px 24px;">🔮 Save Pipeline Lead</button> 
                     </div>
                 </form> 
             </div> 
+
+            <!-- 📋 LEADS ACCOUNT MATRIX GRID -->
             <h2 style="color: #0369a1; font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700;">🔮 Potential Lead Accounts (Marketing Pipeline)</h2> 
+            <div id="leads-list"></div> 
+
+            <!-- 📝 DEDICATED INDEPENDENT RUNNING MARKETING NOTES LEDGER WITH DATE PICKER -->
+            <div id="form-tray-lead-notes" class="form-tray" style="margin-top: 3rem; border-top: 4px solid #ea580c;"> 
+                <h3 style="margin:0 0 1rem 0; color:#ea580c; font-weight: 700;">📝 Log New Marketing Interaction Note</h3> 
+                <form onsubmit="addNewLeadNote(event)"> 
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr 2fr; gap: 0.75rem;">
+                        <select id="l-notes-id" class="dropdown-select" onchange="filterNotesByLead()" required style="width:100%;">
+                            <option value="">-- Choose Target Marketing Lead --</option>
+                        </select> 
+                        <input type="date" id="l-notes-date" class="form-input" required style="width: 90%;">
+                        <input type="text" id="l-notes-text" placeholder="Type presentation feedback, pitch details, or outreach milestones here..." class="form-input" style="width:95%;" required> 
+                    </div> 
+                    <div style="text-align: right; margin-top: 14px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
+                        <button type="submit" class="btn-green" style="background:#ea580c; padding: 10px 24px;">📝 Lock Interaction Note</button> 
+                    </div>
+                </form> 
+            </div> 
+            <div style="background:#ffffff; padding:1.5rem; border-radius:0.75rem; border:1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);"> 
+                <h2 style="color:#ea580c; margin-top:0; font-weight: 700;">📋 Running Marketing Context Timelines</h2> 
+                <div id="master-lead-notes-list"></div> 
+            </div> 
+        </div> 
+
             <div id="leads-list"></div> 
         </div> 
         <div id="panel-schedule" class="tab-panel" style="display:none;">
@@ -398,21 +424,77 @@
                 if (ledger) ledger.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px dashed #cbd5e1; font-size:13px;"><strong>📊 ${f.name} Continuous Stream:</strong> <span>Subscription Baseline: $${total} | Total Extracted Receipts: <span style="color:green;font-weight:bold;">$${paid}</span> | Outstanding Balance Matrix: <span style="color:red;font-weight:bold;">$${bal}</span></span></div>`;
             });
 
-            mockLeads.forEach((lead, index) => {
+                mockLeads.forEach((lead, index) => {
                 if (leadsList) leadsList.innerHTML += `
                     <div class="lead-card">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <strong style="font-size:15px; color:#0369a1;">🔮 ${lead.name}</strong>
-                            <button onclick="deleteLeadRecord(${index})" style="background:#fee2e2; color:#ef4444; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">❌ Remove</button>
+                            <div style="display:flex; gap:8px;">
+                                <button type="button" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('l-notes-id').value='${lead.name.replace(/'/g, "\\'")}'; filterNotesByLead(); window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});">🔎 View Marketing Notes</button>
+                                <button type="button" onclick="deleteLeadRecord(${index})" style="background:#fee2e2; color:#ef4444; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">❌ Remove</button>
+                            </div>
                         </div>
                         <div class="text-muted" style="margin-top:6px;">📍 Location: ${lead.address || 'Not specified'} | 👤 Contact: ${lead.rep || 'None assigned'}</div>
                         <div class="text-muted">📞 Phone: ${lead.phone || 'N/A'} | 📩 Email: ${lead.email || 'N/A'} | 🤝 Referral: ${lead.source || 'Direct'}</div>
-                        <div style="margin-top: 8px; padding: 8px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; border-left: 3px solid #cbd5e1; font-style: italic;">📝 Notes: ${lead.notes}</div>
                     </div>
                 `;
             });
+
             if (typeof populateDropdown === "function") populateDropdown();
+                        if (typeof populateLeadDropdown === "function") populateLeadDropdown();
+
         }
+                // 🔮 Marketing Leads Pipeline - Advanced Alphabetical and Note Storage Engine
+        function addNewLeadNote(e) {
+            e.preventDefault();
+            if (userRole === "board") return;
+            const leadName = document.getElementById('l-notes-id').value;
+            const noteDate = document.getElementById('l-notes-date').value;
+            const noteText = document.getElementById('l-notes-text').value;
+            
+            const lead = mockLeads.find(l => l.name === leadName);
+            if (lead) {
+                if (!lead.notes) lead.notes = [];
+                const formattedDate = new Date(noteDate + 'T00:00:00').toLocaleDateString();
+                lead.notes.unshift({ date: formattedDate, text: noteText });
+                saveDataToCloud();
+                renderDashboard();
+                filterNotesByLead();
+            }
+            document.getElementById('l-notes-text').value = '';
+        }
+
+        function populateLeadDropdown() {
+            const dropdown = document.getElementById('l-notes-id');
+            if (!dropdown) return;
+            const savedValue = dropdown.value;
+            dropdown.innerHTML = '<option value="">-- Choose Target Marketing Lead --</option>';
+            const sortedLeads = [...mockLeads].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            sortedLeads.forEach(l => {
+                dropdown.innerHTML += `<option value="${l.name}">${l.name}</option>`;
+            });
+            dropdown.value = savedValue;
+        }
+
+        function filterNotesByLead() {
+            const selectedName = document.getElementById('l-notes-id').value;
+            const container = document.getElementById('master-lead-notes-list');
+            if (!container) return; container.innerHTML = '';
+            
+            const lead = mockLeads.find(l => l.name === selectedName);
+            if (lead && lead.notes && lead.notes.length > 0) {
+                let html = `<div style="max-height: 400px; overflow-y: auto; border: 1px solid #cbd5e1; background: #f8fafc; padding: 12px; border-radius: 6px;">`;
+                lead.notes.forEach(note => {
+                    html += `<div class="timeline-item" style="padding: 12px; font-size: 14px; margin-bottom: 8px; background: #ffffff; line-height: 1.5; border-left: 4px solid #ea580c;"><span style="font-weight:700; color:#ea580c;">🗓️ ${note.date || 'Log'}:</span> ${note.text || note}</div>`;
+                });
+                html += `</div>`; container.innerHTML = html;
+            } else if (selectedName === "") {
+                container.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 14px;">Please select a lead account from the dropdown box above to review its notes timeline.</span>';
+            } else {
+                container.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 14px;">No marketing notes recorded for this lead account yet.</span>';
+            }
+        }
+
     </script>
 </body>
 </html>
