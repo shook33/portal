@@ -98,10 +98,27 @@
                 <div id="ledger-list"></div> 
             </div> 
         </div> 
-        <div id="panel-leads" class="tab-panel" style="display:none;"> 
+           <div id="panel-leads" class="tab-panel" style="display:none;"> 
+            <!-- ➕ PIPELINE ENTRY FORM TRAY PANEL -->
+            <div id="form-tray-leads" class="form-tray"> 
+                <h3 style="margin:0 0 1rem 0; color:#0369a1; font-weight: 700;">🔮 Register New Potential Referral Lead</h3> 
+                <form onsubmit="addNewLead(event)"> 
+                    <div class="form-grid"> 
+                        <input type="text" id="l-name" placeholder="Potential Home Name" class="form-input" required> 
+                        <input type="text" id="l-add" placeholder="Location City/State" class="form-input"> 
+                        <input type="text" id="l-con" placeholder="Primary Contact Name" class="form-input"> 
+                    </div> 
+                    <div class="form-grid"> 
+                        <input type="email" id="l-em" placeholder="Email Address" class="form-input"> 
+                        <input type="text" id="l-ref" placeholder="Referred By..." class="form-input"> 
+                        <button type="submit" class="btn-green">🔮 Save Pipeline Lead</button> 
+                    </div> 
+                </form> 
+            </div> 
             <h2 style="color: #0369a1; font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700;">🔮 Potential Lead Accounts (Marketing Pipeline)</h2> 
             <div id="leads-list"></div> 
         </div> 
+
         <div id="panel-schedule" class="tab-panel" style="display:none;">
             <div style="background:#ffffff; padding:1.5rem; border-radius:0.75rem; border:1px solid #cbd5e1; text-align: center;">
                 <h2 style="color:#0369a1; margin-top:0; font-weight: 700;">📅 Master Schedule Matrix Timeline</h2>
@@ -123,6 +140,7 @@
             // SECURITY GATE PROFILE CROSS-ROUTING PROFILE MATRIX
             if (code === "SillSelect") {
                 userRole = "admin";
+                
                 document.getElementById('login-frame').classList.add('hidden');
                 document.getElementById('portal-console').classList.remove('hidden');
                 loadDataFromCloud();
@@ -139,6 +157,20 @@
             } else {
                 alert("⚠️ Invalid Access Password Profile. Please re-enter.");
             }
+        }
+        function addNewLead(e) {
+            e.preventDefault();
+            if (userRole === "board") return;
+            mockLeads.push({
+                name: document.getElementById('l-name').value,
+                address: document.getElementById('l-add').value || '',
+                rep: document.getElementById('l-con').value || '',
+                email: document.getElementById('l-em').value || '',
+                source: document.getElementById('l-ref').value || ''
+            });
+            saveDataToCloud();
+            renderDashboard();
+            e.target.reset();
         }
 
         function switchTab(tabName) {
