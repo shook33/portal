@@ -44,7 +44,8 @@
             <button onclick="switchTab('facilities')" id="tab-facilities" class="btn-nav" style="background:#0369a1; color:#ffffff;">🏢 Facilities & Contacts</button> 
             <button onclick="switchTab('notes')" id="tab-notes" class="btn-nav">📋 Correspondence Notes Logs</button> 
             <button onclick="switchTab('payments')" id="tab-payments" class="btn-nav">💰 Payment Ledger</button> 
-            <button onclick="switchTab('leads')" id="tab-leads" class="btn-nav">🔮 Marketing Leads Pipeline</button> 
+                       <button onclick="switchTab('leads')" id="tab-leads" class="btn-nav">🔮 Marketing Pipeline</button> 
+
             <button onclick="switchTab('schedule')" id="tab-schedule" class="btn-nav">📅 Master Schedule Matrix</button> 
         </div> 
         
@@ -101,9 +102,34 @@
             </div> 
         </div> 
 
-             <div id="panel-leads" class="tab-panel" style="display:none;"> 
-            <!-- ➕ PIPELINE ENTRY FORM TRAY PANEL -->
-            <div id="form-tray-leads" class="form-tray"> 
+                    <div id="panel-leads" class="tab-panel" style="display:none;"> 
+            <!-- 📋 LEADS ACCOUNT MATRIX DIRECTORY AT THE TOP -->
+            <h2 style="color: #0369a1; font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700;">🔮 Potential Lead Accounts (Marketing Pipeline)</h2> 
+            <div id="leads-list"></div> 
+
+            <!-- 📝 DEDICATED INDEPENDENT MARKETING NOTES LOGS TRAY -->
+            <div id="form-tray-lead-notes" class="form-tray" style="margin-top: 3rem; border-top: 4px solid #ea580c;"> 
+                <h3 style="margin:0 0 1rem 0; color:#ea580c; font-weight: 700;">📝 Log New Marketing Interaction Note</h3> 
+                <form onsubmit="addNewLeadNote(event)"> 
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr 2fr; gap: 0.75rem;">
+                        <select id="l-notes-id" class="dropdown-select" onchange="filterNotesByLead()" required style="width:100%;">
+                            <option value="">-- Choose Target Marketing Lead --</option>
+                        </select> 
+                        <input type="date" id="l-notes-date" class="form-input" required style="width: 90%;">
+                        <input type="text" id="l-notes-text" placeholder="Type presentation feedback, pitch details, or outreach milestones here..." class="form-input" style="width:95%;" required> 
+                    </div> 
+                    <div style="text-align: right; margin-top: 14px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
+                        <button type="submit" class="btn-green" style="background:#ea580c; padding: 10px 24px;">📝 Lock Interaction Note</button> 
+                    </div>
+                </form> 
+            </div> 
+            <div style="background:#ffffff; padding:1.5rem; border-radius:0.75rem; border:1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 3rem;"> 
+                <h2 style="color:#ea580c; margin-top:0; font-weight: 700;">📋 Marketing Notes Logs</h2> 
+                <div id="master-lead-notes-list"></div> 
+            </div> 
+
+            <!-- ➕ NEW PIPELINE ENTRY FORM TRAY PUSHED TO THE ABSOLUTE BOTTOM -->
+            <div id="form-tray-leads" class="form-tray" style="border-top: 4px solid #0369a1; padding-top: 1.5rem;"> 
                 <h3 style="margin:0 0 1rem 0; color:#0369a1; font-weight: 700;">🔮 Register New Potential Referral Lead</h3> 
                 <form onsubmit="addNewLead(event)"> 
                     <div class="form-grid"> 
@@ -121,6 +147,7 @@
                     </div>
                 </form> 
             </div> 
+        </div> 
 
             <!-- 📋 LEADS ACCOUNT MATRIX GRID -->
             <h2 style="color: #0369a1; font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700;">🔮 Potential Lead Accounts (Marketing Pipeline)</h2> 
