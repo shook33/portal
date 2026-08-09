@@ -1,1 +1,419 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>SILL Select Portal</title> 
+    <style> 
+        body { background-color: #f1f5f9 !important; color: #0f172a !important; font-family: sans-serif; padding: 2rem; margin: 0; } 
+        .flex-center { display: flex; align-items: center; justify-content: center; min-height: 85vh; } 
+        #login-card { background-color: #ffffff; padding: 2.5rem; border-radius: 1rem; width: 100%; max-width: 450px; text-align: center; border: 1px solid #cbd5e1; margin: 4rem auto; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); } 
+        #portal-console { width: 100%; max-width: 1400px; margin: 0 auto; } 
+        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 1.5rem; margin-bottom: 2rem; } 
+        .card { background-color: #ffffff; padding: 1.5rem; border-radius: 0.75rem; border-left: 5px solid #0369a1; margin-bottom: 1rem; } 
+        .lead-card { background-color: #ffffff; padding: 1.25rem; border-radius: 0.75rem; border-top: 4px solid #0369a1; margin-bottom: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); } 
+        .text-muted { color: #64748b; font-size: 0.875rem; margin: 0.25rem 0; } 
+        .hidden { display: none !important; } 
+        .form-tray { background-color: #ffffff; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #cbd5e1; margin-bottom: 1.5rem; border-top: 4px solid #0369a1; } 
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem; } 
+        .form-input, .dropdown-select { background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 0.375rem; color: #0f172a; font-size: 0.9rem; width: 92%; } 
+        .btn-nav { background: #e2e8f0; color: #475569; font-weight: bold; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; transition: all 0.2s; } 
+        .btn-green { background-color: #0369a1; color: #ffffff; font-weight: bold; padding: 0.6rem 1.4rem; border-radius: 0.375rem; border: none; cursor: pointer; } 
+        .timeline-item { background: #ffffff; padding: 0.6rem; border-radius: 6px; margin-bottom: 6px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-left: 4px solid #0369a1; color: #334155; } 
+    </style> 
+</head> 
+<body> 
+    <div id="login-frame" class="flex-center"> 
+        <div id="login-card"> 
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div> 
+            <h2>SILL Select Cloud Login</h2> 
+            <form onsubmit="handleLogin(event)"> 
+                <input type="password" id="access-code" autocomplete="new-password" placeholder="Enter Access Password" style="width:90%; padding:0.75rem; background:#f8fafc; border:1px solid #cbd5e1; text-align:center; margin-bottom:1.5rem; border-radius:0.5rem;" required><br> 
+                <button type="submit" class="btn-green" style="width:100%; padding:0.75rem;">Secure Connect</button> 
+            </form> 
+        </div> 
+    </div> 
+    <div id="portal-console" class="hidden"> 
+        <div class="header-flex"> 
+            <div> 
+                <h1 style="font-size: 2rem; margin: 0; font-weight: bold; color:#0369a1;">SILL Select</h1> 
+                <p class="text-muted" style="margin-top: 0.25rem;">Aiven MySQL Cloud Pipeline Cluster Fully Operational</p> 
+            </div> 
+            <button onclick="window.location.reload()" style="background-color:#e2e8f0; border:1px solid #cbd5e1; color:#475569; padding:0.5rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:bold;">[→ Sign Out</button> 
+        </div> 
+        <div id="admin-tabs-bar" style="display: flex; gap: 0.75rem; margin-bottom: 2rem; border-bottom: 1px solid #cbd5e1; padding-bottom: 0.75rem;"> 
+            <button onclick="switchTab('facilities')" id="tab-facilities" class="btn-nav" style="background:#0369a1; color:#ffffff;">🏢 Facilities & Contacts</button> 
+            <button onclick="switchTab('notes')" id="tab-notes" class="btn-nav">📋 Correspondence Notes Logs</button> 
+            <button onclick="switchTab('payments')" id="tab-payments" class="btn-nav">💰 Payment Ledger</button> 
+            <button onclick="switchTab('leads')" id="tab-leads" class="btn-nav">🔮 Marketing Leads Pipeline</button> 
+            <button onclick="switchTab('schedule')" id="tab-schedule" class="btn-nav">📅 Master Schedule Matrix</button> 
+        </div> 
+        
+        <div id="panel-facilities" class="tab-panel"> 
+            <h2 style="color: #0369a1; font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700;">📂 Active Facilities Workspace Directory</h2> 
+            <div id="facilities-list"></div> 
+            <div id="form-tray-facilities" class="form-tray" style="margin-top: 3rem; border-top: 4px solid #0369a1; padding-top: 2rem;"> 
+                <h3 style="margin:0 0 1rem 0; color:#0369a1; font-weight: 700;">➕ Quick-Add New Active Facility Profile</h3> 
+                <form onsubmit="addNewFacility(event)"> 
+                    <div class="form-grid"> 
+                        <input type="text" id="f-name" placeholder="Facility Name" class="form-input" required> 
+                        <input type="text" id="f-add" placeholder="Address, City, ZIP" class="form-input"> 
+                        <input type="text" id="f-ph" placeholder="Primary Phone" class="form-input"> 
+                        <select id="f-series-count" class="dropdown-select" onchange="updateEstimatedPricingLabel()"> 
+                            <option value="1">1 Series Subscription ($1,500)</option> 
+                            <option value="2">2 Series Bundle ($2,300)</option> 
+                        </select> 
+                    </div> 
+                    <div class="form-grid"> 
+                        <input type="text" id="f-series-names" placeholder="Series Subscribed" class="form-input"> 
+                        <input type="text" id="f-cname" placeholder="Primary Contact Name" class="form-input"> 
+                        <input type="email" id="f-cemail" placeholder="Primary Contact Email" class="form-input"> 
+                        <input type="text" id="f-cname-alt" placeholder="Secondary Contact Name" class="form-input"> 
+                        <input type="email" id="f-cemail-alt" placeholder="Secondary Contact Email" class="form-input"> 
+                    </div> 
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #cbd5e1; padding-top:14px; margin-top:10px;"> 
+                        <span id="price-est-label" style="font-weight:700; color:#0369a1; font-size:0.95rem;">Estimated Standard Invoice: $1,500.00 (Due upon receipt)</span> 
+                        <button type="submit" class="btn-green" style="padding: 10px 24px;">🏢 Save Facility Profile</button> 
+                    </div> 
+                </form> 
+            </div> 
+        </div> 
+        <div id="panel-notes" class="tab-panel" style="display:none;"> 
+            <div id="form-tray-notes" class="form-tray"> 
+                <h3 style="margin:0 0 1rem 0; color:#0369a1; font-weight: 700;">📝 Log New Correspondence Notes</h3> 
+                <form onsubmit="addNewNote(event)"> 
+                    <div class="form-grid"> 
+                        <select id="n-fac-id" class="dropdown-select" onchange="filterNotesByFacility()" required><option value="">-- Choose Target Facility --</option></select> 
+                        <input type="text" id="n-text" placeholder="Type letters, emails, or conversation details here..." class="form-input" style="grid-column: span 2; width:95%;" required> 
+                        <button type="submit" class="btn-green">📋 Lock Correspondence Note</button> 
+                    </div> 
+                </form> 
+            </div> 
+            <div style="background:#ffffff; padding:1.5rem; border-radius:0.75rem; border:1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);"> 
+                <h2 style="color:#0369a1; margin-top:0; font-weight: 700;">📋 Historical Correspondence Timeline</h2> 
+                <div id="master-notes-list"></div> 
+            </div> 
+        </div> 
+
+        <div id="panel-payments" class="tab-panel" style="display:none;"> 
+            <div style="background:#ffffff; padding:1.5rem; border-radius:0.75rem; border:1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);"> 
+                <h2 style="color:#0369a1; margin-top:0; font-weight: 700;">📊 Treasurer Financial Stream Audit Ledger</h2> 
+                <div id="ledger-list"></div> 
+            </div> 
+        </div> 
+
+        <div id="panel-leads" class="tab-panel" style="display:none;"> 
+            <div id="form-tray-leads" class="form-tray"> 
+                <h3 style="margin:0 0 1rem 0; color:#0369a1; font-weight: 700;">🔮 Register New Potential Referral Lead</h3> 
+                <form onsubmit="addNewLead(event)"> 
+                    <div class="form-grid"> 
+                        <input type="text" id="l-name" placeholder="Potential Home Name" class="form-input" required> 
+                        <input type="text" id="l-add" placeholder="Location City/State" class="form-input"> 
+                        <input type="text" id="l-con" placeholder="Primary Contact Name" class="form-input"> 
+                    </div> 
+                    <div class="form-grid"> 
+                        <input type="email" id="l-em" placeholder="Email Address" class="form-input"> 
+                        <input type="text" id="l-ph" placeholder="Primary Phone Number" class="form-input"> 
+                        <input type="text" id="l-ref" placeholder="Referred By..." class="form-input"> 
+                    </div> 
+                    <div class="form-grid" style="margin-top: 0.5rem;">
+                        <input type="text" id="l-notes" placeholder="Add initial notes or context here..." class="form-input" style="grid-column: span 2; width: 95%;">
+                        <button type="submit" class="btn-green" style="height: 100%;">🔮 Save Pipeline Lead</button> 
+                    </div>
+                </form> 
+            </div> 
+            <h2 style="color: #0369a1; font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700;">🔮 Potential Lead Accounts (Marketing Pipeline)</h2> 
+            <div id="leads-list"></div> 
+        </div> 
+        <div id="panel-schedule" class="tab-panel" style="display:none;">
+            <h2 style="color: #0369a1; font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 700;">📅 Master 13-Week Lecture Schedule Matrix</h2>
+            <div id="schedule-matrix-container"></div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 12px; font-style: italic; text-align: left;">
+                📌 Storage Protocol: Data entries automatically lock into local memory arrays when typed. The board runs in read-only viewer mode.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mockFacilities = [];
+        let mockLeads = [];
+        let mockSchedule = [];
+        let userRole = "admin"; 
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const code = document.getElementById('access-code').value.trim();
+            
+            if (code === "SillSelect") {
+                userRole = "admin";
+                document.getElementById('login-frame').classList.add('hidden');
+                document.getElementById('portal-console').classList.remove('hidden');
+                setTimeout(loadDataFromCloud, 100);
+            } else if (code === "TreasureR") {
+                userRole = "treasurer";
+                document.getElementById('login-frame').classList.add('hidden');
+                document.getElementById('portal-console').classList.remove('hidden');
+                setTimeout(loadDataFromCloud, 100);
+            } else if (code === "SillboardlogiN") {
+                userRole = "board";
+                document.getElementById('login-frame').classList.add('hidden');
+                document.getElementById('portal-console').classList.remove('hidden');
+                setTimeout(loadDataFromCloud, 100);
+            } else {
+                alert("⚠️ Invalid Access Password Profile. Please re-enter.");
+            }
+        }
+
+        function switchTab(tabName) {
+            const panels = document.querySelectorAll('.tab-panel');
+            const buttons = document.querySelectorAll('.btn-nav');
+            panels.forEach(p => p.style.display = 'none');
+            buttons.forEach(b => { b.style.background = '#e2e8f0'; b.style.color = '#475569'; });
+            
+            document.getElementById('panel-' + tabName).style.display = 'block';
+            document.getElementById('tab-' + tabName).style.background = '#0369a1';
+            document.getElementById('tab-' + tabName).style.color = '#ffffff';
+        }
+        function loadDataFromCloud() {
+            const savedFac = localStorage.getItem('sill_facilities');
+            const savedLeads = localStorage.getItem('sill_leads');
+            if (savedFac) {
+                mockFacilities = JSON.parse(savedFac);
+            } else {
+                mockFacilities = [
+                    { id: '1', name: 'Aviva Senior Living', address: '1951 N Honore Ave, Sarasota, FL', phone: '941-377-0781', series: 'MM', rep_name: 'Maria Leonardo', rep_email: 'maria@aviva.com', alt_name: 'Robert Vance', alt_email: 'rvance@aviva.com', contract_sent_date: '2026-07-20', contract_received_date: '2026-07-28', invoice_sent_date: '', check_received_date: '', payment_status: 'Unpaid', notes: [] },
+                    { id: '2', name: 'Bay Village', address: '8400 Vamo Rd, Sarasota, FL', phone: '941-966-5611', series: 'GI 1, MM', rep_name: 'John Davis', rep_email: 'jdavis@bayvillage.org', alt_name: '', alt_email: '', contract_sent_date: '2026-07-15', contract_received_date: '', invoice_sent_date: '', check_received_date: '', payment_status: 'Unpaid', notes: [] }
+                ];
+            }
+            if (savedLeads) mockLeads = JSON.parse(savedLeads);
+            
+            if (userRole === "board") {
+                const trays = document.querySelectorAll('.form-tray');
+                trays.forEach(tray => tray.style.display = 'none');
+            } else {
+                const trays = document.querySelectorAll('.form-tray');
+                trays.forEach(tray => tray.style.display = 'block');
+            }
+            
+            renderDashboard();
+            if (typeof loadScheduleMatrixData === "function") loadScheduleMatrixData();
+        }
+
+        function saveDataToCloud() {
+            if (userRole === "board") return; 
+            localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
+            localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
+        }
+
+        function addNewFacility(e) {
+            e.preventDefault();
+            if (userRole === "board") return;
+            const count = document.getElementById('f-series-count').value;
+            mockFacilities.push({
+                id: Date.now().toString(),
+                name: document.getElementById('f-name').value,
+                address: document.getElementById('f-add').value || '',
+                phone: document.getElementById('f-ph').value || '',
+                series: document.getElementById('f-series-names').value || (count === "2" ? "2 Series" : "1 Series"),
+                series_count: count,
+                rep_name: document.getElementById('f-cname').value || '',
+                rep_email: document.getElementById('f-cemail').value || '',
+                alt_name: document.getElementById('f-cname-alt').value || '',
+                alt_email: document.getElementById('f-cemail-alt').value || '',
+                contract_sent_date: '', contract_received_date: '', invoice_sent_date: '', check_received_date: '',
+                payment_status: 'Unpaid', notes: []
+            });
+            saveDataToCloud(); renderDashboard(); e.target.reset();
+        }
+
+        function addNewNote(e) {
+            e.preventDefault();
+            if (userRole === "board") return;
+            const facId = document.getElementById('n-fac-id').value;
+            const text = document.getElementById('n-text').value;
+            const fac = mockFacilities.find(f => f.id === facId);
+            if (fac) {
+                if (!fac.notes) fac.notes = [];
+                fac.notes.unshift({ date: new Date().toLocaleDateString(), text: text });
+                saveDataToCloud(); renderDashboard(); filterNotesByFacility();
+            }
+            e.target.reset();
+        }
+
+        function addNewLead(e) {
+            e.preventDefault();
+            if (userRole === "board") return;
+            mockLeads.push({
+                name: document.getElementById('l-name').value,
+                address: document.getElementById('l-add').value || '',
+                rep: document.getElementById('l-con').value || '',
+                email: document.getElementById('l-em').value || '',
+                phone: document.getElementById('l-ph').value || 'No Phone Saved',
+                source: document.getElementById('l-ref').value || '',
+                notes: document.getElementById('l-notes').value || 'No text context recorded yet.'
+            });
+            saveDataToCloud();
+            renderDashboard();
+            e.target.reset();
+        }
+
+        function populateDropdown() {
+            const dropdown = document.getElementById('n-fac-id');
+            if (!dropdown) return;
+            dropdown.innerHTML = '<option value="">-- Choose Target Facility --</option>';
+            mockFacilities.forEach(f => {
+                dropdown.innerHTML += `<option value="${f.id}">${f.name}</option>`;
+            });
+        }
+
+        function deleteLeadRecord(idx) {
+            mockLeads.splice(idx, 1);
+            saveDataToCloud();
+            renderDashboard();
+        }
+
+        function updateEstimatedPricingLabel() {
+            const val = document.getElementById('f-series-count').value;
+            document.getElementById('price-est-label').innerText = val === "2" ? "Estimated Standard Invoice: $2,300.00 (Due upon receipt)" : "Estimated Standard Invoice: $1,500.00 (Due upon receipt)";
+        }
+        function filterNotesByFacility() {
+            const selectedId = document.getElementById('n-fac-id').value;
+            const masterNotes = document.getElementById('master-notes-list');
+            if (!masterNotes) return; masterNotes.innerHTML = '';
+            const matchedFac = mockFacilities.find(f => f.id === selectedId);
+            if (matchedFac && matchedFac.notes && matchedFac.notes.length > 0) {
+                let notesHTML = `<div style="max-height: 400px; overflow-y: auto; border: 1px solid #cbd5e1; background: #f8fafc; padding: 12px; border-radius: 6px;">`;
+                matchedFac.notes.forEach(note => {
+                    notesHTML += `<div class="timeline-item" style="padding: 12px; font-size: 14px; margin-bottom: 8px; background: #ffffff; line-height: 1.5; border-left: 4px solid #0369a1;"><span style="font-weight:700; color:#0369a1;">🗓️ ${note.date || 'Log'}:</span> ${note.text || note}</div>`;
+                });
+                notesHTML += `</div>`; masterNotes.innerHTML = notesHTML;
+            } else if (selectedId === "") {
+                masterNotes.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 14px;">Please select a facility from the dropdown box above to review its notes timeline.</span>';
+            } else {
+                masterNotes.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 14px;">No notes recorded for this facility yet.</span>';
+            }
+        }
+
+        function loadScheduleMatrixData() {
+            const savedSched = localStorage.getItem('sill_schedule_matrix');
+            if (savedSched) {
+                mockSchedule = JSON.parse(savedSched);
+            } else {
+                mockSchedule = [];
+                for (let w = 1; w <= 13; w++) {
+                    mockSchedule.push({
+                        week: w,
+                        l1_speaker: '', l1_topic: '', l1_url: '',
+                        l2_speaker: '', l2_topic: '', l2_url: '',
+                        l3_speaker: '', l3_topic: '', l3_url: '',
+                    });
+                }
+            }
+            renderScheduleGridTable();
+        }
+
+        function saveScheduleToCloud() {
+            if (userRole === "board") return;
+            localStorage.setItem('sill_schedule_matrix', JSON.stringify(mockSchedule));
+        }
+
+        function renderScheduleGridTable() {
+            const container = document.getElementById('schedule-matrix-container');
+            if (!container) return;
+            const isReadonly = userRole === "board" ? "readonly disabled style='background:#f1f5f9; color:#64748b; cursor:not-allowed;'" : "";
+            
+            let html = `
+                <div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                        <thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                            <tr>
+                                <th style="padding: 14px 18px; font-weight: 700; width: 10%;">WEEK</th>
+                                <th style="padding: 14px 18px; font-weight: 700; width: 30%; color: #0369a1;">🎼 MUSIC MONDAY</th>
+                                <th style="padding: 14px 18px; font-weight: 700; width: 30%; color: #b45309;">🌍 GLOBAL ISSUES 1</th>
+                                <th style="padding: 14px 18px; font-weight: 700; width: 30%; color: #047857;">🌏 GLOBAL ISSUES 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            mockSchedule.forEach((row, index) => {
+                html += `
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 14px 18px; vertical-align: middle; font-weight: 700; color: #475569;">
+                            Week ${row.week}
+                        </td>
+                        <td style="padding: 14px 18px; vertical-align: top;">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <input type="text" value="${row.l1_speaker || ''}" placeholder="👤 Speaker" style="padding: 4px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px;" ${isReadonly} onchange="mockSchedule[${index}].l1_speaker=this.value; saveScheduleToCloud();">
+                                <input type="text" value="${row.l1_topic || ''}" placeholder="📝 Topic" style="padding: 4px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px;" ${isReadonly} onchange="mockSchedule[${index}].l1_topic=this.value; saveScheduleToCloud();">
+                                <input type="text" value="${row.l1_url || ''}" placeholder="🔗 Link URL" style="padding: 4px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; color: #0284c7;" ${isReadonly} onchange="mockSchedule[${index}].l1_url=this.value; saveScheduleToCloud();">
+                            </div>
+                        </td>
+                        <td style="padding: 14px 18px; vertical-align: top;">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <input type="text" value="${row.l2_speaker || ''}" placeholder="👤 Speaker" style="padding: 4px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px;" ${isReadonly} onchange="mockSchedule[${index}].l2_speaker=this.value; saveScheduleToCloud();">
+                                <input type="text" value="${row.l2_topic || ''}" placeholder="📝 Topic" style="padding: 4px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px;" ${isReadonly} onchange="mockSchedule[${index}].l2_topic=this.value; saveScheduleToCloud();">
+                                <input type="text" value="${row.l2_url || ''}" placeholder="🔗 Link URL" style="padding: 4px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; color: #0284c7;" ${isReadonly} onchange="mockSchedule[${index}].l2_url=this.value; saveScheduleToCloud();">
+                            </div>
+                        </td>
+                        <td style="padding: 14px 18px; vertical-align: top;">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <input type="text" value="${row.l3_speaker || ''}" placeholder="👤 Speaker" style="padding: 4px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px;" ${isReadonly} onchange="mockSchedule[${index}].l3_speaker=this.value; saveScheduleToCloud();">
+                                <input type="text" value="${row.l3_topic || ''}" placeholder="📝 Topic" style="padding: 4px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px;" ${isReadonly} onchange="mockSchedule[${index}].l3_topic=this.value; saveScheduleToCloud();">
+                                <input type="text" value="${row.l3_url || ''}" placeholder="🔗 Link URL" style="padding: 4px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; color: #0284c7;" ${isReadonly} onchange="mockSchedule[${index}].l3_url=this.value; saveScheduleToCloud();">
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+        }
+        function renderDashboard() {
+            const fList = document.getElementById('facilities-list');
+            const ledger = document.getElementById('ledger-list');
+            const masterNotes = document.getElementById('master-notes-list');
+            const leadsList = document.getElementById('leads-list');
+            
+            if (!fList) return; fList.innerHTML = ''; if (ledger) ledger.innerHTML = ''; if (leadsList) leadsList.innerHTML = '';
+            mockFacilities.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            const isReadonly = userRole === "board" ? "readonly disabled style='background:#f1f5f9; color:#64748b; cursor:not-allowed;'" : "";
+            
+            let tableHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px; margin-bottom: 24px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:20%;">Facility Info</th><th style="padding:14px 18px; font-weight:700; width:22%;">Contacts Matrix</th><th style="padding:14px 18px; font-weight:700; width:8%;">Series</th><th style="padding:14px 18px; font-weight:700; width:11%;">📅 Contract Sent</th><th style="padding:14px 18px; font-weight:700; width:11%;">📋 Contract Rec'd</th><th style="padding:14px 18px; font-weight:700; width:22%;">💳 Payment Status Matrix</th><th style="padding:14px 18px; font-weight:700; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
+            
+            mockFacilities.forEach(fac => {
+                const isPaid = fac.payment_status === "Paid" || fac.payment_status === "Paid in Full";
+                const isHalf = fac.payment_status === "Half Paid" || fac.payment_status === "Half Payment";
+                let badgeStyle = isPaid ? "background:#dcfce7;color:#15803d;" : (isHalf ? "background:#fef9c3;color:#a16207;" : "background:#fee2e2;color:#ef4444;");
+                
+                tableHTML += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 14px 18px;"><div style="font-weight:700; font-size:15px; color:#0369a1;">${fac.name}</div><div style="font-size:12px; color:#64748b; margin-top:2px;">📍 ${fac.address || 'No Address'}</div></td><td style="padding: 14px 18px; display:flex; flex-direction:column; gap:4px; border:none;"><div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#475569; width:45px;">Primary:</span><input type="text" value="${fac.rep_name || ''}" placeholder="Name" style="padding:4px 6px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; width:130px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').rep_name=this.value; saveDataToCloud();"></div><div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#475569; width:45px;">Second:</span><input type="text" value="${fac.alt_name || ''}" placeholder="Alt Name" style="padding:4px 6px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; width:130px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').alt_name=this.value; saveDataToCloud();"></div></td><td style="padding: 14px 18px;"><input type="text" value="${fac.series || ''}" style="padding:6px 8px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; width:85%; text-align:center; font-weight:700; color:#0369a1; background:#e0f2fe;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').series=this.value; saveDataToCloud();"></td><td style="padding: 14px 18px;"><input type="date" value="${fac.contract_sent_date || ''}" style="padding:6px 8px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_sent_date=this.value; saveDataToCloud();"></td><td style="padding: 14px 18px;"><input type="date" value="${fac.contract_received_date || ''}" style="padding:6px 8px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_received_date=this.value; saveDataToCloud();"></td><td style="padding: 14px 18px;"><div style="display:flex; align-items:center; gap:8px; white-space:nowrap;"><div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:10px; color:#64748b; font-weight:600;">Inv Sent:</span><input type="date" value="${fac.invoice_sent_date || ''}" style="padding:4px; font-size:11px; border:1px solid #cbd5e1; border-radius:4px; width:110px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').invoice_sent_date=this.value; saveDataToCloud();"></div><div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:10px; color:#64748b; font-weight:600;">Chk Rec'd:</span><input type="date" value="${fac.check_received_date || ''}" style="padding:4px; font-size:11px; border:1px solid #cbd5e1; border-radius:4px; width:110px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').check_received_date=this.value; saveDataToCloud();"></div><div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:10px; color:#64748b; font-weight:600;">Status:</span><select style="font-size:12px; padding:4px; font-weight:700; border-radius:4px; ${badgeStyle}" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').payment_status=this.value; saveDataToCloud(); renderDashboard();"><option value="Unpaid" ${fac.payment_status==='Unpaid'?'selected':''}>❌ Unpaid</option><option value="Half Payment" ${isHalf?'selected':''}>🌗 Half Payment</option><option value="Paid in Full" ${isPaid?'selected':''}>✅ Paid in Full</option></select></div></div></td><td style="padding:14px 18px; text-align:center;"><button type="button" class="btn" style="background:#e2e8f0; color:#0f172a; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:600; cursor:pointer; border:1px solid #cbd5e1;" onclick="event.stopPropagation(); switchTab('notes'); document.getElementById('n-fac-id').value='${fac.id}'; filterNotesByFacility();">🔎 View Logs</button></td></tr>`;
+            });
+            tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
+            if (masterNotes && masterNotes.innerHTML === '') masterNotes.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 14px;">Please select a facility from the dropdown box above to review its notes timeline.</span>';
+            
+            mockFacilities.forEach(f => {
+                const total = f.series_count === "2" || f.series === "2 Series" ? 2300 : 1500;
+                const paid = f.payment_status === "Paid" || f.payment_status === "Paid in Full" ? total : (f.payment_status === "Half Payment" ? total/2 : 0);
+                const bal = total - paid;
+                if (ledger) ledger.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px dashed #cbd5e1; font-size:13px;"><strong>📊 ${f.name} Continuous Stream:</strong> <span>Subscription Baseline: $${total} | Total Extracted Receipts: <span style="color:green;font-weight:bold;">$${paid}</span> | Outstanding Balance Matrix: <span style="color:red;font-weight:bold;">$${bal}</span></span></div>`;
+            });
+
+            mockLeads.forEach((lead, index) => {
+                if (leadsList) leadsList.innerHTML += `
+                    <div class="lead-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="font-size:15px; color:#0369a1;">🔮 ${lead.name}</strong>
+                            <button onclick="deleteLeadRecord(${index})" style="background:#fee2e2; color:#ef4444; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">❌ Remove</button>
+                        </div>
+                        <div class="text-muted" style="margin-top:6px;">📍 Location: ${lead.address || 'Not specified'} | 👤 Contact: ${lead.rep || 'None assigned'}</div>
+                        <div class="text-muted">📞 Phone: ${lead.phone || 'N/A'} | 📩 Email: ${lead.email || 'N/A'} | 🤝 Referral: ${lead.source || 'Direct'}</div>
+                        <div style="margin-top: 8px; padding: 8px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #475569; border-left: 3px solid #cbd5e1; font-style: italic;">📝 Notes: ${lead.notes}</div>
+                    </div>
+                `;
+            });
+            if (typeof populateDropdown === "function") populateDropdown();
+        }
+    </script>
+</body>
+</html>
 
