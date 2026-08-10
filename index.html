@@ -568,7 +568,10 @@
 
             // 💰 Render Treasurer Ledgers
             mockFacilities.forEach(f => {
-                const total = f.series_count === "2" || f.series === "2 Series" ? 2300 : 1500;
+                              const activeSeriesText = (f.series || '').trim();
+                const seriesArray = activeSeriesText ? activeSeriesText.split(/[\s,]+/).filter(Boolean) : [];
+                const total = (seriesArray.length >= 2 || f.series_count === "2" || activeSeriesText.toLowerCase().includes('series 2') || activeSeriesText.toLowerCase().includes('2 series')) ? 2300 : 1500;
+
                 const paid = f.payment_status === "Paid" || f.payment_status === "Paid in Full" ? total : (f.payment_status === "Half Payment" ? total/2 : 0);
                 const bal = total - paid;
                 if (ledger) ledger.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px dashed #cbd5e1; font-size:13px;"><strong>📊 ${f.name} Continuous Stream:</strong> <span>Subscription Baseline: $${total} | Total Extracted Receipts: <span style="color:green;font-weight:bold;">$${paid}</span> | Outstanding Balance Matrix: <span style="color:red;font-weight:bold;">$${bal}</span></span></div>`;
