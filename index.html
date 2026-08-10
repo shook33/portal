@@ -95,24 +95,32 @@
 
         </div> 
 
-        <div id="panel-notes" class="tab-panel" style="display:none;"> 
-            <div id="form-tray-notes" class="form-tray"> 
-                <h3 style="margin:0 0 1rem 0; color:#0369a1; font-weight: 700;">📝 Log New Correspondence Notes</h3> 
+               <div id="panel-notes" class="tab-panel" style="display:none;"> 
+            <!-- 📝 LOG NEW NOTES CONTAINER - EXPANDED TO FULL WIDTH -->
+            <div id="form-tray-notes" class="form-tray" style="max-width: 100%; margin-bottom: 2.5rem; border-top: 4px solid #0369a1; padding: 1.75rem; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);"> 
+                <h3 style="margin:0 0 1.25rem 0; color:#0369a1; font-weight: 800; font-size: 1.4rem;">📝 Log New Correspondence Notes</h3> 
                 <form onsubmit="addNewNote(event)"> 
-                    <div class="form-grid"> 
-                        <select id="n-fac-id" class="dropdown-select" onchange="filterNotesByFacility()" required><option value="">-- Choose Target Facility --</option></select> 
-                        <input type="text" id="n-text" placeholder="Type letters, emails, or conversation details here..." class="form-input" style="grid-column: span 2; width:95%;" required> 
-                        <button type="submit" class="btn-green">📋 Lock Correspondence Note</button> 
+                    <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 1rem; align-items: center;"> 
+                        <select id="n-fac-id" class="dropdown-select" onchange="filterNotesByFacility()" required style="font-size: 1.05rem !important; padding: 0.6rem 0.8rem; width: 100%;"></select> 
+                        <input type="text" id="n-text" placeholder="Type letters, emails, conversation details, or outreach milestones here..." class="form-input" style="font-size: 1.05rem !important; padding: 0.6rem 1rem; width: 100%;" required> 
+                        <button type="submit" class="btn-green" style="width: 100%; padding: 0.65rem; font-size: 1.05rem;">💾 Lock Note String</button> 
                     </div> 
                 </form> 
             </div> 
-            <div style="background:#ffffff; padding:1.5rem; border-radius:0.75rem; border:1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);"> 
-                <h2 style="color:#0369a1; margin-top:0; font-weight: 700;">📋 Historical Correspondence Timeline</h2> 
+
+            <!-- 📋 HISTORICAL TIMELINE VIEW PANEL - STRETCHED WIDE WITH INTEGRATED DATA SUBHEADS -->
+            <div style="background:#ffffff; padding:2rem; border-radius:12px; border:1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); max-width: 100%;"> 
+                <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem;">
+                    <h2 style="color:#0369a1; margin:0; font-weight: 800; font-size: 1.65rem;">📋 Historical Correspondence Timeline</h2> 
+                    <!-- Active Facility Subhead Identifier Badge -->
+                    <div id="note-facility-address-subhead" style="font-size: 1.1rem; color: #64748b; font-weight: 600; padding-left: 2px; margin-top: 4px;"></div>
+                </div>
                 <div id="master-notes-list">
-                    <span style="color:#94a3b8; font-style:italic; font-size: 14px;">📌 System Prompt: Please select an active facility account from the dropdown selection box above to review its historical correspondence timeline logs.</span>
+                    <span style="color:#94a3b8; font-style:italic; font-size: 15px;">📌 System Prompt: Please select an active facility account from the dropdown selection box above to review its historical correspondence timeline logs.</span>
                 </div> 
             </div> 
         </div> 
+
 
         <div id="panel-payments" class="tab-panel" style="display:none;"> 
             <div style="background:#ffffff; padding:1.5rem; border-radius:0.75rem; border:1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);"> 
@@ -311,23 +319,81 @@
             document.getElementById('price-est-label').innerText = val === "2" ? "Estimated Standard Invoice: $2,300.00 (Due upon receipt)" : "Estimated Standard Invoice: $1,500.00 (Due upon receipt)";
         }
 
-        function filterNotesByFacility() {
+                function filterNotesByFacility() {
             const selectedId = document.getElementById('n-fac-id').value;
             const masterNotes = document.getElementById('master-notes-list');
-            if (!masterNotes) return; masterNotes.innerHTML = '';
+            const subhead = document.getElementById('note-facility-address-subhead');
+            
+            if (!masterNotes) return; 
+            masterNotes.innerHTML = '';
+            if (subhead) subhead.innerHTML = '';
+            
             const matchedFac = mockFacilities.find(f => f.id === selectedId);
-            if (matchedFac && matchedFac.notes && matchedFac.notes.length > 0) {
-                let notesHTML = `<div style="max-height: 400px; overflow-y: auto; border: 1px solid #cbd5e1; background: #f8fafc; padding: 12px; border-radius: 6px;">`;
-                matchedFac.notes.forEach(note => {
-                    notesHTML += `<div class="timeline-item" style="padding: 12px; font-size: 14px; margin-bottom: 8px; background: #ffffff; line-height: 1.5; border-left: 4px solid #0369a1;"><span style="font-weight:700; color:#0369a1;">🗓️ ${note.date || 'Log'}:</span> ${note.text || note}</div>`;
-                });
-                notesHTML += `</div>`; masterNotes.innerHTML = notesHTML;
-            } else if (selectedId === "") {
-                masterNotes.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 14px;">📌 System Prompt: Please select an active facility account from the dropdown selection box above to review its historical correspondence timeline logs.</span>';
+            
+            if (matchedFac) {
+                if (subhead) {
+                    subhead.innerHTML = `📍 Location: ${matchedFac.address || 'No Address Listed'} | 📞 ${matchedFac.phone || 'No Phone'}`;
+                }
+                
+                if (matchedFac.notes && matchedFac.notes.length > 0) {
+                    let notesHTML = `<div style="display: flex; flex-direction: column; gap: 10px;">`;
+                    matchedFac.notes.forEach((note, nIdx) => {
+                        const noteText = note.text || note;
+                        const noteDate = note.date || new Date().toLocaleDateString();
+                        
+                        notesHTML += `
+                        <div id="note-row-${selectedId}-${nIdx}" class="timeline-item" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; font-size: 1.15rem !important;">
+                            <div id="note-text-container-${selectedId}-${nIdx}" style="flex-grow: 1; padding-right: 20px;">
+                                <span style="font-weight: 700; color: #0369a1; font-size: 1.1rem; display: inline-block; margin-right: 8px;">🗓️ ${noteDate}:</span>
+                                <span id="note-body-text-${selectedId}-${nIdx}" style="font-weight: 500;">${noteText}</span>
+                            </div>
+                            <div style="display: flex; gap: 6px; white-space: nowrap;">
+                                <button type="button" id="note-edit-btn-${selectedId}-${nIdx}" onclick="enableInlineNoteEdit('${selectedId}', ${nIdx})" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: bold; cursor: pointer;">✏️ Edit Note</button>
+                                <button type="button" id="note-save-btn-${selectedId}-${nIdx}" onclick="saveInlineNoteEdit('${selectedId}', ${nIdx})" style="display: none; background: #047857; color: #ffffff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: bold; cursor: pointer;">💾 Save</button>
+                            </div>
+                        </div>`;
+                    });
+                    notesHTML += `</div>`; 
+                    masterNotes.innerHTML = notesHTML;
+                } else {
+                    masterNotes.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 15px;">No correspondence notes logged for this facility yet.</span>';
+                }
             } else {
-                masterNotes.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 14px;">No notes recorded for this facility yet.</span>';
+                masterNotes.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size: 15px;">📌 System Prompt: Please select an active facility account from the dropdown selection box above to review its historical correspondence timeline logs.</span>';
             }
         }
+
+        function enableInlineNoteEdit(facId, idx) {
+            const bodySpan = document.getElementById(`note-body-text-${facId}-${idx}`);
+            const editBtn = document.getElementById(`note-edit-btn-${facId}-${idx}`);
+            const saveBtn = document.getElementById(`note-save-btn-${facId}-${idx}`);
+            if (!bodySpan || !editBtn || !saveBtn) return;
+            
+            const currentText = bodySpan.innerText;
+            bodySpan.innerHTML = `<input type="text" id="note-edit-input-${facId}-${idx}" value="${currentText.replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; font-size: 1.1rem; border: 2px solid #0369a1; border-radius: 6px; color: #0f172a; box-sizing: border-box;">`;
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-block';
+        }
+
+        function saveInlineNoteEdit(facId, idx) {
+            const inputField = document.getElementById(`note-edit-input-${facId}-${idx}`);
+            if (!inputField) return;
+            
+            const updatedText = inputField.value.trim();
+            if (!updatedText) return;
+            
+            const fac = mockFacilities.find(f => f.id === facId);
+            if (fac && fac.notes && fac.notes[idx]) {
+                if (typeof fac.notes[idx] === 'object') {
+                    fac.notes[idx].text = updatedText;
+                } else {
+                    fac.notes[idx] = { date: new Date().toLocaleDateString(), text: updatedText };
+                }
+                saveDataToCloud();
+                filterNotesByFacility();
+            }
+        }
+
 
         function loadScheduleMatrixData() {
             const savedSched = localStorage.getItem('sill_schedule_matrix');
