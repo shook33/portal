@@ -536,14 +536,24 @@
                     <td style="padding: 14px 18px; vertical-align: middle; width: 12%; text-align: left;">
                         <input type="date" value="${fac.contract_received_date || ''}" style="padding:6px 8px; font-size:13px; border:1px solid #cbd5e1; border-radius:4px; width: 130px; background: #ffffff;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_received_date=this.value; saveDataToCloud();">
                     </td>
-                    <!-- Payment Status Selection Column Box -->
+                    <!-- Payment Status Selection Column Box (Pristine Grid Alignment Upgrades) -->
                     <td style="padding: 14px 18px; vertical-align: middle; width: 21%;">
-                        <div style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
-                            <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:10px; color:#64748b; font-weight:600;">Inv Sent:</span><input type="date" value="${fac.invoice_sent_date || ''}" style="padding:4px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; width:105px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').invoice_sent_date=this.value; saveDataToCloud();"></div>
-                            <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:10px; color:#64748b; font-weight:600;">Chk Rec'd:</span><input type="date" value="${fac.check_received_date || ''}" style="padding:4px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; width:105px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').check_received_date=this.value; saveDataToCloud();"></div>
-                            <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:10px; color:#64748b; font-weight:600;">Status:</span><select style="font-size:12px; padding:4px; font-weight:700; border-radius:4px; ${badgeStyle}" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').payment_status=this.value; saveDataToCloud(); renderDashboard();"><option value="Unpaid" ${fac.payment_status==='Unpaid'?'selected':''}>❌ Unpaid</option><option value="Half Payment" ${isHalf?'selected':''}>🌗 Half Payment</option><option value="Paid in Full" ${isPaid?'selected':''}>✅ Paid in Full</option></select></div>
+                        <div style="display: flex; align-items: flex-end; gap: 8px; white-space: nowrap;">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-size: 11px; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">📅 Inv Sent:</span>
+                                <input type="date" value="${fac.invoice_sent_date || ''}" style="padding: 5px 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 4px; width: 125px; background: #ffffff; color: #0f172a;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').invoice_sent_date=this.value; saveDataToCloud();">
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-size: 11px; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">📅 Chk Rec'd:</span>
+                                <input type="date" value="${fac.check_received_date || ''}" style="padding: 5px 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 4px; width: 125px; background: #ffffff; color: #0f172a;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').check_received_date=this.value; saveDataToCloud();">
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-size: 11px; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">📋 Status:</span>
+                                <select style="font-size: 13px; padding: 5px 8px; font-weight: 700; border-radius: 4px; border: 1px solid #cbd5e1; height: 31px; cursor: pointer; ${badgeStyle}" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').payment_status=this.value; saveDataToCloud(); renderDashboard();"><option value="Unpaid" ${fac.payment_status==='Unpaid'?'selected':''}>❌ Unpaid</option><option value="Half Payment" ${isHalf?'selected':''}>🌗 Half Payment</option><option value="Paid in Full" ${isPaid?'selected':''}>✅ Paid in Full</option></select>
+                            </div>
                         </div>
                     </td>
+
                     <!-- Action Link Triggers Column Box -->
                     <td style="padding:14px 18px; text-align:center; vertical-align: middle; width: 5%;"><div style="display:flex; justify-content:center; gap:8px;"><button type="button" class="btn" style="background:#e2e8f0; color:#0f172a; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:600; cursor:pointer; border:1px solid #cbd5e1;" onclick="event.stopPropagation(); switchTab('notes'); document.getElementById('n-fac-id').value='${fac.id}'; filterNotesByFacility();">🔎 View Logs</button><button type="button" style="background:#fee2e2; color:#ef4444; border:1px solid #fca5a5; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;" ${isReadonly} onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete the facility: ${fac.name.replace(/'/g, "\\'")}?')){ mockFacilities=mockFacilities.filter(f=>f.id!=='${fac.id}'); saveDataToCloud(); renderDashboard(); }">❌ Delete</button></div></td>
                 </tr>`;
