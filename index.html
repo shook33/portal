@@ -411,8 +411,8 @@
             });
             tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
             // 🔮 Render Marketing Pipeline Table (Expanded 35% Notes Width!)
-            let leadsHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:18%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:18%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:14%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:11%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:10%;">Referred By</th><th style="padding:14px 18px; font-weight:700; width:35%;">Add Inline Note Matrix</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
-            
+                       let leadsHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:15%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:15%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:12%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:11%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:10%;">Referred By</th><th style="padding:14px 18px; font-weight:700; width:42%;">Add Inline Note Matrix</th><th style="padding:14px 18px; text-align:center; width:5%;">Actions</th></tr></thead><tbody>`;
+
             mockLeads.forEach(lead => {
                 let currentNotesHTML = '';
                 if (lead.notes && lead.notes.length > 0) {
