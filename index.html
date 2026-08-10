@@ -512,8 +512,8 @@
             });
 
             tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
-                       // 🔮 Render Marketing Pipeline Table (Widescreen Horizontal Bar Layout Upgrades)
-            let leadsHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:22%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:22%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:18%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:16%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
+                               // 🔮 Render Marketing Pipeline Table (Widescreen Horizontal Bar Layout Upgrades with Email)
+            let leadsHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:16%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:16%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:14%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Contact Email</th><th style="padding:14px 18px; font-weight:700; width:13%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:13%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
             
             mockLeads.forEach(lead => {
                 let currentNotesHTML = '';
@@ -538,13 +538,14 @@
                     <td style="padding: 14px 18px; font-weight: 700; color: #0369a1; font-size: 15px;">🔮 ${lead.name}</td>
                     <td style="padding: 14px 18px;"><input type="text" value="${lead.address || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').address=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px;"><input type="text" value="${lead.rep || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').rep=this.value; saveDataToCloud();"></td>
+                    <td style="padding: 14px 18px;"><input type="text" value="${lead.email || ''}" placeholder="Contact Email" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').email=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px;"><input type="text" value="${lead.phone || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').phone=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px;"><input type="text" value="${lead.source || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').source=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px; text-align: center;"><button type="button" onclick="deleteLeadRecord('${lead.id}')" style="background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;" ${isReadonly}>❌ Delete</button></td>
                 </tr>
                 <!-- Sub-Row: Expansive Full Widescreen Interactive Notes Tracker Bar -->
                 <tr style="border-bottom: 2px solid #cbd5e1; background-color: #f8fafc;">
-                    <td colspan="6" style="padding: 14px 24px;">
+                    <td colspan="7" style="padding: 14px 24px;">
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;">
                                 <span style="font-weight: 700; color: #ea580c; font-size: 13.5px; white-space: nowrap; width: 90px;">📝 Log Note:</span>
@@ -563,6 +564,7 @@
                 </tr>`;
             });
             leadsHTML += `</tbody></table></div>`; leadsList.innerHTML = leadsHTML;
+
 
             // 💰 Render Treasurer Ledgers
             mockFacilities.forEach(f => {
