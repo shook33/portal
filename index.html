@@ -204,7 +204,7 @@
             document.getElementById('t-' + targetId).classList.add('bg-slate-900', 'text-white', 'shadow-sm');
             renderDashboard();
         }
-        // Primary Structural Layout Interface Mapping Grid Generator Rendering Loops Engine
+           // Primary Structural Layout Interface Mapping Grid Generator Rendering Loops Engine
         function renderDashboard() {
             const fList = document.getElementById('facilities-list');
             const nSelector = document.getElementById('notes-filter-selector');
@@ -231,7 +231,7 @@
                 const isHalf = fac.payment_status === "Half Paid" || fac.payment_status === "Half Payment";
                 let badgeStyle = isPaid ? "background:#dcfce7;color:#15803d;" : (isHalf ? "background:#fef9c3;color:#a16207;" : "background:#fee2e2;color:#ef4444;");
                 
-                tableHTML += `<tr style="border-bottom: 1px solid #e2e8f0;">`;
+                tableHTML += `<tr style="border-bottom: 1px solid #e2e8f0;">
                     <!-- Facility Info Column Box -->
                     <td style="padding: 14px 18px; vertical-align: middle; width: 18%;">
                         <div style="font-weight: 800; font-size: 1.25rem !important; color: #0369a1; line-height: 1.3;">🏢 ${fac.name}</div>
@@ -251,7 +251,7 @@
                             </div>
                         </div>
                     </td>
-                    <!-- Series Subscribed Dropdown Column Box -->
+                        <!-- Series Subscribed Dropdown Column Box -->
                     <td style="padding: 14px 18px; vertical-align: middle; width: 12%;">
                         <select style="font-size: 13px !important; padding: 6px 8px; font-weight: 700; border-radius: 4px; border: 1px solid #cbd5e1; width: 110px; color: #0369a1; background: #e0f2fe; cursor: pointer;" ${isReadonly} onchange="
                             const matched = mockFacilities.find(f => f.id === '${fac.id}');
@@ -324,8 +324,8 @@
                                 🗓️ <strong>${n.date}</strong>: <span id="lead-body-text-${lead.id}-${lIdx}">${n.text}</span>
                             </div>
                             <div style="display: flex; gap: 4px; white-space: nowrap;">
-                                <button type="button" id="lead-edit-btn-${lead.id}-${lIdx}" onclick="enableInlineLeadEdit('${lead.id}', lIdx)" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">✏️ Edit</button>
-                                <button type="button" id="lead-save-btn-${lead.id}-${lIdx}" onclick="saveInlineLeadEdit('${lead.id}', lIdx)" style="display: none; background: #047857; color: #ffffff; border: none; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">💾 Save</button>
+                                <button type="button" id="lead-edit-btn-${lead.id}-${lIdx}" onclick="enableInlineLeadEdit('${lead.id}', ${lIdx})" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">✏️ Edit</button>
+                                <button type="button" id="lead-save-btn-${lead.id}-${lIdx}" onclick="saveInlineLeadEdit('${lead.id}', ${lIdx})" style="display: none; background: #047857; color: #ffffff; border: none; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">💾 Save</button>
                             </div>
                         </div>`).join('');
                 } else {
@@ -375,7 +375,7 @@
                 
                 let finStatus = `<span style="color:#ef4444; font-weight:bold;">⚠️ Account Unpaid / Outstanding Link Pipeline</span>`;
                 if(f.payment_status === "Paid" || f.payment_status === "Paid in Full") {
-                    finStatus = `<span style="color:#16a34a; font-weight:bold;">✅ Full Transaction Confirmed ($${total.toLocaleString()})</span>`;
+                    finStatus = `<span style="color:#16a34a; font-weight:bold;">Full Transaction Confirmed ($${total.toLocaleString()})</span>`;
                 } else if(f.payment_status === "Half Paid" || f.payment_status === "Half Payment") {
                     finStatus = `<span style="color:#ca8a04; font-weight:bold;">🌗 Milestone Half Payment Authorized ($${(total/2).toLocaleString()})</span>`;
                 }
@@ -530,4 +530,3 @@
     </script>
 </body>
 </html>
-
