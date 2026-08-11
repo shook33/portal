@@ -482,12 +482,21 @@
                         <div style="font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 500;">📍 ${fac.address || 'No Address'}</div>
                         <div style="font-size: 12px; color: #475569; margin-top: 2px; font-weight: 600;">📞 ${fac.phone || 'No Phone'}</div>
                     </td>
-                    <td style="padding: 14px 18px; vertical-align: middle;">
-                        <div style="display:flex; flex-direction:column; gap:4px;">
-                            <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#475569; width:45px;">Primary:</span><input type="text" value="${fac.rep_name || ''}" placeholder="Name" style="padding:4px 6px !important; font-size:13px !important; border:1px solid #cbd5e1; border-radius:4px; width:140px !important;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').rep_name=this.value; saveDataToCloud();"></div>
-                            <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#475569; width:45px;">Second:</span><input type="text" value="${fac.alt_name || ''}" placeholder="Alt Name" style="padding:4px 6px !important; font-size:13px !important; border:1px solid #cbd5e1; border-radius:4px; width:140px !important;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').alt_name=this.value; saveDataToCloud();"></div>
+                                    <td style="padding: 14px 18px; vertical-align: middle;">
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <!-- Primary Representative Cluster Box -->
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;">
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#0369a1; width:52px;">Primary:</span><input type="text" value="${fac.rep_name || ''}" placeholder="Contact Name" style="padding:3px 6px !important; font-size:12.5px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').rep_name=this.value; saveDataToCloud();"></div>
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">📬 Email:</span><input type="text" value="${fac.rep_email || ''}" placeholder="Contact Email" style="padding:3px 6px !important; font-size:12px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important; color:#475569;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').rep_email=this.value; saveDataToCloud();"></div>
+                            </div>
+                            <!-- Secondary Representative Cluster Box -->
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;">
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#475569; width:52px;">Second:</span><input type="text" value="${fac.alt_name || ''}" placeholder="Alt Name" style="padding:3px 6px !important; font-size:12.5px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').alt_name=this.value; saveDataToCloud();"></div>
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">📬 Email:</span><input type="text" value="${fac.alt_email || ''}" placeholder="Alt Email" style="padding:3px 6px !important; font-size:12px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important; color:#475569;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').alt_email=this.value; saveDataToCloud();"></div>
+                            </div>
                         </div>
                     </td>
+
                     <td style="padding: 14px 18px; vertical-align: middle;"><input type="text" value="${fac.series || ''}" style="padding:6px 8px !important; font-size:13px !important; border:1px solid #cbd5e1; border-radius:4px; width:85% !important; text-align:center; font-weight:700; color:#0369a1; background:#e0f2fe;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').series=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px; vertical-align: middle;"><input type="date" value="${fac.contract_sent_date || ''}" style="padding:4px 6px; font-size:13px; border:1px solid #cbd5e1; border-radius:4px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_sent_date=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px; vertical-align: middle;"><input type="date" value="${fac.contract_received_date || ''}" style="padding:4px 6px; font-size:13px; border:1px solid #cbd5e1; border-radius:4px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_received_date=this.value; saveDataToCloud();"></td>
@@ -498,12 +507,13 @@
                             <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:10px; color:#64748b; font-weight:600;">Status:</span><select style="font-size:12px; padding:4px; font-weight:700; border-radius:4px; ${badgeStyle}" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').payment_status=this.value; saveDataToCloud(); renderDashboard();"><option value="Unpaid" ${fac.payment_status==='Unpaid'?'selected':''}>❌ Unpaid</option><option value="Half Payment" ${isHalf?'selected':''}>🌗 Half Payment</option><option value="Paid in Full" ${isPaid?'selected':''}>✅ Paid in Full</option></select></div>
                         </div>
                     </td>
-                    <td style="padding:14px 18px; text-align:center; vertical-align: middle;"><button type="button" class="btn" style="background:#e2e8f0; color:#0f172a; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:600; cursor:pointer; border:1px solid #cbd5e1;" onclick="event.stopPropagation(); switchTab('notes'); document.getElementById('n-fac-id').value='${fac.id}'; filterNotesByFacility();">🔎 View Logs</button></td>
+                             <td style="padding:14px 18px; text-align:center; vertical-align: middle;"><div style="display:flex; justify-content:center; gap:8px;"><button type="button" class="btn" style="background:#e2e8f0; color:#0f172a; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:600; cursor:pointer; border:1px solid #cbd5e1;" onclick="event.stopPropagation(); switchTab('notes'); document.getElementById('n-fac-id').value='${fac.id}'; filterNotesByFacility();">🔎 View Logs</button><button type="button" style="background:#fee2e2; color:#ef4444; border:1px solid #fca5a5; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;" ${isReadonly} onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete the facility: ${fac.name.replace(/'/g, "\\'")}?')){ mockFacilities=mockFacilities.filter(f=>f.id!=='${fac.id}'); saveDataToCloud(); renderDashboard(); }">❌ Delete</button></div></td>
                 </tr>`;
             });
+
             tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
-                       // 🔮 Render Marketing Pipeline Table (Widescreen Horizontal Bar Layout Upgrades)
-            let leadsHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:22%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:22%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:18%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:16%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
+                               // 🔮 Render Marketing Pipeline Table (Widescreen Horizontal Bar Layout Upgrades with Email)
+            let leadsHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:16%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:16%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:14%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Contact Email</th><th style="padding:14px 18px; font-weight:700; width:13%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:13%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
             
             mockLeads.forEach(lead => {
                 let currentNotesHTML = '';
@@ -528,13 +538,14 @@
                     <td style="padding: 14px 18px; font-weight: 700; color: #0369a1; font-size: 15px;">🔮 ${lead.name}</td>
                     <td style="padding: 14px 18px;"><input type="text" value="${lead.address || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').address=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px;"><input type="text" value="${lead.rep || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').rep=this.value; saveDataToCloud();"></td>
+                    <td style="padding: 14px 18px;"><input type="text" value="${lead.email || ''}" placeholder="Contact Email" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').email=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px;"><input type="text" value="${lead.phone || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').phone=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px;"><input type="text" value="${lead.source || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').source=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px; text-align: center;"><button type="button" onclick="deleteLeadRecord('${lead.id}')" style="background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;" ${isReadonly}>❌ Delete</button></td>
                 </tr>
                 <!-- Sub-Row: Expansive Full Widescreen Interactive Notes Tracker Bar -->
                 <tr style="border-bottom: 2px solid #cbd5e1; background-color: #f8fafc;">
-                    <td colspan="6" style="padding: 14px 24px;">
+                    <td colspan="7" style="padding: 14px 24px;">
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;">
                                 <span style="font-weight: 700; color: #ea580c; font-size: 13.5px; white-space: nowrap; width: 90px;">📝 Log Note:</span>
@@ -554,9 +565,13 @@
             });
             leadsHTML += `</tbody></table></div>`; leadsList.innerHTML = leadsHTML;
 
+
             // 💰 Render Treasurer Ledgers
             mockFacilities.forEach(f => {
-                const total = f.series_count === "2" || f.series === "2 Series" ? 2300 : 1500;
+                              const activeSeriesText = (f.series || '').trim();
+                const seriesArray = activeSeriesText ? activeSeriesText.split(/[\s,]+/).filter(Boolean) : [];
+                const total = (seriesArray.length >= 2 || f.series_count === "2" || activeSeriesText.toLowerCase().includes('series 2') || activeSeriesText.toLowerCase().includes('2 series')) ? 2300 : 1500;
+
                 const paid = f.payment_status === "Paid" || f.payment_status === "Paid in Full" ? total : (f.payment_status === "Half Payment" ? total/2 : 0);
                 const bal = total - paid;
                 if (ledger) ledger.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px dashed #cbd5e1; font-size:13px;"><strong>📊 ${f.name} Continuous Stream:</strong> <span>Subscription Baseline: $${total} | Total Extracted Receipts: <span style="color:green;font-weight:bold;">$${paid}</span> | Outstanding Balance Matrix: <span style="color:red;font-weight:bold;">$${bal}</span></span></div>`;
@@ -590,5 +605,3 @@
     </script>
 </body>
 </html>
-
-
