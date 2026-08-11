@@ -1,1 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SILL Select - Administrative Workspace</title>
+    <!-- Tailwind CSS Engine Core Framework Integration via Global Content Pipeline -->
+    <script src="https://tailwindcss.com"></script>
+    <style>
+        @import url('https://googleapis.com');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        /* Ultra-Readable Dashboard Override Directives for Administrative Interfaces */
+        input[type="text"], input[type="date"], select {
+            font-size: 14px !important;
+            padding: 6px 10px !important;
+            border-color: #cbd5e1 !important;
+        }
+        input[type="text"]:focus, input[type="date"]:focus, select:focus {
+            outline: none !important;
+            border-color: #0284c7 !important;
+            box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15) !important;
+        }
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="p-6 md:p-10">
+
+    <!-- Administrative Matrix Cloud Permission Gateway Wrapper Layer -->
+    <div id="auth-gate" class="max-w-md mx-auto mt-20 bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-3xl">🔐</span>
+            <div>
+                <h1 class="text-xl font-bold text-slate-900">SILL Select Portal</h1>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-0.5">Admin Security Verification Required</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Enter Admin Passcode:</label>
+                <input type="password" id="gate-key" class="w-full p-2 border border-slate-300 rounded-lg text-sm font-medium focus:outline-none focus:border-sky-500" placeholder="••••••••" onkeypress="if(event.key==='Enter')verifyGateAccess()">
+            </div>
+            <button type="button" onclick="verifyGateAccess()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-sm btn">Verify Security Clearance</button>
+            <div id="gate-error" class="hidden text-rose-500 font-bold text-xs text-center mt-2">⚠️ ACCESS DENIED: Invalid Administrative Credential Block</div>
+        </div>
+    </div>
+
+    <!-- Active Production Console Management Workspace Suite -->
+    <div id="console-workspace" class="hidden max-w-[1550px] mx-auto">
+        
+        
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 pb-5 mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center">SILL Select</h1>
+                <p class="text-sm font-semibold text-slate-500 mt-1 uppercase tracking-wider">Aiven MySQL Cloud Pipeline Cluster Fully Operational</p>
+            </div>
+            <button type="button" onclick="terminateSessionClearance()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1.5 btn"><span>[→</span> Sign Out</button>
+        </div>
+
+        <!-- System Architecture Operational Tab Index Grid Framework Controller Buttons Row -->
+        <div class="flex flex-wrap gap-2 mb-8 bg-slate-100 p-1.5 rounded-xl border border-slate-200 max-w-fit">
+            <button type="button" id="t-fac" onclick="switchTab('fac')" class="px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 btn active">📋 Facilities & Contacts</button>
+            <button type="button" id="t-notes" onclick="switchTab('notes')" class="px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 btn">📋 Correspondence Notes Logs</button>
+            <button type="button" id="t-ledger" onclick="switchTab('ledger')" class="px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 btn">💰 Payment Ledger</button>
+            <button type="button" id="t-marketing" onclick="switchTab('marketing')" class="px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 btn">🔮 Marketing Pipeline</button>
+            <button type="button" id="t-schedule" onclick="switchTab('schedule')" class="px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 btn">🗓️ Master Schedule Matrix</button>
+        </div>
+        <!-- PANEL CONTAINER GRID HOOKS START HERE -->
+
+        <!-- TAB 1: ADMINISTRATIVE WORKSPACE CORE DIRECTORY -->
+        <div id="view-fac" class="tab-content active space-y-6">
+            <div class="flex items-center gap-2 mb-4"><span class="text-xl">📁</span><h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Active Facilities Workspace Directory</h2></div>
+            <div id="facilities-list"></div>
+            
+            <!-- Quick-Insert Fast Registry Form Module Component Canvas Box -->
+            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm max-w-4xl">
+                <div class="flex items-center gap-2.5 mb-5 border-b border-slate-100 pb-3"><span class="text-lg">➕</span><h3 class="font-bold text-slate-900">Register New Facility Instance</h3></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Facility Corporate Name:</label><input type="text" id="add-fac-name" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="e.g. Oakridge Senior Living"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Physical Location Address:</label><input type="text" id="add-fac-address" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="Street, City, FL"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Primary Office Line:</label><input type="text" id="add-fac-phone" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="941-000-0000"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Primary Contact Representative:</label><input type="text" id="add-fac-rep" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="Contact Name"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Primary Representative Email:</label><input type="text" id="add-fac-email" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="rep@facility.com"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Secondary Contact Representative:</label><input type="text" id="add-fac-alt-name" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="Alt Name"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Secondary Representative Email:</label><input type="text" id="add-fac-alt-email" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="alt@facility.com"></div>
+                </div>
+                <button type="button" onclick="executeFacilityRegistration()" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-5 py-2 rounded-lg text-xs btn">🚀 Execute Cluster Wire Insertion</button>
+            </div>
+        </div>
+
+        <!-- TAB 2: CORRESPONDENCE NOTE LOOPS GRID NOTEBOOK SHEET -->
+        <div id="view-notes" class="tab-content space-y-6">
+            <div class="flex items-center gap-2 mb-4"><span class="text-xl">📁</span><h2 class="text-xl font-extrabold text-slate-900 tracking-tight">System-Wide Correspondence Note Timelines</h2></div>
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-wrap items-center gap-4 max-w-fit">
+                <div class="flex items-center gap-2"><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Account Focus:</span><select id="notes-filter-selector" onchange="synchronizeNotebookFocusView()" class="border border-slate-300 rounded-md font-bold text-slate-800 focus:outline-none focus:border-sky-500 bg-slate-50"></select></div>
+            </div>
+            
+            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm max-w-4xl">
+                <div class="flex items-center gap-2.5 mb-4 pb-2 border-b border-slate-100"><span class="text-lg">📝</span><h3 class="font-bold text-slate-900">Append Fresh Interaction Timestamp Note Record</h3></div>
+                <div class="flex flex-col md:flex-row gap-4 items-end">
+                    <input type="hidden" id="n-fac-id">
+                    <div class="w-full md:w-48"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Interaction Calendar Date:</label><input type="date" id="n-date" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500 bg-slate-50"></div>
+                    <div class="flex-grow"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Conversation Note & Ledger Milestone Logs Content Canvas:</label><input type="text" id="n-text" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="Type core conversation outcomes, scheduling agreements, or financial adjustments here..."></div>
+                    <button type="button" onclick="executeNoteTimelineCommit()" class="bg-orange-600 hover:bg-orange-700 text-white font-bold px-6 py-2 rounded-lg text-xs whitespace-nowrap btn">＋ Append Note Instance</button>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm max-w-4xl">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Historical Correspondence Timeline Logs Panel</div>
+                <div id="notes-timeline-stream" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: TREASURER FINANCES PANEL -->
+        <div id="view-ledger" class="tab-content space-y-6">
+            <div class="flex items-center gap-2 mb-4"><span class="text-xl">📁</span><h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Accounting Ledger Balance Stream Extraction Matrix</h2></div>
+            <div id="ledger-financial-matrix"></div>
+        </div>
+
+        <!-- TAB 4: MARKETING CONVERSION PIPELINE FRAME -->
+        <div id="view-marketing" class="tab-content space-y-6">
+            <div class="flex items-center gap-2 mb-4"><span class="text-xl">📁</span><h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Active Marketing Leads Sales Conversion Pipeline</h2></div>
+            <div id="marketing-pipeline-list"></div>
+            
+            <!-- Quick-Insert Fast Pipeline Registration Form Module Component Box -->
+            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm max-w-4xl">
+                <div class="flex items-center gap-2.5 mb-5 border-b border-slate-100 pb-3"><span class="text-lg">🎯</span><h3 class="font-bold text-slate-900">Register New Pipeline Lead Instance</h3></div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Target Facility Name:</label><input type="text" id="add-lead-name" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="e.g. Sarasota Senior Living"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Physical Location Address:</label><input type="text" id="add-lead-address" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="Street, City, FL"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Primary Executive Contact:</label><input type="text" id="add-lead-rep" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="Representative Name"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Contact Email:</label><input type="text" id="add-lead-email" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="lead@facility.com"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Primary Contact Phone Line:</label><input type="text" id="add-lead-phone" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="941-000-0000"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Referred By / Marketing Source Instance:</label><input type="text" id="add-lead-source" class="w-full border border-slate-300 rounded-md focus:outline-none focus:border-sky-500" placeholder="Marketing Channel/Referral Group"></div>
+                </div>
+                <button type="button" onclick="executeLeadPipelineRegistration()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2 rounded-lg text-xs btn">🎯 Inject Lead Record Instance</button>
+            </div>
+        </div>
+
+        <!-- TAB 5: Master Schedule Matrix -->
+        <div id="view-schedule" class="tab-content space-y-6">
+            <div class="flex items-center gap-2 mb-4"><span class="text-xl">📁</span><h2 class="text-xl font-extrabold text-slate-900 tracking-tight">13-Week Master Academic Lecture Schedule Matrix</h2></div>
+            <div id="schedule-matrix-sheet"></div>
+        </div>
+        // System Cloud LocalStorage Serialization Cluster Cache Access Key References
+        const STORAGE_KEY_FACILITIES = 'sill_select_cluster_facilities_v4';
+        const STORAGE_KEY_LEADS = 'sill_select_cluster_leads_v4';
+        const isReadonly = "";
+
+        // Standard Operational Seed Data Packages for Empty Session Buffer Allocation Instantiations
+        const defaultFacilities = [
+            { id: "f-1", name: "Aviva Senior Living", address: "1951 N Honore Ave, Sarasota, FL", phone: "941-377-0781", rep_name: "Maria Leonardo", rep_email: "maria@aviva.com", alt_name: "Robert Vance", alt_email: "rvance@aviva.com", series_count: "1", series: "MM", contract_sent_date: "2026-07-20", contract_received_date: "2026-07-28", invoice_sent_date: "", check_received_date: "", payment_status: "Unpaid", notes: [{ date: "2026-07-20", text: "Registered Aviva onboarding track into secure administrative matrix cluster." }] },
+            { id: "f-2", name: "Bay Village", address: "8400 Vamo Rd, Sarasota, FL", phone: "941-966-5611", rep_name: "John Davis", rep_email: "jdavis@bayvillage.org", alt_name: "", alt_email: "", series_count: "2", series: "GI 1, MM", contract_sent_date: "2026-07-15", contract_received_date: "", invoice_sent_date: "", check_received_date: "", payment_status: "Unpaid", notes: [{ date: "2026-07-15", text: "Dispatched baseline contract agreement packet link to executive loop." }] }
+        ];
+
+        const defaultLeads = [
+            { id: "l-1", name: "The Glenridge on Palmer Ranch", address: "7333 Scotland Way, Sarasota, FL", rep: "Sarah Jenkins", email: "sjenkins@glenridge.com", phone: "941-552-5300", source: "Regional Healthcare Conference Liaison Network", notes: [{ date: "2026-08-01", text: "Conducted primary discovery telephone brief with senior executive group." }] }
+        ];
+
+        let mockFacilities = JSON.parse(localStorage.getItem(STORAGE_KEY_FACILITIES)) || defaultFacilities;
+        let mockLeads = JSON.parse(localStorage.getItem(STORAGE_KEY_LEADS)) || defaultLeads;
+
+        function saveDataToCloud() {
+            localStorage.setItem(STORAGE_KEY_FACILITIES, JSON.stringify(mockFacilities));
+            localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(mockLeads));
+        }
+
+        // Administrative Protection Clearance Authentication Evaluation Function
+        function verifyGateAccess() {
+            const key = document.getElementById('gate-key').value;
+            if (key === 'SillSelect') {
+                document.getElementById('auth-gate').classList.add('hidden');
+                document.getElementById('console-workspace').classList.remove('hidden');
+                renderDashboard();
+            } else {
+                document.getElementById('gate-error').classList.remove('hidden');
+            }
+        }
+
+        function terminateSessionClearance() {
+            document.getElementById('gate-key').value = '';
+            document.getElementById('gate-error').classList.add('hidden');
+            document.getElementById('auth-gate').classList.remove('hidden');
+            document.getElementById('console-workspace').classList.add('hidden');
+        }
+
+        // Tab Navigation Architecture Engine (Surgical Layout Fixes)
+        function switchTab(targetId) {
+            // Hide all tab panels safely
+            const contentPanels = document.querySelectorAll('.tab-content');
+            contentPanels.forEach(panel => {
+                panel.style.display = 'none';
+                panel.classList.remove('active');
+            });
+            
+            // Remove active states from all button headers
+            const tabButtons = document.querySelectorAll('.btn');
+            tabButtons.forEach(btn => {
+                if (btn.id && btn.id.startsWith('t-')) {
+                    btn.classList.remove('bg-slate-900', 'text-white', 'shadow-sm');
+                }
+            });
+            
+            // Unveil the active target panel card cleanly
+            const activePanel = document.getElementById('view-' + targetId);
+            if (activePanel) {
+                activePanel.style.display = 'block';
+                activePanel.classList.add('active');
+            }
+            
+            // Highlight the active selection button header
+            const activeButton = document.getElementById('t-' + targetId);
+            if (activeButton) {
+                activeButton.classList.add('bg-slate-900', 'text-white', 'shadow-sm');
+            }
+            
+            // Re-render the tables to refresh layouts
+            if (typeof renderDashboard === 'function') {
+                renderDashboard();
+            }
+        }
+        // Primary Structural Layout Interface Mapping Grid Generator Rendering Loops Engine
+        function renderDashboard() {
+            const fList = document.getElementById('facilities-list');
+            const nSelector = document.getElementById('notes-filter-selector');
+            const leadsList = document.getElementById('marketing-pipeline-list');
+            
+            // 🏢 Render Facilities Table (Pristine Widescreen Proportions & Realigned Layout Grid)
+            let tableHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px; margin-bottom: 24px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                    <thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                        <tr>
+                            <th style="padding:14px 18px; font-weight:700; width:18%;">Facility Info</th>
+                            <th style="padding:14px 18px; font-weight:700; width:20%;">Contacts Matrix</th>
+                            <th style="padding:14px 18px; font-weight:700; width:12%;">Series Subscribed</th>
+                            <th style="padding:14px 18px; font-weight:700; width:12%;">📅 Contract Sent</th>
+                            <th style="padding:14px 18px; font-weight:700; width:12%;">📋 Contract Rec'd</th>
+                            <th style="padding:14px 18px; font-weight:700; width:21%;">💳 Payment Status Matrix</th>
+                            <th style="padding:14px 18px; text-align:center; width:5%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            mockFacilities.forEach(fac => {
+                const isPaid = fac.payment_status === "Paid" || fac.payment_status === "Paid in Full";
+                const isHalf = fac.payment_status === "Half Paid" || fac.payment_status === "Half Payment";
+                let badgeStyle = isPaid ? "background:#dcfce7;color:#15803d;" : (isHalf ? "background:#fef9c3;color:#a16207;" : "background:#fee2e2;color:#ef4444;");
+                
+                tableHTML += `<tr style="border-bottom: 1px solid #e2e8f0;">`;
+                    <!-- Facility Info Column Box -->
+                    <td style="padding: 14px 18px; vertical-align: middle; width: 18%;">
+                        <div style="font-weight: 800; font-size: 1.25rem !important; color: #0369a1; line-height: 1.3;">🏢 ${fac.name}</div>
+                        <div style="font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 500;">📍 ${fac.address || 'No Address'}</div>
+                        <div style="font-size: 12px; color: #475569; margin-top: 2px; font-weight: 600;">📞 ${fac.phone || 'No Phone'}</div>
+                    </td>
+                    <!-- Contacts Matrix Column Box -->
+                    <td style="padding: 14px 18px; vertical-align: middle; width: 20%;">
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;">
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#0369a1; width:52px;">Primary:</span><input type="text" value="${fac.rep_name || ''}" placeholder="Contact Name" style="padding:3px 6px !important; font-size:12.5px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').rep_name=this.value; saveDataToCloud();"></div>
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">📬 Email:</span><input type="text" value="${fac.rep_email || ''}" placeholder="Contact Email" style="padding:3px 6px !important; font-size:12px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important; color:#475569;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').rep_email=this.value; saveDataToCloud();"></div>
+                            </div>
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;">
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#475569; width:52px;">Second:</span><input type="text" value="${fac.alt_name || ''}" placeholder="Alt Name" style="padding:3px 6px !important; font-size:12.5px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').alt_name=this.value; saveDataToCloud();"></div>
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">📬 Email:</span><input type="text" value="${fac.alt_email || ''}" placeholder="Alt Email" style="padding:3px 6px !important; font-size:12px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important; color:#475569;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').alt_email=this.value; saveDataToCloud();"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <!-- Series Subscribed Dropdown Column Box -->
+                    <td style="padding: 14px 18px; vertical-align: middle; width: 12%;">
+                        <select style="font-size: 13px !important; padding: 6px 8px; font-weight: 700; border-radius: 4px; border: 1px solid #cbd5e1; width: 110px; color: #0369a1; background: #e0f2fe; cursor: pointer;" ${isReadonly} onchange="
+                            const matched = mockFacilities.find(f => f.id === '${fac.id}');
+                            if (matched) {
+                                matched.series_count = this.value;
+                                matched.series = this.value === '2' ? 'GI 1, MM' : 'MM';
+                                saveDataToCloud();
+                                renderDashboard();
+                            }
+                        ">
+                            <option value="1" ${fac.series_count === '1' || fac.series === 'MM' ? 'selected' : ''}>1 Series ($1.5k)</option>
+                            <option value="2" ${fac.series_count === '2' || fac.series !== 'MM' ? 'selected' : ''}>2 Series ($2.3k)</option>
+                        </select>
+                        <div style="display:flex; align-items:center; gap:4px; margin-top:6px; justify-content:center;"><span style="font-weight:700; color:#64748b; white-space:nowrap; font-size:10px;">✍️ Programs:</span><input type="text" value="${fac.series || 'MM'}" style="padding:2px 4px !important; font-size:11px !important; border:1px solid #cbd5e1; border-radius:4px; width:75px !important; font-weight:700; color:#0369a1; text-align:center; background:#ffffff;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').series=this.value; saveDataToCloud();"></div>
+                    </td>
+                    <td style="padding: 14px 18px; vertical-align: middle; width: 12%; text-align: left;">
+                        <input type="date" value="${fac.contract_sent_date || ''}" style="padding:6px 8px; font-size:13px; border:1px solid #cbd5e1; border-radius:4px; width: 130px; background: #ffffff;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_sent_date=this.value; saveDataToCloud();">
+                    </td>
+                    <td style="padding: 14px 18px; vertical-align: middle; width: 12%; text-align: left;">
+                        <input type="date" value="${fac.contract_received_date || ''}" style="padding:6px 8px; font-size:13px; border:1px solid #cbd5e1; border-radius:4px; width: 130px; background: #ffffff;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_received_date=this.value; saveDataToCloud();">
+                    </td>
+                    <!-- Payment Status Matrix Column Box (Compact Stacked Alignment Upgrade) -->
+                    <td style="padding: 14px 18px; vertical-align: middle; width: 21%;">
+                        <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                            <!-- Top Row: Inv Sent Input & Status Dropdown -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="font-size: 11px; color: #475569; font-weight: 700; width: 55px; display: inline-block;">Inv Sent:</span>
+                                    <input type="date" value="${fac.invoice_sent_date || ''}" style="padding: 5px 8px !important; font-size: 13px !important; border: 1px solid #cbd5e1; border-radius: 4px; width: 125px !important; background: #ffffff; color: #0f172a; height: 32px !important; box-sizing: border-box;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').invoice_sent_date=this.value; saveDataToCloud();">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <select style="font-size: 11px !important; padding: 4px 6px !important; font-weight: 700; border-radius: 4px; border: 1px solid #cbd5e1; height: 32px !important; width: 95px; box-sizing: border-box; cursor: pointer; ${badgeStyle}" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').payment_status=this.value; saveDataToCloud(); renderDashboard();">
+                                        <option value="Unpaid" ${fac.payment_status==='Unpaid'?'selected':''}>❌ Unpaid</option>
+                                        <option value="Half Payment" ${isHalf?'selected':''}>🌗 Half Paid</option>
+                                        <option value="Paid in Full" ${isPaid?'selected':''}>✅ Paid</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Bottom Row: Chk Rec'd Input Field -->
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span style="font-size: 11px; color: #475569; font-weight: 700; width: 55px; display: inline-block;">Chk Rec'd:</span>
+                                <input type="date" value="${fac.check_received_date || ''}" style="padding: 5px 8px !important; font-size: 13px !important; border: 1px solid #cbd5e1; border-radius: 4px; width: 125px !important; background: #ffffff; color: #0f172a; height: 32px !important; box-sizing: border-box;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').check_received_date=this.value; saveDataToCloud();">
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding:14px 18px; text-align:center; vertical-align: middle; width: 5%;"><div style="display:flex; justify-content:center; gap:8px;"><button type="button" class="btn" style="background:#e2e8f0; color:#0f172a; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:600; cursor:pointer; border:1px solid #cbd5e1;" onclick="event.stopPropagation(); switchTab('notes'); document.getElementById('n-fac-id').value='${fac.id}'; filterNotesByFacility();">🔎 View Logs</button><button type="button" style="background:#fee2e2; color:#ef4444; border:1px solid #fca5a5; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;" ${isReadonly} onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete the facility: ${fac.name.replace(/'/g, "\\'")}?')){ mockFacilities=mockFacilities.filter(f=>f.id!=='${fac.id}'); saveDataToCloud(); renderDashboard(); }">❌ Delete</button></div></td>
+                </tr>`;
+            });
+            tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
+            // 📋 Render Sync Target Selector Filter List for Notebook Options Panels
+            const cachedFocusID = document.getElementById('n-fac-id').value || (mockFacilities.length > 0 ? mockFacilities.id : '');
+            let selectorHTML = '';
+            mockFacilities.forEach(f => {
+                selectorHTML += `<option value="${f.id}" ${f.id===cachedFocusID?'selected':''}>🏢 ${f.name}</option>`;
+            });
+            nSelector.innerHTML = selectorHTML;
+            if(!document.getElementById('n-fac-id').value && mockFacilities.length > 0) {
+                document.getElementById('n-fac-id').value = mockFacilities.id;
+            }
+            renderNotesTimelineStream();
+
+            // 🔮 Render Marketing Pipeline Table (Widescreen Horizontal Bar Layout Upgrades with Email)
+            let leadsHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:16%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:16%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:14%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Contact Email</th><th style="padding:14px 18px; font-weight:700; width:13%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:13%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
+            mockLeads.forEach(lead => {
+                let currentNotesHTML = '';
+                if (lead.notes && lead.notes.length > 0) {
+                    currentNotesHTML = lead.notes.map((n, lIdx) => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; margin-top: 4px; background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #ea580c; border-radius: 4px; font-size: 13.5px; color: #0f172a;">
+                            <div style="flex-grow: 1; padding-right: 15px; line-height: 1.5;">
+                                🗓️ <strong>${n.date}</strong>: <span id="lead-body-text-${lead.id}-${lIdx}">${n.text}</span>
+                            </div>
+                            <div style="display: flex; gap: 4px; white-space: nowrap;">
+                                <button type="button" id="lead-edit-btn-${lead.id}-${lIdx}" onclick="enableInlineLeadEdit('${lead.id}', ${lIdx})" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">✏️ Edit</button>
+                                <button type="button" id="lead-save-btn-${lead.id}-${lIdx}" onclick="saveInlineLeadEdit('${lead.id}', ${lIdx})" style="display: none; background: #047857; color: #ffffff; border: none; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">💾 Save</button>
+                            </div>
+                        </div>`).join('');
+                } else {
+                    currentNotesHTML = `<span style="font-size: 12px; color: #94a3b8; font-style: italic; padding-left: 4px;">No recorded interactions saved for this facility lead yet.</span>`;
+                }
+                
+                leadsHTML += `
+                <tr style="border-bottom: 1px dashed #cbd5e1; background-color: #fafafa;">
+                    <td style="padding: 14px 18px; font-weight: 700; color: #0369a1; font-size: 15px;">🔮 ${lead.name}</td>
+                    <td style="padding: 14px 18px;"><input type="text" value="${lead.address || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').address=this.value; saveDataToCloud();"></td>
+                    <td style="padding: 14px 18px;"><input type="text" value="${lead.rep || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').rep=this.value; saveDataToCloud();"></td>
+                    <td style="padding: 14px 18px;"><input type="text" value="${lead.email || ''}" placeholder="Contact Email" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').email=this.value; saveDataToCloud();"></td>
+                    <td style="padding: 14px 18px;"><input type="text" value="${lead.phone || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').phone=this.value; saveDataToCloud();"></td>
+                    <td style="padding: 14px 18px;"><input type="text" value="${lead.source || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').source=this.value; saveDataToCloud();"></td>
+                    <td style="padding: 14px 18px; text-align: center;"><button type="button" onclick="deleteLeadRecord('${lead.id}')" style="background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;" ${isReadonly}>❌ Delete</button></td>
+                </tr>
+                <tr style="border-bottom: 2px solid #cbd5e1; background-color: #f8fafc;">
+                    <td colspan="7" style="padding: 14px 24px;">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;">
+                                <span style="font-weight: 700; color: #ea580c; font-size: 13.5px; white-space: nowrap; width: 90px;">📝 Log Note:</span>
+                                <input type="date" id="date-pick-${lead.id}" style="padding: 6px 10px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 150px; background:#ffffff;" ${isReadonly}>
+                                <input type="text" id="note-input-${lead.id}" placeholder="Type conversation milestones, presentation feedback, or outreach items here..." style="padding: 6px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; flex-grow: 1; color: #0f172a; background:#ffffff;" ${isReadonly} onkeypress="if(event.key==='Enter'){ addInlineLeadNote('${lead.id}', this.value, document.getElementById('date-pick-${lead.id}').value); this.value=''; }">
+                                <button type="button" style="background: #ea580c; color: #ffffff; border: none; padding: 6px 18px; border-radius: 4px; font-size: 13.5px; font-weight: bold; cursor: pointer; white-space:nowrap;" ${isReadonly} onclick="addInlineLeadNote('${lead.id}', document.getElementById('note-input-${lead.id}').value, document.getElementById('date-pick-${lead.id}').value); document.getElementById('note-input-${lead.id}').value='';">＋ Add Note</button>
+                            </div>
+                            <div style="margin-top: 4px;">
+                                <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">📋 Marketing Interaction Logs History:</div>
+                                <div style="display: flex; flex-direction: column; gap: 6px;">
+                                    ${currentNotesHTML}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            leadsHTML += `</tbody></table></div>`; leadsList.innerHTML = leadsHTML;
+            // 💰 Render Treasurer Ledgers
+            const ledgerPanel = document.getElementById('ledger-financial-matrix');
+            let ledgerHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700;">Facility Instance</th><th style="padding:14px 18px; font-weight:700;">Active Program Array</th><th style="padding:14px 18px; font-weight:700;">Invoice Base Rate</th><th style="padding:14px 18px; font-weight:700;">Account Processing Balance Status</th></tr></thead><tbody>`;
+            
+            let grandTotalExpected = 0;
+            mockFacilities.forEach(f => {
+                const activeSeriesText = (f.series || '').trim();
+                const seriesArray = activeSeriesText ? activeSeriesText.split(/[\s,]+/).filter(Boolean) : [];
+                const total = (seriesArray.length >= 2 || f.series_count === "2" || activeSeriesText.toLowerCase().includes('series 2') || activeSeriesText.toLowerCase().includes('2 series')) ? 2300 : 1500;
+                grandTotalExpected += total;
+                
+                let finStatus = `<span style="color:#ef4444; font-weight:bold;">⚠️ Account Unpaid / Outstanding Link Pipeline</span>`;
+                if(f.payment_status === "Paid" || f.payment_status === "Paid in Full") {
+                    finStatus = `<span style="color:#16a34a; font-weight:bold;">✅ Full Transaction Confirmed ($${total.toLocaleString()})</span>`;
+                } else if(f.payment_status === "Half Paid" || f.payment_status === "Half Payment") {
+                    finStatus = `<span style="color:#ca8a04; font-weight:bold;">🌗 Milestone Half Payment Authorized ($${(total/2).toLocaleString()})</span>`;
+                }
+                
+                ledgerHTML += `<tr style="border-bottom: 1px solid #cbd5e1;"><td style="padding:14px 18px; font-weight:700; color:#0f172a;">🏢 ${f.name}</td><td style="padding:14px 18px;"><span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:4px; font-weight:700; font-size:12px;">🏷️ ${f.series || 'MM'}</span></td><td style="padding:14px 18px; font-weight:700; color:#475569;">$${total.toLocaleString()}</td><td style="padding:14px 18px;">${finStatus}</td></tr>`;
+            });
+            
+            ledgerHTML += `<tr style="background:#f8fafc; border-top:2px solid #94a3b8;"><td colspan="2" style="padding:16px 18px; font-weight:800; color:#0f172a; text-align:right;">Grand Total Expected System Revenue Metrics:</td><td colspan="2" style="padding:16px 18px; font-weight:900; color:#0284c7; font-size:16px;">$${grandTotalExpected.toLocaleString()} USD</td></tr></tbody></table></div>`;
+            ledgerPanel.innerHTML = ledgerHTML;
+            // 🗓️ Render Schedule Matrix Panel Sheet Block Component
+            const sPanel = document.getElementById('schedule-matrix-sheet');
+            let sHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 12px; font-weight:700; text-align:left; width:200px;">Facility Location Array</th>`;
+            for(let w=1; w<=13; w++) { sHTML += `<th style="padding:14px 6px; font-weight:700;">Wk ${w}</th>`; }
+            sHTML += `</tr></thead><tbody>`;
+            
+            mockFacilities.forEach(f => {
+                sHTML += `<tr style="border-bottom: 1px solid #cbd5e1;"><td style="padding:14px 12px; font-weight:700; text-align:left; color:#0369a1; background:#f8fafc;">🏢 ${f.name}</td>`;
+                for(let w=1; w<=13; w++) {
+                    const uniqueCellKey = `${f.id}-wk-${w}`;
+                    const savedCellValue = localStorage.getItem(uniqueCellKey) || '';
+                    sHTML += `<td style="padding:4px; border-right:1px dashed #e2e8f0;"><input type="text" value="${savedCellValue}" placeholder="--" style="width:100%; border:1px solid #e2e8f0; border-radius:4px; text-align:center; padding:4px 2px !important; font-size:12px !important; font-weight:600;" ${isReadonly} onchange="localStorage.setItem('${uniqueCellKey}', this.value); saveDataToCloud();"></td>`;
+                }
+                sHTML += `</tr>`;
+            });
+            sHTML += `</tbody></table></div>`; sPanel.innerHTML = sHTML;
+        }
+        // 📋 Active Inline Dialogue Interaction Notes Canvas Generators
+        function renderNotesTimelineStream() {
+            const focusID = document.getElementById('n-fac-id').value;
+            const stream = document.getElementById('notes-timeline-stream');
+            if (!focusID && mockFacilities.length > 0) {
+                document.getElementById('n-fac-id').value = mockFacilities[0].id;
+            }
+            const currentID = document.getElementById('n-fac-id').value;
+            const matched = mockFacilities.find(f => f.id === currentID);
+            if(!matched) { stream.innerHTML = ''; return; }
+            
+            if(!matched.notes || matched.notes.length === 0) {
+                stream.innerHTML = `<span class="text-xs italic text-slate-400 pl-1">No notes saved.</span>`;
+                return;
+            }
+            
+            let timelineHTML = '';
+            matched.notes.forEach((note, idx) => {
+                timelineHTML += `
+                <div class="flex justify-between items-start bg-slate-50 border border-slate-200 border-l-4 border-sky-600 rounded-lg p-3 shadow-2xs">
+                    <div style="flex-grow: 1; padding-right: 15px; line-height: 1.5;">
+                        <span class="text-xs font-bold text-slate-400 mr-2">🗓️ ${note.date}</span>
+                        <span id="note-body-text-${idx}" class="text-sm font-medium text-slate-800">${note.text}</span>
+                    </div>
+                    <div class="flex gap-1.5 whitespace-nowrap">
+                        <button type="button" id="note-edit-btn-${idx}" onclick="enableInlineTimelineEdit(${idx})" class="bg-white text-slate-600 border border-slate-200 font-bold px-2 py-1 rounded text-2xs btn">✏️ Edit</button>
+                        <button type="button" id="note-save-btn-${idx}" onclick="saveInlineTimelineEdit(${idx})" class="hidden bg-emerald-700 text-white font-bold px-2.5 py-1 rounded text-2xs btn">💾 Save</button>
+                    </div>
+                </div>`;
+            });
+            stream.innerHTML = timelineHTML;
+        }
+
+        function enableInlineTimelineEdit(idx) {
+            const bodySpan = document.getElementById(`note-body-text-${idx}`);
+            const editBtn = document.getElementById(`note-edit-btn-${idx}`);
+            const saveBtn = document.getElementById(`note-save-btn-${idx}`);
+            const currentText = bodySpan.innerText;
+            bodySpan.innerHTML = `<input type="text" id="note-edit-input-${idx}" value="${currentText.replace(/"/g, '&quot;')}" class="w-full border border-sky-400 rounded px-2 py-1 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-100 bg-white">`;
+            editBtn.classList.add('hidden');
+            saveBtn.classList.remove('hidden');
+        }
+
+        function saveInlineTimelineEdit(idx) {
+            const focusID = document.getElementById('n-fac-id').value;
+            const updatedValue = document.getElementById(`note-edit-input-${idx}`).value;
+            const matched = mockFacilities.find(f => f.id === focusID);
+            if(matched && matched.notes && matched.notes[idx]) {
+                matched.notes[idx].text = updatedValue;
+                saveDataToCloud();
+                renderNotesTimelineStream();
+            }
+        }
+
+        function synchronizeNotebookFocusView() {
+            const selector = document.getElementById('notes-filter-selector');
+            document.getElementById('n-fac-id').value = selector.value;
+            renderNotesTimelineStream();
+        }
+
+        function filterNotesByFacility() {
+            const cachedID = document.getElementById('n-fac-id').value;
+            const selector = document.getElementById('notes-filter-selector');
+            if (selector) { selector.value = cachedID; }
+            renderNotesTimelineStream();
+        }
+
+        function executeNoteTimelineCommit() {
+            const fid = document.getElementById('n-fac-id').value;
+            const d = document.getElementById('n-date').value;
+            const t = document.getElementById('n-text').value;
+            if(!d || !t) return;
+            const matched = mockFacilities.find(f => f.id === fid);
+            if(matched) {
+                if(!matched.notes) matched.notes = [];
+                matched.notes.push({ date: d, text: t });
+                saveDataToCloud();
+                document.getElementById('n-text').value = '';
+                renderNotesTimelineStream();
+            }
+        }
+
+        function enableInlineLeadEdit(leadId, noteIdx) {
+            const bodySpan = document.getElementById(`lead-body-text-${leadId}-${noteIdx}`);
+            const editBtn = document.getElementById(`lead-edit-btn-${leadId}-${noteIdx}`);
+            const saveBtn = document.getElementById(`lead-save-btn-${leadId}-${noteIdx}`);
+            const currentText = bodySpan.innerText;
+            bodySpan.innerHTML = `<input type="text" id="lead-edit-input-${leadId}-${noteIdx}" value="${currentText.replace(/"/g, '&quot;')}" style="width:100%; border:1px solid #0284c7; border-radius:4px; padding:2px 6px; background:#ffffff;">`;
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-block';
+        }
+
+        function saveInlineLeadEdit(leadId, noteIdx) {
+            const updatedText = document.getElementById(`lead-edit-input-${leadId}-${noteIdx}`).value;
+            const matchedLead = mockLeads.find(l => l.id === leadId);
+            if (matchedLead && matchedLead.notes && matchedLead.notes[noteIdx]) {
+                matchedLead.notes[noteIdx].text = updatedText;
+                saveDataToCloud();
+                renderDashboard();
+            }
+        }
+
+        function addInlineLeadNote(leadId, noteText, noteDate) {
+            if (!noteText || !noteDate) return;
+            const matchedLead = mockLeads.find(l => l.id === leadId);
+            if (matchedLead) {
+                if (!matchedLead.notes) matchedLead.notes = [];
+                matchedLead.notes.push({ date: noteDate, text: noteText });
+                saveDataToCloud();
+                renderDashboard();
+            }
+        }
+
+        function deleteLeadRecord(leadId) {
+            if (confirm('Are you certain you want to permanently delete this lead record?')) {
+                mockLeads = mockLeads.filter(l => l.id !== leadId);
+                saveDataToCloud();
+                renderDashboard();
+            }
+        }
+
+        function executeFacilityRegistration() {
+            const n = document.getElementById('add-fac-name').value;
+            const a = document.getElementById('add-fac-address').value;
+            const p = document.getElementById('add-fac-phone').value;
+            const r = document.getElementById('add-fac-rep').value;
+            const e = document.getElementById('add-fac-email').value;
+            const an = document.getElementById('add-fac-alt-name').value;
+            const ae = document.getElementById('add-fac-alt-email').value;
+            if(!n) return;
+            
+            const freshID = 'f-' + (mockFacilities.length + 1) + '-' + Math.floor(Math.random()*1000);
+            mockFacilities.push({ id: freshID, name: n, address: a, phone: p, rep_name: r, rep_email: e, alt_name: an, alt_email: ae, series_count: "1", series: "MM", contract_sent_date: "", contract_received_date: "", invoice_sent_date: "", check_received_date: "", payment_status: "Unpaid", notes: [{ date: "2026-08-10", text: "Facility created." }] });
+            saveDataToCloud();
+            document.getElementById('add-fac-name').value = '';
+            document.getElementById('add-fac-address').value = '';
+            document.getElementById('add-fac-phone').value = '';
+            document.getElementById('add-fac-rep').value = '';
+            document.getElementById('add-fac-email').value = '';
+            document.getElementById('add-fac-alt-name').value = '';
+            document.getElementById('add-fac-alt-email').value = '';
+            renderDashboard();
+        }
+
+        function executeLeadPipelineRegistration() {
+            const n = document.getElementById('add-lead-name').value;
+            const a = document.getElementById('add-lead-address').value;
+            const r = document.getElementById('add-lead-rep').value;
+            const e = document.getElementById('add-lead-email').value;
+            const p = document.getElementById('add-lead-phone').value;
+            const s = document.getElementById('add-lead-source').value;
+            if(!n) return;
+            
+            const freshLeadID = 'l-' + (mockLeads.length + 1) + '-' + Math.floor(Math.random()*1000);
+            mockLeads.push({ id: freshLeadID, name: n, address: a, rep: r, email: e, phone: p, source: s, notes: [{ date: "2026-08-10", text: "Lead logged." }] });
+            saveDataToCloud();
+            document.getElementById('add-lead-name').value = '';
+            document.getElementById('add-lead-address').value = '';
+            document.getElementById('add-lead-rep').value = '';
+            document.getElementById('add-lead-email').value = '';
+            document.getElementById('add-lead-phone').value = '';
+            document.getElementById('add-lead-source').value = '';
+            renderDashboard();
+        }
+    </script>
+</body>
+</html>
 
