@@ -416,17 +416,19 @@
                         const noteDate = note.date || new Date().toLocaleDateString();
                         
                         notesHTML += `
-                        <div id="note-row-${selectedId}-${nIdx}" class="timeline-item" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; font-size: 1.15rem !important; margin-bottom: 0px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                            <div id="note-text-container-${selectedId}-${nIdx}" style="flex-grow: 1; padding-right: 24px;">
-                                <span style="font-weight: 700; color: #0369a1; font-size: 1.1rem; display: inline-block; margin-right: 12px; white-space: nowrap;">🗓️ ${noteDate}:</span>
-                                <span id="note-body-text-${selectedId}-${nIdx}" style="font-weight: 500; line-height: 1.6;">${noteText}</span>
-                            </div>
-                            <div style="display: flex; gap: 8px; white-space: nowrap;">
-                                <button type="button" id="note-edit-btn-${selectedId}-${nIdx}" onclick="enableInlineNoteEdit('${selectedId}', ${nIdx})" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: bold; cursor: pointer;">✏️ Edit</button>
-                                <button type="button" id="note-save-btn-${selectedId}-${nIdx}" onclick="saveInlineNoteEdit('${selectedId}', ${nIdx})" style="display: none; background: #047857; color: #ffffff; border: none; padding: 6px 16px; border-radius: 4px; font-size: 13px; font-weight: bold; cursor: pointer;">💾 Save</button>
-                            </div>
-                        </div>`;
+                                  <div id="note-row-${selectedId}-${nIdx}" class="timeline-item" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; margin-bottom: 12px;">
+                                <div id="note-text-container-${selectedId}-${nIdx}" style="flex-grow: 1; padding-right: 24px;">
+                                    <span style="font-weight: 700; color: #0369a1; font-size: 1.1rem; display: inline-block; margin-right: 12px; white-space: nowrap;">📅 ${noteDate}</span>
+                                    <span id="note-body-text-${selectedId}-${nIdx}" style="font-weight: 500; line-height: 1.6; color: #334155;">${noteText}</span>
+                                </div>
+                                <div style="display: flex; gap: 8px; white-space: nowrap; align-items: center;">
+                                    <button type="button" id="note-edit-btn-${selectedId}-${nIdx}" onclick="enableInlineNoteEdit('${selectedId}', ${nIdx})" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">✏️ Edit</button>
+                                    <button type="button" id="note-save-btn-${selectedId}-${nIdx}" onclick="saveInlineNoteEdit('${selectedId}', ${nIdx})" style="display: none; background: #047857; color: #ffffff; border: none; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">💾 Save</button>
+                                </div>
+                            </div>`;
                     });
+
+
                     notesHTML += `</div>`; 
                     masterNotes.innerHTML = notesHTML;
                 } else {
