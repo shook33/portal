@@ -481,7 +481,7 @@
             const isReadonly = userRole === "board" ? "readonly disabled style='background:#f1f5f9; color:#64748b; cursor:not-allowed;'" : "";
             
             // 🏢 Render Facilities Table (Pristine Large Labels & Fitted Inputs)
-            let tableHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px; margin-bottom: 24px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:22%;">Facility Info</th><th style="padding:14px 18px; font-weight:700; width:22%;">Contacts Matrix</th><th style="padding:14px 18px; font-weight:700; width:10%;">Series Subscribed</th><th style="padding:14px 18px; font-weight:700; width:11%;">📅 Contract Sent</th><th style="padding:14px 18px; font-weight:700; width:11%;">📋 Contract Rec'd</th><th style="padding:14px 18px; font-weight:700; width:20%;">💳 Payment Status Matrix</th><th style="padding:14px 18px; text-align:center; width:5%;">Actions</th></tr></thead><tbody>`;
+        let tableHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px; margin-bottom: 24px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:22%;">Facility Info</th><th style="padding:14px 18px; font-weight:700; width:22%;">Contacts Matrix</th><th style="padding:14px 18px; font-weight:700; width:10%;">Series Subscribed</th><th style="padding:14px 18px; font-weight:700; width:16%;">📋 Contract Status</th><th style="padding:14px 18px; font-weight:700; width:25%;">💳 Invoice & Payment Ledgers</th><th style="padding:14px 18px; text-align:center; width:5%;">Actions</th></tr></thead><tbody>`;
             mockFacilities.forEach(fac => {
                 const isPaid = fac.payment_status === "Paid" || fac.payment_status === "Paid in Full";
                 const isHalf = fac.payment_status === "Half Paid" || fac.payment_status === "Half Payment";
@@ -523,14 +523,42 @@
                                          <div style="display:flex; align-items:center; gap:4px; margin-top:6px; justify-content:center;"><span style="font-size:10px; font-weight:700; color:#64748b; white-space:nowrap;">✍️ Programs:</span><input type="text" value="${fac.series || 'MM'}" style="padding:2px 4px !important; font-size:11px !important; border:1px solid #cbd5e1; border-radius:4px; width:75px !important; font-weight:700; color:#0369a1; text-align:center; background:#ffffff;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').series=this.value; saveDataToCloud();"></div>
                     </td>
 
-                    <td style="padding: 14px 18px; vertical-align: middle;"><input type="date" value="${fac.contract_received_date || ''}" style="padding:4px 6px; font-size:13px; border:1px solid #cbd5e1; border-radius:4px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_received_date=this.value; saveDataToCloud();"></td>
+                     <!-- 📋 Combined Contract Milestones Box: Sent & Signed Tracking -->
                     <td style="padding: 14px 18px; vertical-align: middle;">
-                        <div style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
-                            <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:10px; color:#64748b; font-weight:600;">Inv Sent:</span><input type="date" value="${fac.invoice_sent_date || ''}" style="padding:4px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; width:105px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').invoice_sent_date=this.value; saveDataToCloud();"></div>
-                            <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:10px; color:#64748b; font-weight:600;">Chk Rec'd:</span><input type="date" value="${fac.check_received_date || ''}" style="padding:4px; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; width:105px;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').check_received_date=this.value; saveDataToCloud();"></div>
-                            <div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:10px; color:#64748b; font-weight:600;">Status:</span><select style="font-size:12px; padding:4px; font-weight:700; border-radius:4px; ${badgeStyle}" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').payment_status=this.value; saveDataToCloud(); renderDashboard();"><option value="Unpaid" ${fac.payment_status==='Unpaid'?'selected':''}>❌ Unpaid</option><option value="Half Payment" ${isHalf?'selected':''}>🌗 Half Payment</option><option value="Paid in Full" ${isPaid?'selected':''}>✅ Paid in Full</option></select></div>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span style="font-size: 11px; font-weight: 700; color: #475569; width: 65px;">📋 Sent:</span>
+                                <input type="date" value="${fac.contract_sent_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 115px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_sent_date=this.value; saveDataToCloud();">
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span style="font-size: 11px; font-weight: 700; color: #0369a1; width: 65px;">✍️ Signed:</span>
+                                <input type="date" value="${fac.contract_received_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 115px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_received_date=this.value; saveDataToCloud();">
+                            </div>
                         </div>
                     </td>
+
+                    <!-- 💳 Invoice & Payment Processing Box -->
+                    <td style="padding: 14px 18px; vertical-align: middle;">
+                        <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span style="font-size: 10px; color: #64748b; font-weight: 600;">Inv Sent:</span>
+                                <input type="date" value="${fac.invoice_sent_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 105px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').invoice_sent_date=this.value; saveDataToCloud();">
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span style="font-size: 10px; color: #64748b; font-weight: 600;">Chk Rec'd:</span>
+                                <input type="date" value="${fac.check_received_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 105px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').check_received_date=this.value; saveDataToCloud();">
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span style="font-size: 10px; color: #64748b; font-weight: 600;">Status:</span>
+                                <select style="font-size: 12px; padding: 4px; font-weight: 700; border-radius: 4px; ${badgeStyle || ''}" onchange="mockFacilities.find(f=>f.id==='${fac.id}').payment_status=this.value; saveDataToCloud(); renderDashboard();">
+                                    <option value="Unpaid" ${fac.payment_status==='Unpaid'?'selected':''}>❌ Unpaid</option>
+                                    <option value="Half Payment" ${fac.payment_status==='Half Payment'?'selected':''}>🌗 Half Payment</option>
+                                    <option value="Paid in Full" ${fac.payment_status==='Paid in Full' || fac.payment_status==='Paid'?'selected':''}>✅ Paid in Full</option>
+                                </select>
+                            </div>
+                        </div>
+                    </td>
+                  
                              <td style="padding:14px 18px; text-align:center; vertical-align: middle;"><div style="display:flex; justify-content:center; gap:8px;"><button type="button" class="btn" style="background:#e2e8f0; color:#0f172a; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:600; cursor:pointer; border:1px solid #cbd5e1;" onclick="event.stopPropagation(); switchTab('notes'); document.getElementById('n-fac-id').value='${fac.id}'; filterNotesByFacility();">🔎 View Logs</button><button type="button" style="background:#fee2e2; color:#ef4444; border:1px solid #fca5a5; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;" ${isReadonly} onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete the facility: ${fac.name.replace(/'/g, "\\'")}?')){ mockFacilities=mockFacilities.filter(f=>f.id!=='${fac.id}'); saveDataToCloud(); renderDashboard(); }">❌ Delete</button></div></td>
                 </tr>`;
             });
