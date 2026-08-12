@@ -227,11 +227,30 @@
             if (typeof loadScheduleMatrixData === "function") loadScheduleMatrixData();
         }
 
-        function saveDataToCloud() {
-            if (userRole === "board") return; 
-            localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
-            localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
+        async function saveDataToCloud() {
+    if (userRole === "board") return;
+    
+    // 💾 Safety Backup: Keep local browser data synced as a fallback
+    localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
+    localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
+
+    // 📡 Cloud Pipeline Connection: Paste your server endpoint link inside the quotes below!
+    const CLOUD_API_URL = "YOUR_DATABASE_SERVER_ADDRESS_HERE";
+
+    if (CLOUD_API_URL !== "YOUR_DATABASE_SERVER_ADDRESS_HERE") {
+        try {
+            await fetch(CLOUD_API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ facilities: mockFacilities, leads: mockLeads })
+            });
+            console.log("☁️ Real-time Data Sync: Successfully broadcast to Aiven MySQL Pipeline Cluster.");
+        } catch (error) {
+            console.error("⚠️ Connection Alert: Cloud network pipeline unreachable. Data safely cached locally.", error);
         }
+    }
+}
+
 
         function addNewFacility(e) {
             e.preventDefault();
