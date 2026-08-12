@@ -170,16 +170,17 @@
                 document.getElementById('login-frame').classList.add('hidden');
                 document.getElementById('portal-console').classList.remove('hidden');
                 setTimeout(loadDataFromCloud, 100);
-            } else if (code === "TreasureR") {
-                userRole = "treasurer";
-                document.getElementById('login-frame').classList.add('hidden');
-                document.getElementById('portal-console').classList.remove('hidden');
-                setTimeout(loadDataFromCloud, 100);
-            } else if (code === "SillboardlogiN") {
-                userRole = "board";
-                document.getElementById('login-frame').classList.add('hidden');
-                document.getElementById('portal-console').classList.remove('hidden');
-                setTimeout(loadDataFromCloud, 100);
+           } else if (code === "Select2027") {
+            userRole = "treasurer";
+            document.getElementById('login-frame').classList.add('hidden');
+            document.getElementById('portal-console').classList.remove('hidden');
+            setTimeout(loadDataFromCloud, 100);
+        } else if (code === "Sillselect2027") {
+            userRole = "board";
+            document.getElementById('login-frame').classList.add('hidden');
+            document.getElementById('portal-console').classList.remove('hidden');
+            setTimeout(loadDataFromCloud, 100);
+        
             } else {
                 alert("⚠️ Invalid Access Password Profile. Please re-enter.");
             }
