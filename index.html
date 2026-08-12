@@ -261,7 +261,14 @@
             if (fac) {
                 if (!fac.notes) fac.notes = [];
                 fac.notes.unshift({ date: new Date().toLocaleDateString(), text: text });
-                saveDataToCloud(); renderDashboard(); filterNotesByFacility();
+                        const savedFacId = document.getElementById('n-fac-id').value;
+        saveDataToCloud(); 
+        renderDashboard(); 
+        if (savedFacId && document.getElementById('n-fac-id')) {
+            document.getElementById('n-fac-id').value = savedFacId;
+        }
+        filterNotesByFacility();
+
             }
              document.getElementById('n-text').value = '';
 
