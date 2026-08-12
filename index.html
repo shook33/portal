@@ -657,6 +657,17 @@
         }
 
         }
+        // ↩️ Browser Back Arrow Navigation Interceptor Guard
+window.addEventListener('load', function() {
+    window.history.pushState({ noBack: true }, '');
+    window.history.pushState({ noBack: true }, '');
+});
+
+window.addEventListener('popstate', function(event) {
+    window.history.pushState({ noBack: true }, '');
+    alert("🔄 Portal Alert: Use the navigation tabs at the top of the dashboard to change pages. The browser back arrow is disabled to protect your unsaved workspace data.");
+});
+
     </script>
 </body>
 </html>
