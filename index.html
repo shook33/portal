@@ -233,27 +233,32 @@
             if (typeof loadScheduleMatrixData === "function") loadScheduleMatrixData();
         }
 
-        async function saveDataToCloud() {
-   // if (userRole === "board") return;
+ async function saveDataToCloud() {
+    if (userRole === "board") return;
     
     // 💾 Safety Backup: Keep local browser data synced as a fallback
     localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
     localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
 
-    // 🌐 Live Cloud Sync Link
-const CLOUD_API_URL = "https://kvdb.io/XMyn18bL9FeRbzGWohJPTw/all_portal_data"; 
+    // 📡 Live Cloud Sync Link (Your Verified Bucket Key)
+    const CLOUD_API_URL = "https://kvdb.io";
 
-if (CLOUD_API_URL !== "YOUR_DATABASE_SERVER_ADDRESS_HERE") {
     try {
         await fetch(CLOUD_API_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify({ 
                 facilities: mockFacilities, 
                 leads: mockLeads,
-                schedule: mockSchedule 
+                schedule: typeof mockSchedule !== "undefined" ? mockSchedule : []
             })
         });
+        console.log("☁️ Global Data Sync: Successfully saved to live cloud storage.");
+    } catch (error) {
+        console.error("⚠️ Connection Alert: Cloud pipeline unreachable. Data cached locally.", error);
+    }
+}
+
         console.log("☁️ Real-time Data Sync: Successfully broadcast to Cloud Pipeline Cluster.");
     } catch (error) {
         console.error("⚠️ Connection Alert: Cloud network pipeline unreachable.", error);
