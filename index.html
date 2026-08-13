@@ -196,7 +196,8 @@
             document.getElementById('tab-' + tabName).style.background = '#0369a1';
             document.getElementById('tab-' + tabName).style.color = '#ffffff';
         }
-        function loadDataFromCloud() {
+        async function loadDataFromCloud() {
+
             try {
         const response = await fetch('https://kvdb.io/sill_portal_sync_2026/all_portal_data');
         if (response.ok) {
