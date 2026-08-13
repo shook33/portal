@@ -196,28 +196,46 @@
             document.getElementById('tab-' + tabName).style.background = '#0369a1';
             document.getElementById('tab-' + tabName).style.color = '#ffffff';
         }
-      function loadDataFromCloud() {
+     function loadDataFromCloud() {
     const CLOUD_API_URL = "https://kvdb.io";
 
     fetch(CLOUD_API_URL)
         .then(response => {
-            if (!response.ok) throw new Error("No cloud data yet");
-            return response.json();
+            if (!response.ok) throw new Error("Cloud bucket initialization required.");
+            return response.text(); // Read as plain text to protect empty states smoothly
         })
-        .then(data => {
+        .then(text => {
+            // 🛡️ Safety Catch: If the cloud is brand new, pass straight to local memory cache
+            if (!text || text.trim() === "" || text === "null") {
+                throw new Error("Cloud bucket is fresh.");
+            }
+            
+            const data = JSON.parse(text);
             if (data.facilities) mockFacilities = data.facilities;
             if (data.leads) mockLeads = data.leads;
             console.log("☁️ Global Data Sync: Successfully downloaded latest cloud updates.");
             renderDashboard();
         })
         .catch(error => {
-            console.log("⚠️ Local Fallback: Using computer's local storage cache.", error);
+            console.log("⚠️ Initialization Fallback: Setting up fresh cloud data container.", error);
+            
+            // Gather your computer's local active template data as the master baseline
             const localFac = localStorage.getItem('sill_facilities');
             const localLeads = localStorage.getItem('sill_leads');
+            
             if (localFac) mockFacilities = JSON.parse(localFac);
             if (localLeads) mockLeads = JSON.parse(localLeads);
+            
+            // Force-render the portal instantly so you are never locked out of your screen
             renderDashboard();
+            
+            // Automatically push your data upward to seed the cloud slot permanently
+            if (typeof saveDataToCloud === "function") {
+                saveDataToCloud();
+            }
         });
+}
+
 }
   
             
