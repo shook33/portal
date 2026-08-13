@@ -227,66 +227,7 @@
             if (typeof loadScheduleMatrixData === "function") loadScheduleMatrixData();
         }
 
-        async function saveDataToCloud() {
-    if (userRole === "board") return;
-    
-    // 💾 Safety Backup: Keep local browser data synced as a fallback
-    localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
-    localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
 
-    // 📡 Cloud Pipeline Connection: Paste your server endpoint link inside the quotes below!
-    const CLOUD_API_URL = "YOUR_DATABASE_SERVER_ADDRESS_HERE";
-
-    if (CLOUD_API_URL !== "YOUR_DATABASE_SERVER_ADDRESS_HERE") {
-        try {
-            await fetch(CLOUD_API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ facilities: mockFacilities, leads: mockLeads })
-            });
-            console.log("☁️ Real-time Data Sync: Successfully broadcast to Aiven MySQL Pipeline Cluster.");
-        } catch (error) {
-            console.error("⚠️ Connection Alert: Cloud network pipeline unreachable. Data safely cached locally.", error);
-        }
-    }
-}
-
-
-        function addNewFacility(e) {
-            e.preventDefault();
-            if (userRole === "board") return;
-            mockFacilities.push({
-                id: Date.now().toString(),
-                name: document.getElementById('f-name').value,
-                address: document.getElementById('f-add').value || '',
-                phone: document.getElementById('f-ph').value || '',
-                series: document.getElementById('f-series-names').value || '',
-                series_count: document.getElementById('f-series-count').value,
-                rep_name: document.getElementById('f-cname').value || '',
-                rep_email: document.getElementById('f-cemail').value || '',
-                alt_name: document.getElementById('f-cname-alt').value || '',
-                alt_email: document.getElementById('f-cemail-alt').value || '',
-                contract_sent_date: '', contract_received_date: '', invoice_sent_date: '', check_received_date: '',
-                payment_status: 'Unpaid', notes: []
-            });
-            saveDataToCloud(); renderDashboard(); e.target.reset();
-        }
-
-        function addNewNote(e) {
-            e.preventDefault();
-            if (userRole === "board") return;
-            const facId = document.getElementById('n-fac-id').value;
-            const text = document.getElementById('n-text').value;
-            const fac = mockFacilities.find(f => f.id === facId);
-            if (fac) {
-                if (!fac.notes) fac.notes = [];
-                fac.notes.unshift({ date: new Date().toLocaleDateString(), text: text });
-                        const savedFacId = document.getElementById('n-fac-id').value;
-        saveDataToCloud(); 
-        renderDashboard(); 
-        if (savedFacId && document.getElementById('n-fac-id')) {
-            document.getElementById('n-fac-id').value = savedFacId;
-        }
         filterNotesByFacility();
 
             }
@@ -310,6 +251,28 @@
             renderDashboard();
             e.target.reset();
         }
+async function saveDataToCloud() {
+    if (userRole === "board") return;
+    
+    localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
+    localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
+
+          const CLOUD_API_URL = "https://kvdb.io";
+
+
+    try {
+        await fetch(CLOUD_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ facilities: mockFacilities, leads: mockLeads })
+        });
+        console.log("☁️ Global Data Sync: Broadcasted successfully.");
+    } catch (error) {
+        console.error("⚠️ Connection Alert: Cached locally.", error);
+    }
+}
+
+
 
         function addInlineLeadNote(leadId, noteText, dateVal) {
             if (userRole === "board") return;
