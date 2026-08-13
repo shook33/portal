@@ -229,16 +229,12 @@
             // Force-render the portal instantly so you are never locked out of your screen
             renderDashboard();
             
-            // Automatically push your data upward to seed the cloud slot permanently
-            if (typeof saveDataToCloud === "function") {
+                        if (typeof saveDataToCloud === "function") {
                 saveDataToCloud();
             }
         });
 }
 
-}
-  
-            
             if (userRole === "board") {
                 const trays = document.querySelectorAll('.form-tray');
                 trays.forEach(tray => tray.style.display = 'none');
