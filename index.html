@@ -197,28 +197,39 @@
             document.getElementById('tab-' + tabName).style.color = '#ffffff';
         }
         async function loadDataFromCloud() {
+    // 📡 Cloud Sync Pipeline: Your Live Verified Bucket
+    const CLOUD_API_URL = "https://kvdb.io";
 
-            try {
-         const response = await fetch("https://kvdb.io/XMyn18bL9FeRbzGWohJPTw/all_portal_data")
+    try {
+        const response = await fetch(CLOUD_API_URL);
         if (response.ok) {
-            const cloudData = await response.json();
-            mockFacilities = cloudData.facilities || [];
-            mockLeads = cloudData.leads || [];
-            mockSchedule = cloudData.schedule || [];
-            console.log("☁️ Cloud Sync: Loaded live datasets.");
-        } else {
-            const savedFac = localStorage.getItem('sill_facilities');
-            const savedLeads = localStorage.getItem('sill_leads');
-            if (savedFac) mockFacilities = JSON.parse(savedFac);
-            if (savedLeads) mockLeads = JSON.parse(savedLeads);
+            const text = await response.text();
+            if (text && text.trim() !== "" && text !== "null") {
+                const cloudData = JSON.parse(text);
+                if (cloudData.facilities) mockFacilities = cloudData.facilities;
+                if (cloudData.leads) mockLeads = cloudData.leads;
+                if (cloudData.schedule) mockSchedule = cloudData.schedule;
+                console.log("☁️ Cloud Sync: Loaded live datasets.");
+                renderDashboard();
+                return;
+            }
         }
+        throw new Error("Initializing container.");
     } catch (error) {
-        console.error("⚠️ Network Alert: Cloud pipeline unreachable.", error);
+        console.error("⚠️ Local Cache Fallback:", error);
         const savedFac = localStorage.getItem('sill_facilities');
         const savedLeads = localStorage.getItem('sill_leads');
         if (savedFac) mockFacilities = JSON.parse(savedFac);
         if (savedLeads) mockLeads = JSON.parse(savedLeads);
+        renderDashboard();
+        
+        // Auto-initialize cloud if it is blank and user is not a board member
+        if (typeof saveDataToCloud === "function" && userRole !== "board") {
+            saveDataToCloud();
+        }
     }
+}
+
  
             
             if (userRole === "board") {
