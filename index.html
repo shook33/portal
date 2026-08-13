@@ -196,24 +196,30 @@
             document.getElementById('tab-' + tabName).style.background = '#0369a1';
             document.getElementById('tab-' + tabName).style.color = '#ffffff';
         }
-        function loadDataFromCloud() {
-            const savedFac = localStorage.getItem('sill_facilities');
-            const savedLeads = localStorage.getItem('sill_leads');
-            if (savedFac) {
-                mockFacilities = JSON.parse(savedFac);
-            } else {
-                mockFacilities = [
-                    { id: '1', name: 'Aviva Senior Living', address: '1951 N Honore Ave, Sarasota, FL', phone: '941-377-0781', series: 'MM', rep_name: 'Maria Leonardo', rep_email: 'maria@aviva.com', alt_name: 'Robert Vance', alt_email: 'rvance@aviva.com', contract_sent_date: '2026-07-20', contract_received_date: '2026-07-28', invoice_sent_date: '', check_received_date: '', payment_status: 'Unpaid', notes: [] },
-                    { id: '2', name: 'Bay Village', address: '8400 Vamo Rd, Sarasota, FL', phone: '941-966-5611', series: 'GI 1, MM', rep_name: 'John Davis', rep_email: 'jdavis@bayvillage.org', alt_name: '', alt_email: '', contract_sent_date: '2026-07-15', contract_received_date: '', invoice_sent_date: '', check_received_date: '', payment_status: 'Unpaid', notes: [] }
-                ];
-            }
-            if (savedLeads) {
-                mockLeads = JSON.parse(savedLeads);
-            } else {
-                mockLeads = [
-                    { id: '101', name: 'Emerson Lakes', address: 'Sarasota, FL', rep: 'Michelle Aguilar', phone: '941-555-0199', source: 'Direct', notes: [] }
-                ];
-            }
+      function loadDataFromCloud() {
+    const CLOUD_API_URL = "https://kvdb.io";
+
+    fetch(CLOUD_API_URL)
+        .then(response => {
+            if (!response.ok) throw new Error("No cloud data yet");
+            return response.json();
+        })
+        .then(data => {
+            if (data.facilities) mockFacilities = data.facilities;
+            if (data.leads) mockLeads = data.leads;
+            console.log("☁️ Global Data Sync: Successfully downloaded latest cloud updates.");
+            renderDashboard();
+        })
+        .catch(error => {
+            console.log("⚠️ Local Fallback: Using computer's local storage cache.", error);
+            const localFac = localStorage.getItem('sill_facilities');
+            const localLeads = localStorage.getItem('sill_leads');
+            if (localFac) mockFacilities = JSON.parse(localFac);
+            if (localLeads) mockLeads = JSON.parse(localLeads);
+            renderDashboard();
+        });
+}
+  
             
             if (userRole === "board") {
                 const trays = document.querySelectorAll('.form-tray');
