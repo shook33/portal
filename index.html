@@ -199,7 +199,7 @@
         async function loadDataFromCloud() {
 
             try {
-        const response = await fetch('https://kvdb.io/sill_portal_sync_2026/all_portal_data');
+         const response = await fetch("https://kvdb.io/XMyn18bL9FeRbzGWohJPTw/all_portal_data")
         if (response.ok) {
             const cloudData = await response.json();
             mockFacilities = cloudData.facilities || [];
@@ -241,7 +241,7 @@
     localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
 
     // 🌐 Live Cloud Sync Link
-const CLOUD_API_URL = "https://kvdb.io/sill_portal_sync_2026/all_portal_data"; 
+const CLOUD_API_URL = "https://kvdb.io/XMyn18bL9FeRbzGWohJPTw/all_portal_data"; 
 
 if (CLOUD_API_URL !== "YOUR_DATABASE_SERVER_ADDRESS_HERE") {
     try {
