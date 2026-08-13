@@ -196,8 +196,7 @@
             document.getElementById('tab-' + tabName).style.background = '#0369a1';
             document.getElementById('tab-' + tabName).style.color = '#ffffff';
         }
-        async function loadDataFromCloud() {
-    // 📡 Cloud Sync Pipeline: Your Live Verified Bucket
+ async function loadDataFromCloud() {
     const CLOUD_API_URL = "https://kvdb.io";
 
     try {
@@ -211,6 +210,7 @@
                 if (cloudData.schedule) mockSchedule = cloudData.schedule;
                 console.log("☁️ Cloud Sync: Loaded live datasets.");
                 renderDashboard();
+                if (typeof loadScheduleMatrixData === "function") loadScheduleMatrixData();
                 return;
             }
         }
@@ -222,27 +222,13 @@
         if (savedFac) mockFacilities = JSON.parse(savedFac);
         if (savedLeads) mockLeads = JSON.parse(savedLeads);
         renderDashboard();
+        if (typeof loadScheduleMatrixData === "function") loadScheduleMatrixData();
         
-        // Auto-initialize cloud if it is blank and user is not a board member
         if (typeof saveDataToCloud === "function" && userRole !== "board") {
             saveDataToCloud();
         }
     }
 }
-
- 
-            
-            if (userRole === "board") {
-                const trays = document.querySelectorAll('.form-tray');
-                trays.forEach(tray => tray.style.display = 'none');
-            } else {
-                const trays = document.querySelectorAll('.form-tray');
-                trays.forEach(tray => tray.style.display = 'block');
-            }
-            
-            renderDashboard();
-            if (typeof loadScheduleMatrixData === "function") loadScheduleMatrixData();
-        }
 
  async function saveDataToCloud() {
     if (userRole === "board") return;
