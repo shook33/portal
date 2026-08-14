@@ -237,21 +237,14 @@
     localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
     localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
 
-    // 📡 Live Cloud Sync Link (Your Verified Bucket Key)
-  const CLOUD_API_URL ="https://kvdb.io/PJaQatF8VgmMZszQAVVfDe/all_portal_data";
-    try {
-        await fetch(CLOUD_API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify({ 
-                facilities: mockFacilities, 
-                leads: mockLeads,
-                schedule: typeof mockSchedule !== "undefined" ? mockSchedule : []
-            })
-        });
-        console.log("☁️ Global Data Sync: Successfully saved to live cloud storage.");
-    } catch (error) {
-        console.error("⚠️ Connection Alert: Cloud pipeline unreachable. Data cached locally.", error);
+           // ☁️ Live Cloud Sync to JSONBin
+        const dataToSync = {
+            facilities: mockFacilities,
+            leads: mockLeads,
+            schedule: typeof mockSchedule !== "undefined" ? mockSchedule : []
+        };
+        await updatePortalDatabase(dataToSync);
+
     }
 }
 
