@@ -199,22 +199,20 @@
  async function loadDataFromCloud() {
     const CLOUD_API_URL = "https://kvdb.io";
 
-    try {
-        const response = await fetch(CLOUD_API_URL);
-        if (response.ok) {
-            const text = await response.text();
-            if (text && text.trim() !== "" && text !== "null") {
-                const cloudData = JSON.parse(text);
+        try {
+            const cloudData = await readPortalDatabase();
+            if (cloudData) {
                 if (cloudData.facilities) mockFacilities = cloudData.facilities;
                 if (cloudData.leads) mockLeads = cloudData.leads;
                 if (cloudData.schedule) mockSchedule = cloudData.schedule;
+                
                 console.log("☁️ Cloud Sync: Loaded live datasets.");
                 renderDashboard();
                 if (typeof loadScheduleMatrixData === "function") loadScheduleMatrixData();
                 return;
             }
-        }
-        throw new Error("Initializing container.");
+            throw new Error("No data returned from cloud storage.");
+
     } catch (error) {
         console.error("⚠️ Local Cache Fallback:", error);
         const savedFac = localStorage.getItem('sill_facilities');
