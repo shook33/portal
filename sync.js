@@ -1,4 +1,4 @@
-const CLOUD_API_URL = "https://jsonbin.io";
+const CLOUD_API_URL = "https://api.jsonbin.io/v3/b/6a7f520af5f4af5e29170934";
 const MASTER_KEY = "$2a$10$u9FEMu6Tf2efPdqxEntoKOLlZYYxzpTzjM7L91vlKQD0gFpY/bEkC";
 
 async function readPortalDatabase() {
