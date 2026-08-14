@@ -5,7 +5,6 @@ async function readPortalDatabase() {
   try {
     const response = await fetch(`${CLOUD_API_URL}/latest`, {
       method: "GET",
-      mode: "cors",
       headers: {
         "X-Master-Key": MASTER_KEY,
         "Content-Type": "application/json"
@@ -27,7 +26,6 @@ async function updatePortalDatabase(newDatabaseState) {
   try {
     const response = await fetch(CLOUD_API_URL, {
       method: "PUT",
-      mode: "cors",
       headers: {
         "X-Master-Key": MASTER_KEY,
         "Content-Type": "application/json"
@@ -46,4 +44,3 @@ async function updatePortalDatabase(newDatabaseState) {
     console.error("Failed to update database:", error);
   }
 }
-
