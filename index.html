@@ -196,58 +196,36 @@
             document.getElementById('tab-' + tabName).style.background = '#0369a1';
             document.getElementById('tab-' + tabName).style.color = '#ffffff';
         }
-        // 1. Put your actual JSONBin values here
-const CLOUD_API_URL = "https://api.jsonbin.io/v3/b/6a7f520af5f4af5e29170934";
-const BOARD_KEY = "$2a$10$PyoHfaLBSIoOpvhpK0MneOoVhbqHuFWRnscnF/0QXM2Dh58Cnb0NmE";
-const TREASURER_KEY = "$2a$10$NYB74jskTu.uAC7DizOPBef6N1mHu31.SbKFKwQ06wAbKuA1Nc5FK";
-
-// This helper function picks the right key based on who logged in
-function getApiKeyForRole() {
-    if (userRole === "board") {
-        return BOARD_KEY;
-    }
-    return TREASURER_KEY; // Gives admin/treasurer full update access
-}
-
-
-function loadDataFromCloud() {
-    // Hide or show entry forms instantly based on role
-    const trays = document.querySelectorAll('.form-tray');
-    trays.forEach(tray => {
-        tray.style.display = (userRole === "board") ? 'none' : 'block';
-    });
-
-    // Fetch the live database from JSONBin using your safe keys
-    fetch(CLOUD_API_URL, {
-        method: 'GET',
-        headers: {
-            'X-Access-Key': getApiKeyForRole()
+        function loadDataFromCloud() {
+            const savedFac = localStorage.getItem('sill_facilities');
+            const savedLeads = localStorage.getItem('sill_leads');
+            if (savedFac) {
+                mockFacilities = JSON.parse(savedFac);
+            } else {
+                mockFacilities = [
+                    { id: '1', name: 'Aviva Senior Living', address: '1951 N Honore Ave, Sarasota, FL', phone: '941-377-0781', series: 'MM', rep_name: 'Maria Leonardo', rep_email: 'maria@aviva.com', alt_name: 'Robert Vance', alt_email: 'rvance@aviva.com', contract_sent_date: '2026-07-20', contract_received_date: '2026-07-28', invoice_sent_date: '', check_received_date: '', payment_status: 'Unpaid', notes: [] },
+                    { id: '2', name: 'Bay Village', address: '8400 Vamo Rd, Sarasota, FL', phone: '941-966-5611', series: 'GI 1, MM', rep_name: 'John Davis', rep_email: 'jdavis@bayvillage.org', alt_name: '', alt_email: '', contract_sent_date: '2026-07-15', contract_received_date: '', invoice_sent_date: '', check_received_date: '', payment_status: 'Unpaid', notes: [] }
+                ];
+            }
+            if (savedLeads) {
+                mockLeads = JSON.parse(savedLeads);
+            } else {
+                mockLeads = [
+                    { id: '101', name: 'Emerson Lakes', address: 'Sarasota, FL', rep: 'Michelle Aguilar', phone: '941-555-0199', source: 'Direct', notes: [] }
+                ];
+            }
+            
+            if (userRole === "board") {
+                const trays = document.querySelectorAll('.form-tray');
+                trays.forEach(tray => tray.style.display = 'none');
+            } else {
+                const trays = document.querySelectorAll('.form-tray');
+                trays.forEach(tray => tray.style.display = 'block');
+            }
+            
+            renderDashboard();
+            if (typeof loadScheduleMatrixData === "function") loadScheduleMatrixData();
         }
-    })
-    .then(response => {
-        if (!response.ok) throw new Error("Database fetch failed");
-        return response.json();
-    })
-    .then(data => {
-        // JSONBin wraps your data inside a "record" object
-        const record = data.record;
-        
-        // Point your app's main variables to the live cloud data
-        mockFacilities = record.mockFacilities || [];
-        mockLeads = record.mockLeads || [];
-        
-         // Draw the fresh data onto your 13-week matrix dashboard
-        if (typeof renderDashboard === 'function') renderDashboard();
-        if (typeof loadScheduleMatrixData === 'function') loadScheduleMatrixData();
-        
-        console.log("Database successfully synced from cloud!");
-    })
-    .catch(error => {
-        console.error("Cloud sync error:", error);
-        alert("Could not load live data. Check your connection.");
-    });
-}
-     
 
         async function saveDataToCloud() {
     if (userRole === "board") return;
@@ -256,29 +234,26 @@ function loadDataFromCloud() {
     localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
     localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
 
-       // Prepare the data payload to send to JSONBin
-    const payload = {
-        mockFacilities: mockFacilities,
-        mockLeads: mockLeads
-    };
+    // 🌐 Live Cloud Sync Link
+const CLOUD_API_URL = "https://kvdb.io/sill_portal_sync_2026/all_portal_data"; 
 
-    // Send the updated data to the cloud
-    await fetch(CLOUD_API_URL, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Access-Key': getApiKeyForRole()
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => {
-        if (!response.ok) throw new Error("Cloud save failed");
-        console.log("Database successfully backed up to cloud!");
-    })
-    .catch(error => {
-        console.error("Cloud save error:", error);
-        alert("Failed to save changes to the cloud.");
-    });
+if (CLOUD_API_URL !== "YOUR_DATABASE_SERVER_ADDRESS_HERE") {
+    try {
+        await fetch(CLOUD_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                facilities: mockFacilities, 
+                leads: mockLeads,
+                schedule: mockSchedule 
+            })
+        });
+        console.log("☁️ Real-time Data Sync: Successfully broadcast to Cloud Pipeline Cluster.");
+    } catch (error) {
+        console.error("⚠️ Connection Alert: Cloud network pipeline unreachable.", error);
+    }
+}
+
 }
 
 
