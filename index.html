@@ -217,19 +217,18 @@ function loadDataFromCloud() {
         tray.style.display = (userRole === "board") ? 'none' : 'block';
     });
 
-       fetch(CLOUD_API_URL, {
+    fetch(CLOUD_API_URL, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             'X-Access-Key': getApiKeyForRole()
-        } // <--- Closes headers
-    })    // <--- Closes fetch
-    
-    
+        }
+    })
     .then(response => {
         if (!response.ok) throw new Error("Database fetch failed");
         return response.json();
     })
+
     .then(data => {
         // JSONBin wraps your data inside a "record" object
         const record = data.record;
