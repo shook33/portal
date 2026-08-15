@@ -196,59 +196,92 @@
             document.getElementById('tab-' + tabName).style.background = '#0369a1';
             document.getElementById('tab-' + tabName).style.color = '#ffffff';
         }
- async function loadDataFromCloud() {
-    const CLOUD_API_URL = "https://kvdb.io";
+        // 1. Put your actual JSONBin values here
+const CLOUD_API_URL = "https://api.jsonbin.io/v3/b/6a7f520af5f4af5e29170934";
+const BOARD_KEY = "$2a$10$PyoHfaLBSIoOpvhpK0MneOoVhbqHuFWRnscnF/0QXM2Dh58Cnb0NmE";
+const TREASURER_KEY = "$2a$10$NYB74jskTu.uAC7DizOPBef6N1mHu31.SbKFKwQ06wAbKuA1Nc5FK";
 
-    try {
-        const response = await fetch(CLOUD_API_URL);
-        if (response.ok) {
-            const text = await response.text();
-            if (text && text.trim() !== "" && text !== "null") {
-                const cloudData = JSON.parse(text);
-                if (cloudData.facilities) mockFacilities = cloudData.facilities;
-                if (cloudData.leads) mockLeads = cloudData.leads;
-                if (cloudData.schedule) mockSchedule = cloudData.schedule;
-                console.log("☁️ Cloud Sync: Loaded live datasets.");
-                renderDashboard();
-                if (typeof loadScheduleMatrixData === "function") loadScheduleMatrixData();
-                return;
-            }
-        }
-        throw new Error("Initializing container.");
-    } catch (error) {
-        console.error("⚠️ Local Cache Fallback:", error);
-        const savedFac = localStorage.getItem('sill_facilities');
-        const savedLeads = localStorage.getItem('sill_leads');
-        if (savedFac) mockFacilities = JSON.parse(savedFac);
-        if (savedLeads) mockLeads = JSON.parse(savedLeads);
-        renderDashboard();
-        if (typeof loadScheduleMatrixData === "function") loadScheduleMatrixData();
-        
-        if (typeof saveDataToCloud === "function" && userRole !== "board") {
-            saveDataToCloud();
-        }
+// This helper function picks the right key based on who logged in
+function getApiKeyForRole() {
+    if (userRole === "board") {
+        return BOARD_KEY;
     }
+    return TREASURER_KEY; // Gives admin/treasurer full update access
 }
 
- async function saveDataToCloud() {
+
+function loadDataFromCloud() {
+    // Hide or show entry forms instantly based on role
+    const trays = document.querySelectorAll('.form-tray');
+    trays.forEach(tray => {
+        tray.style.display = (userRole === "board") ? 'none' : 'block';
+    });
+
+    // Fetch the live database from JSONBin using your safe keys
+    fetch(CLOUD_API_URL, {
+        method: 'GET',
+        headers: {
+            'X-Access-Key': getApiKeyForRole()
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Database fetch failed");
+        return response.json();
+    })
+    .then(data => {
+        // JSONBin wraps your data inside a "record" object
+        const record = data.record;
+        
+        // Point your app's main variables to the live cloud data
+        mockFacilities = record.mockFacilities || [];
+        mockLeads = record.mockLeads || [];
+        
+         // Draw the fresh data onto your 13-week matrix dashboard
+        if (typeof renderDashboard === 'function') renderDashboard();
+        if (typeof loadScheduleMatrixData === 'function') loadScheduleMatrixData();
+        
+        console.log("Database successfully synced from cloud!");
+    })
+    .catch(error => {
+        console.error("Cloud sync error:", error);
+        alert("Could not load live data. Check your connection.");
+    });
+}
+     
+
+        async function saveDataToCloud() {
     if (userRole === "board") return;
     
     // 💾 Safety Backup: Keep local browser data synced as a fallback
     localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
     localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
 
-           // ☁️ Live Cloud Sync to JSONBin
-        const dataToSync = {
-            facilities: mockFacilities,
-            leads: mockLeads,
-            schedule: typeof mockSchedule !== "undefined" ? mockSchedule : []
-        };
-        await updatePortalDatabase(dataToSync);
+       // Prepare the data payload to send to JSONBin
+    const payload = {
+        mockFacilities: mockFacilities,
+        mockLeads: mockLeads
+    };
 
-    }
+    // Send the updated data to the cloud
+    await fetch(CLOUD_API_URL, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Access-Key': getApiKeyForRole()
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Cloud save failed");
+        console.log("Database successfully backed up to cloud!");
+    })
+    .catch(error => {
+        console.error("Cloud save error:", error);
+        alert("Failed to save changes to the cloud.");
+    });
 }
 
- 
+
         function addNewFacility(e) {
             e.preventDefault();
             if (userRole === "board") return;
@@ -687,6 +720,5 @@ window.addEventListener('popstate', function(event) {
 });
 
     </script>
-    <script src="sync.js"></script>
 </body>
 </html>
