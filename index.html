@@ -217,14 +217,15 @@ function loadDataFromCloud() {
         tray.style.display = (userRole === "board") ? 'none' : 'block';
     });
 
-    // Fetch the live database from JSONBin using your safe keys
-    fetch(CLOUD_API_URL, {
+       fetch(CLOUD_API_URL, {
         method: 'GET',
         headers: {
-            'Content-Type':'application/json', 
+            'Content-Type': 'application/json',
             'X-Access-Key': getApiKeyForRole()
-        }
-    })
+        } // <--- Closes headers
+    })    // <--- Closes fetch
+    
+    
     .then(response => {
         if (!response.ok) throw new Error("Database fetch failed");
         return response.json();
