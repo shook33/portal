@@ -78,6 +78,7 @@ function exportToExcel() {
     profiles.forEach(profile => {
         if (profile.trim().length < 15) return;
         
+        // 1. FILTER: Skip the standalone dashboard title block completely
         if (profile.toLowerCase().includes('contacts matrix series') && !profile.toLowerCase().includes('avenue') && !profile.toLowerCase().includes('cir')) return;
 
         excelTemplate += '<tr>';
@@ -89,15 +90,14 @@ function exportToExcel() {
             let lowerLine = line.toLowerCase();
 
             if (line === "Primary:" || line === "Email:" || line === "Second:") return;
+            // Additional check to prevent dashboard header text from leaking into cells
             if (lowerLine.includes('facility info contacts matrix series')) return;
 
-            // CLEANING ENGINE: Strip out emojis, custom icon fonts, and floating vertical bars
             let cleanLine = line
-                .replace(/[\u2190-\u21FF]|[\u2600-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDC00-\uDFFF]/g, '') // Removes Emojis
-                .replace(/\|\s*$/g, '') // Removes trailing vertical bars
+                .replace(/[\u2190-\u21FF]|[\u2600-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDC00-\uDFFF]/g, '')
+                .replace(/\|\s*$/g, '')
                 .trim();
 
-            // Skip lines that became empty after stripping the icons
             if (cleanLine === "" || cleanLine === "|") return;
 
             if (lowerLine.includes('@') || lowerLine.includes('phone') || lowerLine.includes('contact')) {
@@ -113,10 +113,8 @@ function exportToExcel() {
             }
         });
 
-        // Use a clean comma-space separator to keep everything perfectly readable on one line
         const cleanCell = (arr) => {
             let cellText = arr.join(', ').trim();
-            // Remove any trailing or double commas caused by empty icon positions
             cellText = cellText.replace(/^,|,$/g, '').replace(/,\s*,/g, ',').replace(/\s*\|\s*/g, ', ');
             return cellText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         };
