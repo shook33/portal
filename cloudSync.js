@@ -44,24 +44,9 @@ async function updatePortalDatabase(newDatabaseState) {
     console.error("Failed to update database:", error);
   }
 }
-// Dynamically load true Excel export library bypassing HTML filters
-(function loadExcelLibrary() {
-    const scriptEl = document.createElement("script");
-    // We break up the URL string so filters never see or block it
-    const domain = "cdnjs" + ".cloudflare.com";
-    scriptEl.src = "https://" + domain + "/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
-
-    document.head.appendChild(scriptEl);
-})();
-
-// Active export function triggered by your HTML button
+// Self-contained backup function triggered by your HTML button
 window.exportToExcel = function() {
     try {
-        if (typeof XLSX === 'undefined') {
-            alert("Excel library is still loading. Please wait 2 seconds and try clicking again!");
-            return;
-        }
-
         // Pull the schedule table straight from your active screen view
         const table = document.querySelector("table") || 
                       document.querySelector(".tab-panel[style*='display: block'] table") || 
@@ -72,17 +57,31 @@ window.exportToExcel = function() {
             return;
         }
 
-        // Generate native .xlsx workbook structure
-        const worksheet = XLSX.utils.table_to_sheet(table);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Lecture Matrix Backup");
+        // Loop through rows and columns to generate clean spreadsheet data
+        let csvContent = "";
+        for (let row of table.rows) {
+            let rowData = [];
+            for (let cell of row.cells) {
+                // Escape quotes and wrap cell contents safely
+                let text = cell.innerText.replace(/"/g, '""');
+                rowData.push('"' + text + '"');
+            }
+            csvContent += rowData.join(",") + "\r\n";
+        }
 
-        // Force browser download with a clean date timestamp
+        // Create the file download completely locally (no internet required)
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        
         const dateStr = new Date().toISOString().slice(0, 10);
-        XLSX.writeFile(workbook, `lecture_matrix_backup_${dateStr}.xlsx`);
+        link.setAttribute("download", `lecture_matrix_backup_${dateStr}.csv`);
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         
     } catch (err) {
-        console.error(err);
-        alert("Backup failed. Technical error: " + err.message);
+        alert("Backup failed: " + err.message);
     }
 };
