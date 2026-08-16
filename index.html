@@ -76,63 +76,66 @@ function exportToExcel() {
 
         excelTemplate += '<tr>';
 
-        // 1. Identify the 5 main visual column blocks on your screen layout
-        let UICols = Array.from(card.children).filter(el => {
-            let className = el.className ? el.className.toLowerCase() : "";
-            return className.includes('col-') || className.includes('cell') || el.tagName === 'DIV';
-        });
+        // 1. Find every single element that contains actual text or value data inside this card
+        const formElements = card.querySelectorAll('div, p, span, h1, h2, h3, h4, h5, h6, strong, b, input, select');
+        
+        // Setting up 5 empty buckets for our 5 Excel columns
+        let columnsData = [[], [], [], [], []];
 
-        // Fallback to deeper rows if columns are nested
-        if (UICols.length < 3) {
-            UICols = Array.from(card.querySelectorAll('[class*="col-"], .cell'));
-        }
+        // 2. Measure the exact left-edge monitor coordinate of the parent container card
+        const cardLeft = card.getBoundingClientRect().left;
+        const cardWidth = card.getBoundingClientRect().width || 1200;
+        const columnSlotWidth = cardWidth / 5; // Divide the card width into 5 equal vertical screen slots
 
-        // 2. Loop through exactly 5 slots to map directly to Excel columns A, B, C, D, E
-        for (let i = 0; i < 5; i++) {
-            let colBox = UICols[i];
-            let cellTextParts = [];
+        formElements.forEach(el => {
+            let extractedText = "";
 
-            if (colBox) {
-                // Read standard plain text elements inside this column slot
-                if (colBox.innerText && colBox.innerText.trim()) {
-                    cellTextParts.push(colBox.innerText.trim());
-                }
-
-                // Hunt for text input values inside this specific column slot
-                const inputs = colBox.querySelectorAll('input, select');
-                inputs.forEach(input => {
-                    if (input.tagName === 'INPUT') {
-                        if (input.type === 'checkbox' || input.type === 'radio') {
-                            // Extract checkboxes as readable visual marks
-                            if (input.checked) {
-                                let label = input.nextSibling?.innerText || input.parentElement?.innerText || "";
-                                label = label.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-                                cellTextParts.push("[X] " + label);
-                            }
-                        } else if (input.value && input.value.trim()) {
-                            cellTextParts.push(input.value.trim());
-                        }
-                    } else if (input.tagName === 'SELECT') {
-                        // Extract dropdown selections
-                        if (input.options[input.selectedIndex]) {
-                            let selectVal = input.options[input.selectedIndex].text;
-                            if (selectVal && !selectVal.toLowerCase().includes('select')) {
-                                cellTextParts.push(selectVal.trim());
-                            }
-                        }
+            // Gather standard plain text
+            if (el.children.length === 0 && el.innerText && el.innerText.trim()) {
+                extractedText = el.innerText.trim();
+            }
+            // Gather input field text box values
+            if (el.tagName === 'INPUT') {
+                if (el.type === 'checkbox' || el.type === 'radio') {
+                    if (el.checked) {
+                        let label = el.nextSibling?.innerText || el.parentElement?.innerText || "";
+                        extractedText = "[X] " + label.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
                     }
-                });
+                } else if (el.value && el.value.trim()) {
+                    extractedText = el.value.trim();
+                }
+            }
+            // Gather dropdown selection menus
+            if (el.tagName === 'SELECT' && el.options[el.selectedIndex]) {
+                let selectedVal = el.options[el.selectedIndex].text;
+                if (selectedVal && !selectedVal.toLowerCase().includes('select')) {
+                    extractedText = selectedVal.trim();
+                }
             }
 
-            // 3. Clean up the extracted text block
-            let cleanCellText = cellTextParts
-                .map(t => t.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim())
+            // Strip administrative action text
+            extractedText = extractedText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+
+            if (extractedText && extractedText.length > 0) {
+                // Calculate exactly which of the 5 horizontal screen slots this element rests in
+                const elementLeft = el.getBoundingClientRect().left;
+                const relativeX = elementLeft - cardLeft;
+                
+                let columnIndex = Math.floor(relativeX / columnSlotWidth);
+                if (columnIndex < 0) columnIndex = 0;
+                if (columnIndex > 4) columnIndex = 4;
+
+                columnsData[columnIndex].push(extractedText);
+            }
+        });
+
+        // 3. Map our 5 physical pixel slots straight into Excel cells
+        for (let i = 0; i < 5; i++) {
+            let cleanCellText = columnsData[i]
                 .filter((t, idx, self) => t.length > 0 && self.indexOf(t) === idx)
-                .join(' | '); // Lock everything onto a single row line
+                .join(' | ');
 
-            // Escape standard HTML string properties
             cleanCellText = cleanCellText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
             excelTemplate += '<td>' + cleanCellText + '</td>';
         }
 
