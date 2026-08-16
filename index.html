@@ -67,45 +67,61 @@ function exportToExcel() {
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
-    const rows = Array.from(container.children);
+    // 1. Loop through each individual facility block card container directly
+    const cards = Array.from(container.children);
     let rowsCount = 0;
 
-    rows.forEach(row => {
-        if (!row.innerText || !row.innerText.includes('Primary:')) return;
+    cards.forEach(card => {
+        // Skip purely decorative lines or header titles
+        if (!card.innerText || card.innerText.trim().length < 15 || card.innerText.includes('Download Excel')) return;
 
         excelTemplate += '<tr>';
-        const textBlocks = row.innerText.split('\n').map(t => t.trim()).filter(t => t.length > 0);
-        
-        let facilityData = [];
-        let contactData = [];
-        let seriesData = [];
-        let statusData = [];
-        let ledgerData = [];
 
-        textBlocks.forEach(line => {
-            let cleanLine = line.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-            if (!cleanLine) return;
+        // 2. Safely grab your five layout columns by matching Bootstrap grid column segments
+        const columns = card.querySelectorAll('[class*="col-"], .cell, td');
 
-            if (cleanLine.toLowerCase().includes('primary') || cleanLine.toLowerCase().includes('email:') || cleanLine.toLowerCase().includes('second')) {
-                contactData.push(cleanLine);
-            } else if (cleanLine.toLowerCase().includes('series') || cleanLine.toLowerCase().includes('programs:')) {
-                seriesData.push(cleanLine);
-            } else if (cleanLine.toLowerCase().includes('status:') || cleanLine.toLowerCase().includes('signed:') || cleanLine.toLowerCase().includes('sent:')) {
-                statusData.push(cleanLine);
-            } else if (cleanLine.toLowerCase().includes('$') || cleanLine.toLowerCase().includes('unpaid') || cleanLine.toLowerCase().includes('chk rec')) {
-                ledgerData.push(cleanLine);
-            } else {
-                facilityData.push(cleanLine);
+        if (columns.length >= 4) {
+            // If the card matches your standard layout grid structure
+            for (let i = 0; i < 5; i++) {
+                let col = columns[i];
+                let cellText = "";
+                
+                if (col) {
+                    // Extract text while cleaning out button names
+                    cellText = col.innerText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+                    cellText = cellText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                }
+                excelTemplate += `<td>${cellText}</td>`;
             }
-        });
+        } else {
+            // Fallback: If it's a stacked card text blob, split it evenly
+            const textBlocks = card.innerText.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+            let facilityData = [], contactData = [], seriesData = [], statusData = [], ledgerData = [];
 
-        const cleanCell = (arr) => arr.join('\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            textBlocks.forEach(line => {
+                let cleanLine = line.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+                if (!cleanLine) return;
 
-            excelTemplate += '<td>' + cleanCell(facilityData) + '</td>';
-            excelTemplate += '<td>' + cleanCell(contactData) + '</td>'
-            excelTemplate += '<td>' + cleanCell(seriesData) + '</td>';
-            excelTemplate += '<td>' + cleanCell(statusData) + '</td>';
-            excelTemplate += '<td>' + cleanCell(ledgerData) + '</td>';
+                if (cleanLine.toLowerCase().includes('primary') || cleanLine.toLowerCase().includes('email:') || cleanLine.toLowerCase().includes('second')) {
+                    contactData.push(cleanLine);
+                } else if (cleanLine.toLowerCase().includes('series') || cleanLine.toLowerCase().includes('programs:')) {
+                    seriesData.push(cleanLine);
+                } else if (cleanLine.toLowerCase().includes('status:') || cleanLine.toLowerCase().includes('signed:') || cleanLine.toLowerCase().includes('sent:')) {
+                    statusData.push(cleanLine);
+                } else if (cleanLine.toLowerCase().includes('$') || cleanLine.toLowerCase().includes('unpaid') || cleanLine.toLowerCase().includes('paid')) {
+                    ledgerData.push(cleanLine);
+                } else {
+                    facilityData.push(cleanLine);
+                }
+            });
+
+            const cleanCell = (arr) => arr.join('\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            excelTemplate += `<td>${cleanCell(facilityData)}</td>`;
+            excelTemplate += `<td>${cleanCell(contactData)}</td>`;
+            excelTemplate += `<td>${cleanCell(seriesData)}</td>`;
+            excelTemplate += `<td>${cleanCell(statusData)}</td>`;
+            excelTemplate += `<td>${cleanCell(ledgerData)}</td>`;
+        }
 
         excelTemplate += '</tr>';
         rowsCount++;
@@ -114,7 +130,7 @@ function exportToExcel() {
     excelTemplate += '</tbody></table></body></html>';
 
     if (rowsCount === 0) {
-        alert('Data layout is still initializing. Please wait 2 seconds and click again!');
+        alert('No active profiles detected.');
         return;
     }
 
