@@ -61,7 +61,7 @@ function exportToExcel() {
         return;
     }
 
-    // 1. Build a native HTML spreadsheet structure that Excel reads flawlessly
+    // 1. Set up the exact spreadsheet shell
     let excelTemplate = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://w3.org">
       <head>
@@ -71,8 +71,8 @@ function exportToExcel() {
         <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
         </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
         <style>
-          td { mso-number-format:"\\@"; vertical-align: top; white-space: pre-wrap; }
-          th { font-weight: bold; background-color: #f2f2f2; }
+          td { mso-number-format:"\\@"; vertical-align: top; white-space: pre-wrap; padding: 6px; }
+          th { font-weight: bold; background-color: #e6e6e6; padding: 6px; }
         </style>
       </head>
       <body>
@@ -89,27 +89,89 @@ function exportToExcel() {
           <tbody>
     `;
 
-    // 2. Loop through each dashboard item card
-    const cards = container.children;
-    for (let card of cards) {
-        if (!card.innerText.trim()) continue;
+    // 2. Direct Extraction: Get all direct children blocks inside the list
+    const items = Array.from(container.children);
+    
+    let rowsAdded = 0;
 
-        const segments = card.querySelectorAll(':scope > div, :scope > td, [class*="col"]');
-        
-        if (segments.length >= 4) {
+    items.forEach(item => {
+        // Skip purely decorative lines or completely empty spacer elements
+        if (!item.innerText || item.innerText.trim().length < 10) return;
+
+        // Clean up interactive dashboard buttons from the raw text
+        let cleanText = item.innerText
+            .replace(/View Logs/gi, '')
+            .replace(/Delete/gi, '')
+            .trim();
+
+        // Split the card text into sections based on your stacked line breaks
+        // This isolates the distinct stacked text blocks from your layout
+        let blocks = cleanText.split('\n').map(b => b.trim()).filter(b => b.length > 0);
+
+        if (blocks.length > 0) {
             excelTemplate += '<tr>';
             
-            let colsData = Array.from(segments).slice(0, 5).map(seg => {
-                let text = seg.innerText || "";
-                
-                // Strip management dashboard buttons
-                text = text.replace(/View Logs/gi, '')
-                           .replace(/Delete/gi, '')
-                           .trim();
+            // Distribute your text pieces across the 5 target cells
+            // This safely catches stacked data even if the inner grid elements change
+            let col1 = []; // Facility Info
+            let col2 = []; // Contacts Matrix
+            let col3 = []; // Series
+            let col4 = []; // Contract Status
+            let col5 = []; // Ledger
 
-                // Convert HTML characters safely to keep layouts intact inside the cell
-                return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            blocks.forEach(line => {
+                if (line.toLowerCase().includes('primary contact') || line.toLowerCase().includes('email') || line.toLowerCase().includes('phone')) {
+                    col2.push(line);
+                } else if (line.toLowerCase().includes('series') || line.toLowerCase().includes('subscribed')) {
+                    col3.push(line);
+                } else if (line.toLowerCase().includes('status') || line.toLowerCase().includes('active') || line.toLowerCase().includes('pending')) {
+                    col4.push(line);
+                } else if (line.toLowerCase().includes('$') || line.toLowerCase().includes('invoice') || line.toLowerCase().includes('paid')) {
+                    col5.push(line);
+                } else {
+                    col1.push(line);
+                }
             });
+
+            // Pack them securely into HTML table columns
+            const finalCols = [col1, col2, col3, col4, col5].map(arr => {
+                let cellContent = arr.join('\n');
+                return cellContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            });
+
+            excelTemplate += `<td>${finalCols[0]}</td>`;
+            excelTemplate += `<td>${finalCols[1]}</td>`;
+            excelTemplate += `<td>${finalCols[2]}</td>`;
+            excelTemplate += `<td>${finalCols[3]}</td>`;
+            excelTemplate += `<td>${finalCols[4]}</td>`;
+            
+            excelTemplate += '</tr>';
+            rowsAdded++;
+        }
+    });
+
+    excelTemplate += '</tbody></table></body></html>';
+
+    if (rowsAdded === 0) {
+        alert('Could not parse any active profiles. Please make sure the data is fully loaded on the screen.');
+        return;
+    }
+
+    // 3. Download the file natively
+    const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'facilities_perfect_backup.xls');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+</script>
 
             // Handle blank data cells to keep the row straight
             while (colsData.length < 5) {
