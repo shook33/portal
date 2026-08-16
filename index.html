@@ -77,54 +77,58 @@ function exportToExcel() {
 
         excelTemplate += '<tr>';
 
-        // 2. Extract visible text line-by-line while collecting dynamic input field values
-        let rawLines = [];
-        const allElements = card.querySelectorAll('*');
-        
-        allElements.forEach(el => {
-            if (el.children.length === 0 && el.innerText && el.innerText.trim()) {
-                rawLines.push(el.innerText.trim());
-            }
-            if (el.tagName === 'INPUT' && el.value && el.value.trim() && el.type !== 'checkbox') {
-                rawLines.push(el.value.trim());
-            }
-            if (el.tagName === 'SELECT' && el.options[el.selectedIndex]) {
-                let selectedText = el.options[el.selectedIndex].text;
-                if (selectedText && !selectedText.toLowerCase().includes('select')) {
-                    rawLines.push(selectedText.trim());
-                }
-            }
-        });
-
-        let cleanLines = rawLines.map(line => {
-            return line.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-        }).filter((line, index, self) => line.length > 0 && self.indexOf(line) === index);
-
+        // 2. Fallback arrays to capture text fields
         let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
 
-        // 3. Precise Text Sorting Rules
-        cleanLines.forEach(line => {
-            let lower = line.toLowerCase();
+        // 3. TARGET ALL INPUT AND SELECT BOXES BY THEIR PHYSICAL ORDER ON THE CARD
+        const inputs = Array.from(card.querySelectorAll('input, select'));
+        
+        // SILL Framework Input Order Mapping:
+        // Input 0: Facility Name text field
+        // Input 1: Contact Name text field 
+        // Input 2: Email text field
+        // Select 3: Series Subscribed Dropdown
+        if (inputs.length >= 3) {
+            // Force Facility Name into Column A
+            if (inputs[0] && inputs[0].value) col1.push(inputs[0].value.trim());
+            
+            // Force Contact Info into Column B
+            let contactName = inputs[1] ? inputs[1].value.trim() : "";
+            let contactEmail = inputs[2] ? inputs[2].value.trim() : "";
+            if (contactName) col2.push("Primary: " + contactName);
+            if (contactEmail) col2.push("Email: " + contactEmail);
+            
+            // Force Series Dropdown Text into Column C
+            let seriesSelect = card.querySelector('select');
+            if (seriesSelect && seriesSelect.options[seriesSelect.selectedIndex]) {
+                let seriesText = seriesSelect.options[seriesSelect.selectedIndex].text;
+                if (seriesText && !seriesText.toLowerCase().includes('select')) {
+                    col3.push(seriesText.trim());
+                }
+            }
+        }
 
-            // Column B: Contacts (Names matching identifiers, emails, or phone patterns)
-            if (lower.includes('primary') || lower.includes('second') || lower.includes('@') || lower.includes('email') || lower.includes('phone') || lower.includes('contact') || line.trim() === "brian hook" || line.trim() === "richard geifman" || line.trim() === "Kathie Westpheling") {
-                col2.push(line);
-            } 
-            // Column C: Series Packages (Any mentions of series, tracks, or programs)
-            else if (lower.includes('series') || lower.includes('programs') || lower.includes('subscribed')) {
-                col3.push(line);
-            } 
-            // Column D: Contracts (Status entries, signed logs, dates)
-            else if (lower.includes('status') || lower.includes('signed') || lower.includes('active') || lower.includes('pending') || lower.includes('sent')) {
-                col4.push(line);
-            } 
-            // Column E: Ledger Billing (Currency signs, invoices, checks, balance terms)
-            else if (lower.includes('$') || lower.includes('unpaid') || lower.includes('paid') || lower.includes('ledger') || lower.includes('invoice') || lower.includes('payment') || lower.includes('rec\'d') || lower.includes('chk')) {
-                col5.push(line);
-            } 
-            // Column A: Facility details (Names, raw physical location addresses, unit numbers)
-            else {
-                col1.push(line);
+        // 4. Scrape the remaining static text lines on the dashboard card
+        const lines = card.innerText.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+        
+        lines.forEach(line => {
+            let lower = line.toLowerCase();
+            let cleanLine = line.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+            if (!cleanLine) return;
+
+            // Sort status and ledger lines cleanly into Columns D and E
+            if (lower.includes('status') || lower.includes('signed') || lower.includes('active') || lower.includes('pending') || lower.includes('sent')) {
+                col4.push(cleanLine);
+            } else if (lower.includes('$') || lower.includes('unpaid') || lower.includes('paid') || lower.includes('ledger') || lower.includes('rec\'d') || lower.includes('chk')) {
+                col5.push(cleanLine);
+            } else {
+                // If it's an address label or phone line, add it to Column A underneath the name
+                if (!lower.includes('primary') && !lower.includes('email') && !lower.includes('second') && !lower.includes('@') && cleanLine.length > 2) {
+                    // Prevent duplicating the facility name if it was already pulled from input fields
+                    if (col1.length === 0 || !cleanLine.includes(col1[0])) {
+                        col1.push(cleanLine);
+                    }
+                }
             }
         });
 
@@ -154,6 +158,7 @@ function exportToExcel() {
     }
 }
 </script>
+
 
 
 
