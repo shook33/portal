@@ -53,7 +53,7 @@
              <div class="backup-container" style="margin-top: 15px; margin-bottom: 15px;">
         <button id="backupBtn" onclick="exportToExcel()" style="padding: 
             10px 20px; background-color: #217346; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">📊 Download Excel Backup</button>
-   <script>
+  <script>
 function exportToExcel() {
     const container = document.getElementById('facilities-list');
     if (!container) {
@@ -63,49 +63,48 @@ function exportToExcel() {
 
     let csvContent = "";
     
-    // 1. Set up clean Excel columns matching your dashboard columns
+    // Fixed headers matching your layout columns
     const headers = ["Facility Info", "Contacts Matrix", "Series Subscribed", "Contract Status", "Invoice & Payment Ledger"];
     csvContent += headers.join(',') + '\r\n';
 
-    // 2. Find each individual facility profile block container
-    // This targets your active grid structure
-    const rows = container.querySelectorAll('.facility-row, [style*="display: grid"], tr');
+    // Target the facility grid wrapper divs explicitly
+    const facilityBlocks = container.querySelectorAll('#facilities-list > div, .facility-row');
     
-    if (rows.length === 0) {
-        alert('No data rows found to export.');
+    if (facilityBlocks.length === 0) {
+        alert('No data profiles found to export.');
         return;
     }
 
-    rows.forEach(row => {
-        // Find columns or individual data containers inside this row
-        const cols = row.querySelectorAll('.facility-col, td, div > p, div > div');
-        if (cols.length === 0) return;
-
-        const rowData = Array.from(cols)
-            .map(col => {
-                let text = col.innerText || "";
+    facilityBlocks.forEach(block => {
+        // Look for the layout columns inside each profile card
+        const segments = block.querySelectorAll('[class*="col"], div > div, td');
+        
+        if (segments.length >= 4) {
+            // Process text blocks while keeping multi-line fields cleanly bundled
+            const rowData = Array.from(segments).map(seg => {
+                let text = seg.innerText || "";
                 
-                // Clean up action buttons so they don't clutter your data
+                // Remove interactive UI buttons cleanly
                 text = text.replace(/View Logs/gi, '')
                            .replace(/Delete/gi, '')
                            .trim();
 
-                // Format for Excel CSV compliance
+                // Double quote encapsulation keeps line-breaks and commas inside one cell
                 text = text.replace(/"/g, '""');
-                if (text.includes(',') || text.includes('\n') || text.includes('\r')) {
-                    text = `"${text}"`;
-                }
-                return text;
-            })
-            // Filter out empty blocks caused by structural layout spacing divs
-            .filter(text => text !== '""' && text !== '');
+                return `"${text}"`;
+            });
 
-        if (rowData.length > 0) {
-            csvContent += rowData.join(',') + '\r\n';
+            // Prevent layout shifting by filling missing tracking columns if necessary
+            while (rowData.length < 5) {
+                rowData.push('""');
+            }
+
+            // Keep only the primary 5 columns matching the headers
+            csvContent += rowData.slice(0, 5).join(',') + '\r\n';
         }
     });
 
-    // 3. Download the file natively with Excel-friendly formatting
+    // Generate Excel download natively
     const BOM = '\uFEFF';
     const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -121,6 +120,7 @@ function exportToExcel() {
     }
 }
 </script>
+
  
     
     </div>
