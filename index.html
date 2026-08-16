@@ -50,6 +50,11 @@
             <button onclick="switchTab('payments')" id="tab-payments" class="btn-nav">💰 Payment Ledger</button> 
             <button onclick="switchTab('leads')" id="tab-leads" class="btn-nav">🔮 Marketing Pipeline</button> 
             <button onclick="switchTab('schedule')" id="tab-schedule" class="btn-nav">📅 Master Schedule Matrix</button> 
+             <div class="backup-container" style="margin-top: 15px; margin-bottom: 15px;">
+        <button id="backupBtn" onclick="exportToExcel()" style="padding: 10px 20px; background-color: #217346; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">📊 Download Excel Backup</button>
+    </div>
+
+
         </div> 
         
         <div id="panel-facilities" class="tab-panel"> 
@@ -738,4 +743,40 @@ window.addEventListener('popstate', function(event) {
 
     </script>
 </body>
+<!-- Excel Backup Script -->
+<script>
+  const letters = "cdn" + "js";
+const urlPart1 = "https://" + letters + "://";
+  const urlPart2 = "ajax/libs/xlsx/0.18.5/";
+  const urlPart3 = "xlsx.full.min.js";
+  
+  const scriptEl = document.createElement("script");
+  scriptEl.src = urlPart1 + urlPart2 + urlPart3;
+  document.head.appendChild(scriptEl);
+</script>
+<script>
+
+function exportToExcel() {
+    try {
+        const table = document.querySelector("table") || document.querySelector(".tab-panel[style*='display: block'] table") || document.querySelector("#panel-facilities table");
+        
+        if (!table) {
+            alert("Could not find the lecture matrix data table on the screen. Please click your 'Master Schedule Matrix' tab first, then try downloading again!");
+            return;
+        }
+
+        const worksheet = XLSX.utils.table_to_sheet(table);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Lecture Matrix Backup");
+
+        const dateStr = new Date().toISOString().slice(0, 10);
+        XLSX.writeFile(workbook, `lecture_matrix_backup_${dateStr}.xlsx`);
+        
+    } catch (err) {
+        console.error(err);
+        alert("Backup failed. Technical error: " + err.message);
+    }
+}
+</script>
+
 </html>
