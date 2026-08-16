@@ -216,6 +216,23 @@ function loadDataFromCloud() {
     trays.forEach(tray => {
         tray.style.display = (userRole === "board") ? 'none' : 'block';
     });
+    // Add a friendly alert banner just for the board
+    const bannerId = 'board-warning-banner';
+    let existingBanner = document.getElementById(bannerId);
+    
+    if (userRole === "board") {
+        if (!existingBanner) {
+            const banner = document.createElement('div');
+            banner.id = bannerId;
+            banner.innerHTML = "ℹ️ <strong>Board View-Only Mode:</strong> You can review the matrix data below. Any temporary changes you make on this screen will not be saved to the database.";
+            banner.style.cssText = "background-color: #fff3cd; color: #856404; padding: 12px; margin: 15px 0; border: 1px solid #ffeeba; border-radius: 4px; font-size: 14px; text-align: center;";
+            
+            const consoleSection = document.getElementById('portal-console');
+            if (consoleSection) consoleSection.insertBefore(banner, consoleSection.firstChild);
+        }
+    } else {
+        if (existingBanner) existingBanner.remove();
+    }
 
     // Fetch the live database from JSONBin using your safe keys
     fetch(CLOUD_API_URL, {
