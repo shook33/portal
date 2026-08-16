@@ -67,6 +67,7 @@ function exportToExcel() {
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
+    // 1. Target the exact layout blocks matching each separate facility profile
     const cards = container.querySelectorAll('.facility-row, [style*="grid"], [style*="flex"], .panel-body > div');
     let rowsCount = 0;
 
@@ -76,25 +77,43 @@ function exportToExcel() {
 
         excelTemplate += '<tr>';
 
-        // 1. Explicitly grab the facility title name tag so it never vanishes
-        let titleElement = card.querySelector('h1, h2, h3, h4, h5, h6, strong, b, .title, [class*="title"]');
-        let facilityName = titleElement ? titleElement.innerText.trim() : "";
-
-        let cleanText = card.innerText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-        const lines = cleanText.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+        // 2. Extract visible text line-by-line while collecting dynamic input field values
+        let rawLines = [];
         
+        // Walk through the card elements in order
+        const allElements = card.querySelectorAll('*');
+        allElements.forEach(el => {
+            // Grab standard text nodes
+            if (el.children.length === 0 && el.innerText && el.innerText.trim()) {
+                rawLines.push(el.innerText.trim());
+            }
+            
+            // CRITICAL: Pull text from active input fields and text boxes
+            if (el.tagName === 'INPUT' && el.value && el.value.trim()) {
+                if (el.type !== 'checkbox' && el.type !== 'radio') {
+                    rawLines.push(el.value.trim());
+                }
+            }
+            
+            // CRITICAL: Pull selected options from dropdown menus
+            if (el.tagName === 'SELECT' && el.options[el.selectedIndex]) {
+                let selectedText = el.options[el.selectedIndex].text;
+                if (selectedText && !selectedText.toLowerCase().includes('select')) {
+                    rawLines.push(selectedText.trim());
+                }
+            }
+        });
+
+        // Clean out button instructions and remove duplicate lines
+        let cleanLines = rawLines.map(line => {
+            return line.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+        }).filter((line, index, self) => line.length > 0 && self.indexOf(line) === index);
+
         let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
 
-        // If we found a name, make it the very first item in Column A
-        if (facilityName) {
-            col1.push(facilityName);
-        }
-
-        lines.forEach(line => {
-            // Skip repeating the title in the sub-lines if it's already caught
-            if (line === facilityName) return;
-
-            if (line.toLowerCase().includes('primary') || line.toLowerCase().includes('email:') || line.toLowerCase().includes('second')) {
+        // 3. Sort values into the 5 target spreadsheet columns
+        cleanLines.forEach(line => {
+            if (line.toLowerCase().includes('primary') || line.toLowerCase().includes('email:') || line.toLowerCase().includes('second') || line.toLowerCase().includes('@')) {
                 col2.push(line);
             } else if (line.toLowerCase().includes('series') || line.toLowerCase().includes('programs:')) {
                 col3.push(line);
@@ -103,10 +122,7 @@ function exportToExcel() {
             } else if (line.toLowerCase().includes('$') || line.toLowerCase().includes('unpaid') || line.toLowerCase().includes('paid')) {
                 col5.push(line);
             } else {
-                // Prevent adding duplicate icon rows if they match structural text
-                if (line.length > 2) {
-                    col1.push(line);
-                }
+                col1.push(line);
             }
         });
 
@@ -136,6 +152,7 @@ function exportToExcel() {
     }
 }
 </script>
+
 
 
 
