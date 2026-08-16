@@ -45,7 +45,8 @@ async function updatePortalDatabase(newDatabaseState) {
   }
 }
 // Self-contained backup function triggered by your HTML button
-window.exportToExcel = function() {
+function exportToExcel() {
+
     try {
         // Pull the schedule table straight from your active screen view
         const table = document.querySelector("table") || 
