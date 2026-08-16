@@ -53,7 +53,7 @@
              <div class="backup-container" style="margin-top: 15px; margin-bottom: 15px;">
         <button id="backupBtn" onclick="exportToExcel()" style="padding: 
             10px 20px; background-color: #217346; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">📊 Download Excel Backup</button>
-  <script>
+<script>
 function exportToExcel() {
     const container = document.getElementById('facilities-list');
     if (!container) {
@@ -61,50 +61,42 @@ function exportToExcel() {
         return;
     }
 
-    let csvContent = "";
-    
-    // Fixed headers matching your layout columns
-    const headers = ["Facility Info", "Contacts Matrix", "Series Subscribed", "Contract Status", "Invoice & Payment Ledger"];
-    csvContent += headers.join(',') + '\r\n';
+    // Use a semicolon delimiter which Excel parses perfectly for multi-line cells
+    let csvContent = "Facility Info;Contacts Matrix;Series Subscribed;Contract Status;Invoice & Payment Ledger\r\n";
 
-    // Target the facility grid wrapper divs explicitly
-    const facilityBlocks = container.querySelectorAll('#facilities-list > div, .facility-row');
-    
-    if (facilityBlocks.length === 0) {
-        alert('No data profiles found to export.');
-        return;
-    }
+    // Loop through each distinct card entry block
+    const cards = container.children;
+    for (let card of cards) {
+        // Skip structural template wrappers or text labels
+        if (!card.innerText.trim()) continue;
 
-    facilityBlocks.forEach(block => {
-        // Look for the layout columns inside each profile card
-        const segments = block.querySelectorAll('[class*="col"], div > div, td');
+        // Force extraction by hunting down the 5 visual column structures explicitly
+        const segments = card.querySelectorAll(':scope > div, :scope > td, [class*="col"]');
         
         if (segments.length >= 4) {
-            // Process text blocks while keeping multi-line fields cleanly bundled
-            const rowData = Array.from(segments).map(seg => {
+            let colsData = Array.from(segments).slice(0, 5).map(seg => {
                 let text = seg.innerText || "";
                 
-                // Remove interactive UI buttons cleanly
+                // Erase interactive button instructions
                 text = text.replace(/View Logs/gi, '')
                            .replace(/Delete/gi, '')
                            .trim();
 
-                // Double quote encapsulation keeps line-breaks and commas inside one cell
+                // Clean quotes for Excel CSV standards
                 text = text.replace(/"/g, '""');
                 return `"${text}"`;
             });
 
-            // Prevent layout shifting by filling missing tracking columns if necessary
-            while (rowData.length < 5) {
-                rowData.push('""');
+            // If a column block is missing, insert an empty cell value
+            while (colsData.length < 5) {
+                colsData.push('""');
             }
 
-            // Keep only the primary 5 columns matching the headers
-            csvContent += rowData.slice(0, 5).join(',') + '\r\n';
+            csvContent += colsData.join(';') + '\r\n';
         }
-    });
+    }
 
-    // Generate Excel download natively
+    // Force Excel to use UTF-8 and treat semicolons as column separators
     const BOM = '\uFEFF';
     const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -112,7 +104,7 @@ function exportToExcel() {
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', 'facilities_matrix_backup.csv');
+        link.setAttribute('download', 'facilities_perfect_backup.csv');
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -120,6 +112,7 @@ function exportToExcel() {
     }
 }
 </script>
+ 
 
  
     
