@@ -76,61 +76,73 @@ function exportToExcel() {
 
         excelTemplate += '<tr>';
 
-        let allValues = [];
-        const elements = card.querySelectorAll('*');
+        let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
 
-        elements.forEach(el => {
-            if (el.children.length === 0 && el.innerText && el.innerText.trim()) {
-                allValues.push(el.innerText.trim());
-            }
-            if (el.tagName === 'INPUT') {
-                if (el.type === 'checkbox' || el.type === 'radio') {
-                    if (el.checked) {
-                        let label = el.nextSibling?.innerText || el.parentElement?.innerText || "";
-                        allValues.push("[X] " + label.trim());
-                    }
-                } else if (el.value && el.value.trim()) {
-                    allValues.push(el.value.trim());
+        // 1. EXTRACT FROM ACTIVE TEXT INPUT BOXES AND DROPDOWNS FIRST
+        const inputElements = Array.from(card.querySelectorAll('input, select'));
+        let textInputValues = [];
+
+        inputElements.forEach(el => {
+            if (el.tagName === 'INPUT' && el.type !== 'checkbox' && el.type !== 'radio') {
+                if (el.value && el.value.trim()) {
+                    textInputValues.push(el.value.trim());
                 }
             }
             if (el.tagName === 'SELECT' && el.options[el.selectedIndex]) {
                 let dropdownText = el.options[el.selectedIndex].text;
                 if (dropdownText && !dropdownText.toLowerCase().includes('select')) {
-                    allValues.push(dropdownText.trim());
+                    col3.push(dropdownText.trim()); // Send dropdown choices directly to Column C
                 }
             }
         });
 
-        let cleanValues = allValues.map(v => {
-            return v.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-        }).filter((v, idx, self) => v.length > 0 && self.indexOf(v) === idx);
-
-        let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
-
-        // 1. DYNAMIC RESET: Force the very first string found to be the Facility Info Name
-        if (cleanValues.length > 0) {
-            col1.push(cleanValues[0]);
+        // The first text box on your dashboard is always the Facility Name
+        if (textInputValues.length > 0) {
+            col1.push(textInputValues[0]); // Force Facility Name into Column A
+        }
+        // The second text box is the Contact Person Name
+        if (textInputValues.length > 1) {
+            col2.push("Primary: " + textInputValues[1]);
+        }
+        // The third text box is the Email Address
+        if (textInputValues.length > 2) {
+            col2.push("Email: " + textInputValues[2]);
         }
 
-        // 2. Sort the remaining elements, skipping the first element we just assigned
-        cleanValues.slice(1).forEach(val => {
-            let lower = val.toLowerCase();
+        // 2. SCRAPE AND SORT THE REMAINING LABELS AND CHECKBOXES ON THE CARD
+        const items = card.querySelectorAll('*');
+        items.forEach(item => {
+            // Process checked boxes cleanly
+            if (item.tagName === 'INPUT' && (item.type === 'checkbox' || item.type === 'radio') && item.checked) {
+                let label = item.nextSibling?.innerText || item.parentElement?.innerText || "";
+                label = label.replace(/View Logs/gi).replace(/Delete/gi).trim();
+                
+                let lowerLabel = label.toLowerCase();
+                if (lowerLabel.includes('status') || lowerLabel.includes('active') || lowerLabel.includes('pending')) {
+                    col4.push("[X] " + label);
+                } else {
+                    col5.push("[X] " + label);
+                }
+            }
 
-            if (lower.includes('primary:') || lower.includes('email:') || lower.includes('second:') || lower.includes('@') || lower.includes('phone:') || val === "brian hook" || val === "richard geifman" || val === "Kathie Westpheling") {
-                col2.push(val);
-            }
-            else if (lower.includes('series') || lower.includes('programs') || lower.includes('subscribed') || lower.includes('track') || lower.includes('matrix')) {
-                col3.push(val);
-            }
-            else if (lower.includes('status:') || lower.includes('signed:') || lower.includes('active') || lower.includes('pending')) {
-                col4.push(val);
-            }
-            else if (lower.includes('inv sent:') || lower.includes('chk rec\'d:') || lower.includes('$') || lower.includes('unpaid') || lower.includes('paid') || lower.includes('half payment') || lower.includes('ledger')) {
-                col5.push(val);
-            }
-            else {
-                if (val.length > 2) {
-                    col1.push(val);
+            // Gather plain text fields for layout descriptions
+            if (item.children.length === 0 && item.innerText && item.innerText.trim()) {
+                let txt = item.innerText.trim();
+                let lowerTxt = txt.toLowerCase();
+
+                // Clean dashboard system control text
+                txt = txt.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+                if (!txt || txt === "Primary:" || txt === "Email:" || txt === "Second:") return;
+
+                if (lowerTxt.includes('status:') || lowerTxt.includes('signed:')) {
+                    col4.push(txt);
+                } else if (lowerTxt.includes('inv sent:') || lowerTxt.includes('chk rec\'d:') || lowerTxt.includes('$') || lowerTxt.includes('ledger')) {
+                    col5.push(txt);
+                } else {
+                    // Send phone or addresses to Column A if it doesn't match other column rules
+                    if (txt.length > 2 && !lowerTxt.includes('@') && txt !== textInputValues[0] && txt !== textInputValues[1]) {
+                        col1.push(txt);
+                    }
                 }
             }
         });
@@ -139,7 +151,7 @@ function exportToExcel() {
 
         excelTemplate += '<td>' + wrapCell(col1) + '</td>';
         excelTemplate += '<td>' + wrapCell(col2) + '</td>';
-        excelTemplate += '<td>' + wrapCell(col3) + '</td>'; // Cleaned the plus symbol marker
+        excelTemplate += '<td>' + wrapCell(col3) + '</td>';
         excelTemplate += '<td>' + wrapCell(col4) + '</td>';
         excelTemplate += '<td>' + wrapCell(col5) + '</td>';
         excelTemplate += '</tr>';
