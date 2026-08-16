@@ -61,50 +61,80 @@ function exportToExcel() {
         return;
     }
 
-    // Use a semicolon delimiter which Excel parses perfectly for multi-line cells
-    let csvContent = "Facility Info;Contacts Matrix;Series Subscribed;Contract Status;Invoice & Payment Ledger\r\n";
+    // 1. Build a native HTML spreadsheet structure that Excel reads flawlessly
+    let excelTemplate = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://w3.org">
+      <head>
+        <meta http-equiv="content-type" content="text/plain; charset=UTF-8">
+        <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+        <x:Name>Facilities Backup</x:Name>
+        <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+        </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+        <style>
+          td { mso-number-format:"\\@"; vertical-align: top; white-space: pre-wrap; }
+          th { font-weight: bold; background-color: #f2f2f2; }
+        </style>
+      </head>
+      <body>
+        <table border="1">
+          <thead>
+            <tr>
+              <th>Facility Info</th>
+              <th>Contacts Matrix</th>
+              <th>Series Subscribed</th>
+              <th>Contract Status</th>
+              <th>Invoice & Payment Ledger</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
 
-    // Loop through each distinct card entry block
+    // 2. Loop through each dashboard item card
     const cards = container.children;
     for (let card of cards) {
-        // Skip structural template wrappers or text labels
         if (!card.innerText.trim()) continue;
 
-        // Force extraction by hunting down the 5 visual column structures explicitly
         const segments = card.querySelectorAll(':scope > div, :scope > td, [class*="col"]');
         
         if (segments.length >= 4) {
+            excelTemplate += '<tr>';
+            
             let colsData = Array.from(segments).slice(0, 5).map(seg => {
                 let text = seg.innerText || "";
                 
-                // Erase interactive button instructions
+                // Strip management dashboard buttons
                 text = text.replace(/View Logs/gi, '')
                            .replace(/Delete/gi, '')
                            .trim();
 
-                // Clean quotes for Excel CSV standards
-                text = text.replace(/"/g, '""');
-                return `"${text}"`;
+                // Convert HTML characters safely to keep layouts intact inside the cell
+                return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             });
 
-            // If a column block is missing, insert an empty cell value
+            // Handle blank data cells to keep the row straight
             while (colsData.length < 5) {
-                colsData.push('""');
+                colsData.push('');
             }
 
-            csvContent += colsData.join(';') + '\r\n';
+            // Wrap each layout cell inside structural HTML table columns
+            colsData.forEach(cellText => {
+                excelTemplate += `<td>${cellText}</td>`;
+            });
+
+            excelTemplate += '</tr>';
         }
     }
 
-    // Force Excel to use UTF-8 and treat semicolons as column separators
-    const BOM = '\uFEFF';
-    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    excelTemplate += '</tbody></table></body></html>';
+
+    // 3. Trigger native file download as a direct Excel XML format
+    const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
     const link = document.createElement('a');
     
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', 'facilities_perfect_backup.csv');
+        link.setAttribute('download', 'facilities_perfect_backup.xls');
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -112,6 +142,8 @@ function exportToExcel() {
     }
 }
 </script>
+
+
  
 
  
