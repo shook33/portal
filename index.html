@@ -67,49 +67,59 @@ function exportToExcel() {
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
-    // 1. Read all the text on the screen, clean up operational buttons
     let fullPortalText = container.innerText
         .replace(/View Logs/gi, '')
         .replace(/Delete/gi, '')
         .trim();
 
-    // 2. MAGIC STEP: Split the massive text block right before every facility name
-    // This instantly breaks your giant clump into 4 distinct profile sections!
     const profiles = fullPortalText.split(/(?=Aviva Senior Living|Bay Village|Kathie Test|Test 2)/i);
     let totalRows = 0;
 
     profiles.forEach(profile => {
         if (profile.trim().length < 15) return;
+        
+        if (profile.toLowerCase().includes('contacts matrix series') && !profile.toLowerCase().includes('avenue') && !profile.toLowerCase().includes('cir')) return;
 
         excelTemplate += '<tr>';
 
-        // Split this specific facility profile down into individual lines of text
         let lines = profile.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
         let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
 
         lines.forEach(line => {
             let lowerLine = line.toLowerCase();
 
-            // Clear out cluttering empty tracking labels
             if (line === "Primary:" || line === "Email:" || line === "Second:") return;
+            if (lowerLine.includes('facility info contacts matrix series')) return;
 
-            // Route lines to their respective columns based on keyword patterns
+            // CLEANING ENGINE: Strip out emojis, custom icon fonts, and floating vertical bars
+            let cleanLine = line
+                .replace(/[\u2190-\u21FF]|[\u2600-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDC00-\uDFFF]/g, '') // Removes Emojis
+                .replace(/\|\s*$/g, '') // Removes trailing vertical bars
+                .trim();
+
+            // Skip lines that became empty after stripping the icons
+            if (cleanLine === "" || cleanLine === "|") return;
+
             if (lowerLine.includes('@') || lowerLine.includes('phone') || lowerLine.includes('contact')) {
-                col2.push(line);
+                col2.push(cleanLine);
             } else if (lowerLine.includes('series') || lowerLine.includes('programs') || lowerLine.includes('subscribed') || lowerLine.includes('half payment')) {
-                col3.push(line);
+                col3.push(cleanLine);
             } else if (lowerLine.includes('status') || lowerLine.includes('active') || lowerLine.includes('pending')) {
-                col4.push(line);
+                col4.push(cleanLine);
             } else if (lowerLine.includes('$') || lowerLine.includes('invoice') || lowerLine.includes('paid') || lowerLine.includes('sent:') || lowerLine.includes('rec\'d:')) {
-                col5.push(line);
+                col5.push(cleanLine);
             } else {
-                col1.push(line); // Name and address elements go to Column A
+                col1.push(cleanLine);
             }
         });
 
-        // Pack each column safely on its own continuous line inside the cell
-        const cleanCell = (arr) => arr.join(' | ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        // Use a clean comma-space separator to keep everything perfectly readable on one line
+        const cleanCell = (arr) => {
+            let cellText = arr.join(', ').trim();
+            // Remove any trailing or double commas caused by empty icon positions
+            cellText = cellText.replace(/^,|,$/g, '').replace(/,\s*,/g, ',').replace(/\s*\|\s*/g, ', ');
+            return cellText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        };
 
         excelTemplate += '<td>' + cleanCell(col1) + '</td>';
         excelTemplate += '<td>' + cleanCell(col2) + '</td>';
@@ -127,7 +137,6 @@ function exportToExcel() {
         return;
     }
 
-    // 3. Fire download process natively
     const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
     const link = document.createElement('a');
     if (link.download !== undefined) {
