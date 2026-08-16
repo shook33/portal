@@ -67,7 +67,6 @@ function exportToExcel() {
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
-    // 1. Isolate each parent card component wrapper block
     const cards = container.querySelectorAll('.facility-row, [style*="grid"], [style*="flex"], .panel-body > div');
     let rowsCount = 0;
 
@@ -77,68 +76,66 @@ function exportToExcel() {
 
         excelTemplate += '<tr>';
 
-        // 2. Fallback arrays to capture text fields
-        let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
-
-        // 3. TARGET ALL INPUT AND SELECT BOXES BY THEIR PHYSICAL ORDER ON THE CARD
-        const inputs = Array.from(card.querySelectorAll('input, select'));
-        
-        // SILL Framework Input Order Mapping:
-        // Input 0: Facility Name text field
-        // Input 1: Contact Name text field 
-        // Input 2: Email text field
-        // Select 3: Series Subscribed Dropdown
-        if (inputs.length >= 3) {
-            // Force Facility Name into Column A
-            if (inputs[0] && inputs[0].value) col1.push(inputs[0].value.trim());
-            
-            // Force Contact Info into Column B
-            let contactName = inputs[1] ? inputs[1].value.trim() : "";
-            let contactEmail = inputs[2] ? inputs[2].value.trim() : "";
-            if (contactName) col2.push("Primary: " + contactName);
-            if (contactEmail) col2.push("Email: " + contactEmail);
-            
-            // Force Series Dropdown Text into Column C
-            let seriesSelect = card.querySelector('select');
-            if (seriesSelect && seriesSelect.options[seriesSelect.selectedIndex]) {
-                let seriesText = seriesSelect.options[seriesSelect.selectedIndex].text;
-                if (seriesText && !seriesText.toLowerCase().includes('select')) {
-                    col3.push(seriesText.trim());
-                }
-            }
-        }
-
-        // 4. Scrape the remaining static text lines on the dashboard card
-        const lines = card.innerText.split('\n').map(t => t.trim()).filter(t => t.length > 0);
-        
-        lines.forEach(line => {
-            let lower = line.toLowerCase();
-            let cleanLine = line.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-            if (!cleanLine) return;
-
-            // Sort status and ledger lines cleanly into Columns D and E
-            if (lower.includes('status') || lower.includes('signed') || lower.includes('active') || lower.includes('pending') || lower.includes('sent')) {
-                col4.push(cleanLine);
-            } else if (lower.includes('$') || lower.includes('unpaid') || lower.includes('paid') || lower.includes('ledger') || lower.includes('rec\'d') || lower.includes('chk')) {
-                col5.push(cleanLine);
-            } else {
-                // If it's an address label or phone line, add it to Column A underneath the name
-                if (!lower.includes('primary') && !lower.includes('email') && !lower.includes('second') && !lower.includes('@') && cleanLine.length > 2) {
-                    // Prevent duplicating the facility name if it was already pulled from input fields
-                    if (col1.length === 0 || !cleanLine.includes(col1[0])) {
-                        col1.push(cleanLine);
-                    }
-                }
-            }
+        // 1. Identify the 5 main visual column blocks on your screen layout
+        let UICols = Array.from(card.children).filter(el => {
+            let className = el.className ? el.className.toLowerCase() : "";
+            return className.includes('col-') || className.includes('cell') || el.tagName === 'DIV';
         });
 
-        const wrapCell = (arr) => arr.join(' | ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        
-        excelTemplate += '<td>' + wrapCell(col1) + '</td>';
-        excelTemplate += '<td>' + wrapCell(col2) + '</td>';
-        excelTemplate += '<td>' + wrapCell(col3) + '</td>';
-        excelTemplate += '<td>' + wrapCell(col4) + '</td>';
-        excelTemplate += '<td>' + wrapCell(col5) + '</td>';
+        // Fallback to deeper rows if columns are nested
+        if (UICols.length < 3) {
+            UICols = Array.from(card.querySelectorAll('[class*="col-"], .cell'));
+        }
+
+        // 2. Loop through exactly 5 slots to map directly to Excel columns A, B, C, D, E
+        for (let i = 0; i < 5; i++) {
+            let colBox = UICols[i];
+            let cellTextParts = [];
+
+            if (colBox) {
+                // Read standard plain text elements inside this column slot
+                if (colBox.innerText && colBox.innerText.trim()) {
+                    cellTextParts.push(colBox.innerText.trim());
+                }
+
+                // Hunt for text input values inside this specific column slot
+                const inputs = colBox.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (input.tagName === 'INPUT') {
+                        if (input.type === 'checkbox' || input.type === 'radio') {
+                            // Extract checkboxes as readable visual marks
+                            if (input.checked) {
+                                let label = input.nextSibling?.innerText || input.parentElement?.innerText || "";
+                                label = label.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+                                cellTextParts.push("[X] " + label);
+                            }
+                        } else if (input.value && input.value.trim()) {
+                            cellTextParts.push(input.value.trim());
+                        }
+                    } else if (input.tagName === 'SELECT') {
+                        // Extract dropdown selections
+                        if (input.options[input.selectedIndex]) {
+                            let selectVal = input.options[input.selectedIndex].text;
+                            if (selectVal && !selectVal.toLowerCase().includes('select')) {
+                                cellTextParts.push(selectVal.trim());
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 3. Clean up the extracted text block
+            let cleanCellText = cellTextParts
+                .map(t => t.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim())
+                .filter((t, idx, self) => t.length > 0 && self.indexOf(t) === idx)
+                .join(' | '); // Lock everything onto a single row line
+
+            // Escape standard HTML string properties
+            cleanCellText = cleanCellText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            excelTemplate += '<td>' + cleanCellText + '</td>';
+        }
+
         excelTemplate += '</tr>';
         rowsCount++;
     });
@@ -160,15 +157,7 @@ function exportToExcel() {
 </script>
 
 
-
-
-
-
-
- 
-
- 
-    
+   
     </div>
 
 
