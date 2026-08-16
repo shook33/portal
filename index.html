@@ -55,28 +55,29 @@
             10px 20px; background-color: #217346; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">📊 Download Excel Backup</button>
 <script>
 function exportToExcel() {
-    const container = document.getElementById('facilities-list');
+    // 1. Target the actual dynamic dashboard entries container
+    const container = document.getElementById('facilities-list') || document.querySelector('.panel-body');
     if (!container) {
-        alert('Facilities data not found.');
+        alert('Facilities container layout not found on this view.');
         return;
     }
 
-    // 1. Set up the exact spreadsheet shell
+    // 2. Build our standard HTML document shell that Excel opens cleanly
     let excelTemplate = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://w3.org">
       <head>
         <meta http-equiv="content-type" content="text/plain; charset=UTF-8">
         <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
-        <x:Name>Facilities Backup</x:Name>
+        <x:Name>Facilities Directory</x:Name>
         <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
         </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
         <style>
-          td { mso-number-format:"\\@"; vertical-align: top; white-space: pre-wrap; padding: 6px; }
-          th { font-weight: bold; background-color: #e6e6e6; padding: 6px; }
+          td { mso-number-format:"\\@"; vertical-align: top; white-space: pre-wrap; padding: 8px; border: 1px solid #ccc; }
+          th { font-weight: bold; background-color: #f2f2f2; padding: 8px; border: 1px solid #ccc; text-align: left; }
         </style>
       </head>
       <body>
-        <table border="1">
+        <table>
           <thead>
             <tr>
               <th>Facility Info</th>
@@ -89,82 +90,83 @@ function exportToExcel() {
           <tbody>
     `;
 
-    // 2. Direct Extraction: Get all direct children blocks inside the list
-    const items = Array.from(container.children);
-    
-    let rowsAdded = 0;
+    // 3. Target the custom workspace row component elements
+    // This finds the row containers matching "Aviva Senior Living" and others
+    const rows = container.querySelectorAll('.row, [class*="facility-row"], [class*="item"]');
+    let dynamicRowCount = 0;
 
-    items.forEach(item => {
-        // Skip purely decorative lines or completely empty spacer elements
-        if (!item.innerText || item.innerText.trim().length < 10) return;
-
-        // Clean up interactive dashboard buttons from the raw text
-        let cleanText = item.innerText
-            .replace(/View Logs/gi, '')
-            .replace(/Delete/gi, '')
-            .trim();
-
-        // Split the card text into sections based on your stacked line breaks
-        // This isolates the distinct stacked text blocks from your layout
-        let blocks = cleanText.split('\n').map(b => b.trim()).filter(b => b.length > 0);
-
-        if (blocks.length > 0) {
+    rows.forEach(row => {
+        // Look inside the card to pull the visible layout segments
+        const columns = row.querySelectorAll('[class*="col-"], td, .cell');
+        
+        // Ensure it's a valid data row containing information, skipping empty spacers
+        if (columns.length >= 4 && row.innerText.includes('Primary:')) {
             excelTemplate += '<tr>';
             
-            // Distribute your text pieces across the 5 target cells
-            // This safely catches stacked data even if the inner grid elements change
-            let col1 = []; // Facility Info
-            let col2 = []; // Contacts Matrix
-            let col3 = []; // Series
-            let col4 = []; // Contract Status
-            let col5 = []; // Ledger
+            // Extract textual content cell-by-cell while grabbing current form values
+            const cellValues = Array.from(columns).slice(0, 5).map(col => {
+                // If the column contains data inputs, extract their values
+                const inputs = col.querySelectorAll('input, select, textarea');
+                let extractedText = col.innerText || "";
 
-            blocks.forEach(line => {
-                if (line.toLowerCase().includes('primary contact') || line.toLowerCase().includes('email') || line.toLowerCase().includes('phone')) {
-                    col2.push(line);
-                } else if (line.toLowerCase().includes('series') || line.toLowerCase().includes('subscribed')) {
-                    col3.push(line);
-                } else if (line.toLowerCase().includes('status') || line.toLowerCase().includes('active') || line.toLowerCase().includes('pending')) {
-                    col4.push(line);
-                } else if (line.toLowerCase().includes('$') || line.toLowerCase().includes('invoice') || line.toLowerCase().includes('paid')) {
-                    col5.push(line);
-                } else {
-                    col1.push(line);
+                if (inputs.length > 0) {
+                    let inputValues = [];
+                    inputs.forEach(input => {
+                        if (input.type === 'checkbox') {
+                            if (input.checked) inputValues.push("[X]");
+                        } else if (input.value && input.value.trim() !== "") {
+                            // Extract placeholder labels alongside text for clarity
+                            let label = input.getAttribute('placeholder') || "";
+                            inputValues.push(label ? `${label} ${input.value}` : input.value);
+                        }
+                    });
+                    if (inputValues.length > 0) {
+                        extractedText += "\n" + inputValues.join("\n");
+                    }
                 }
+
+                // Clean up interactive dashboard action text
+                return extractedText
+                    .replace(/View Logs/gi, '')
+                    .replace(/Delete/gi, '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .trim();
             });
 
-            // Pack them securely into HTML table columns
-            const finalCols = [col1, col2, col3, col4, col5].map(arr => {
-                let cellContent = arr.join('\n');
-                return cellContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            });
+            // Fill missing tracking cells if a row finishes early
+            while (cellValues.length < 5) {
+                cellValues.push('');
+            }
 
-            excelTemplate += `<td>${finalCols[0]}</td>`;
-            excelTemplate += `<td>${finalCols[1]}</td>`;
-            excelTemplate += `<td>${finalCols[2]}</td>`;
-            excelTemplate += `<td>${finalCols[3]}</td>`;
-            excelTemplate += `<td>${finalCols[4]}</td>`;
+            // Print values inside individual HTML columns
+            excelTemplate += `<td>${cellValues[0]}</td>`;
+            excelTemplate += `<td>${cellValues[1]}</td>`;
+            excelTemplate += `<td>${cellValues[2]}</td>`;
+            excelTemplate += `<td>${cellValues[3]}</td>`;
+            excelTemplate += `<td>${cellValues[4]}</td>`;
             
             excelTemplate += '</tr>';
-            rowsAdded++;
+            dynamicRowCount++;
         }
     });
 
     excelTemplate += '</tbody></table></body></html>';
 
-    if (rowsAdded === 0) {
-        alert('Could not parse any active profiles. Please make sure the data is fully loaded on the screen.');
+    if (dynamicRowCount === 0) {
+        alert('Could not isolate active data columns. Please verify that data rows are fully rendered on screen.');
         return;
     }
 
-    // 3. Download the file natively
+    // 4. Download file natively as Excel document
     const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
     const link = document.createElement('a');
     
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', 'facilities_perfect_backup.xls');
+        link.setAttribute('download', 'facilities_workspace_backup.xls');
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -172,6 +174,7 @@ function exportToExcel() {
     }
 }
 </script>
+
 
             // Handle blank data cells to keep the row straight
             while (colsData.length < 5) {
