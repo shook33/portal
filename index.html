@@ -67,7 +67,7 @@ function exportToExcel() {
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
-    // 1. Target the exact layout blocks matching each separate facility profile
+    // 1. Isolate each parent card component wrapper block
     const cards = container.querySelectorAll('.facility-row, [style*="grid"], [style*="flex"], .panel-body > div');
     let rowsCount = 0;
 
@@ -79,23 +79,15 @@ function exportToExcel() {
 
         // 2. Extract visible text line-by-line while collecting dynamic input field values
         let rawLines = [];
-        
-        // Walk through the card elements in order
         const allElements = card.querySelectorAll('*');
+        
         allElements.forEach(el => {
-            // Grab standard text nodes
             if (el.children.length === 0 && el.innerText && el.innerText.trim()) {
                 rawLines.push(el.innerText.trim());
             }
-            
-            // CRITICAL: Pull text from active input fields and text boxes
-            if (el.tagName === 'INPUT' && el.value && el.value.trim()) {
-                if (el.type !== 'checkbox' && el.type !== 'radio') {
-                    rawLines.push(el.value.trim());
-                }
+            if (el.tagName === 'INPUT' && el.value && el.value.trim() && el.type !== 'checkbox') {
+                rawLines.push(el.value.trim());
             }
-            
-            // CRITICAL: Pull selected options from dropdown menus
             if (el.tagName === 'SELECT' && el.options[el.selectedIndex]) {
                 let selectedText = el.options[el.selectedIndex].text;
                 if (selectedText && !selectedText.toLowerCase().includes('select')) {
@@ -104,24 +96,34 @@ function exportToExcel() {
             }
         });
 
-        // Clean out button instructions and remove duplicate lines
         let cleanLines = rawLines.map(line => {
             return line.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
         }).filter((line, index, self) => line.length > 0 && self.indexOf(line) === index);
 
         let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
 
-        // 3. Sort values into the 5 target spreadsheet columns
+        // 3. Precise Text Sorting Rules
         cleanLines.forEach(line => {
-            if (line.toLowerCase().includes('primary') || line.toLowerCase().includes('email:') || line.toLowerCase().includes('second') || line.toLowerCase().includes('@')) {
+            let lower = line.toLowerCase();
+
+            // Column B: Contacts (Names matching identifiers, emails, or phone patterns)
+            if (lower.includes('primary') || lower.includes('second') || lower.includes('@') || lower.includes('email') || lower.includes('phone') || lower.includes('contact') || line.trim() === "brian hook" || line.trim() === "richard geifman" || line.trim() === "Kathie Westpheling") {
                 col2.push(line);
-            } else if (line.toLowerCase().includes('series') || line.toLowerCase().includes('programs:')) {
+            } 
+            // Column C: Series Packages (Any mentions of series, tracks, or programs)
+            else if (lower.includes('series') || lower.includes('programs') || lower.includes('subscribed')) {
                 col3.push(line);
-            } else if (line.toLowerCase().includes('status:') || line.toLowerCase().includes('signed:')) {
+            } 
+            // Column D: Contracts (Status entries, signed logs, dates)
+            else if (lower.includes('status') || lower.includes('signed') || lower.includes('active') || lower.includes('pending') || lower.includes('sent')) {
                 col4.push(line);
-            } else if (line.toLowerCase().includes('$') || line.toLowerCase().includes('unpaid') || line.toLowerCase().includes('paid')) {
+            } 
+            // Column E: Ledger Billing (Currency signs, invoices, checks, balance terms)
+            else if (lower.includes('$') || lower.includes('unpaid') || lower.includes('paid') || lower.includes('ledger') || lower.includes('invoice') || lower.includes('payment') || lower.includes('rec\'d') || lower.includes('chk')) {
                 col5.push(line);
-            } else {
+            } 
+            // Column A: Facility details (Names, raw physical location addresses, unit numbers)
+            else {
                 col1.push(line);
             }
         });
