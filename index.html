@@ -53,41 +53,59 @@
              <div class="backup-container" style="margin-top: 15px; margin-bottom: 15px;">
         <button id="backupBtn" onclick="exportToExcel()" style="padding: 
             10px 20px; background-color: #217346; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">📊 Download Excel Backup</button>
-             <script>
+   <script>
 function exportToExcel() {
-    // 1. Target the correct facilities list container
     const container = document.getElementById('facilities-list');
     if (!container) {
         alert('Facilities data not found.');
         return;
     }
 
-    // 2. Find any table inside it, or build data from rows
-    const table = container.querySelector('table');
     let csvContent = "";
+    
+    // 1. Set up clean Excel columns matching your dashboard columns
+    const headers = ["Facility Info", "Contacts Matrix", "Series Subscribed", "Contract Status", "Invoice & Payment Ledger"];
+    csvContent += headers.join(',') + '\r\n';
 
-    if (table) {
-        // Extract data if it renders as a standard table
-        const rows = table.querySelectorAll('tr');
-        rows.forEach(row => {
-            const cols = row.querySelectorAll('td, th');
-            const rowData = Array.from(cols).map(col => {
-                let text = col.innerText.replace(/"/g, '""');
-                return (text.includes(',') || text.includes('\n')) ? `"${text}"` : text;
-            }).join(',');
-            csvContent += rowData + '\r\n';
-        });
-    } else {
-        // Fallback: Extract plain text elements if it renders as list items
-        const items = container.querySelectorAll('div, li, p');
-        items.forEach(item => {
-            if(item.innerText.trim()) {
-                csvContent += `"${item.innerText.replace(/"/g, '""')}"\r\n`;
-            }
-        });
+    // 2. Find each individual facility profile block container
+    // This targets your active grid structure
+    const rows = container.querySelectorAll('.facility-row, [style*="display: grid"], tr');
+    
+    if (rows.length === 0) {
+        alert('No data rows found to export.');
+        return;
     }
 
-    // 3. Create file download link with Excel UTF-8 BOM formatting
+    rows.forEach(row => {
+        // Find columns or individual data containers inside this row
+        const cols = row.querySelectorAll('.facility-col, td, div > p, div > div');
+        if (cols.length === 0) return;
+
+        const rowData = Array.from(cols)
+            .map(col => {
+                let text = col.innerText || "";
+                
+                // Clean up action buttons so they don't clutter your data
+                text = text.replace(/View Logs/gi, '')
+                           .replace(/Delete/gi, '')
+                           .trim();
+
+                // Format for Excel CSV compliance
+                text = text.replace(/"/g, '""');
+                if (text.includes(',') || text.includes('\n') || text.includes('\r')) {
+                    text = `"${text}"`;
+                }
+                return text;
+            })
+            // Filter out empty blocks caused by structural layout spacing divs
+            .filter(text => text !== '""' && text !== '');
+
+        if (rowData.length > 0) {
+            csvContent += rowData.join(',') + '\r\n';
+        }
+    });
+
+    // 3. Download the file natively with Excel-friendly formatting
     const BOM = '\uFEFF';
     const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -95,7 +113,7 @@ function exportToExcel() {
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', 'facilities_backup.csv');
+        link.setAttribute('download', 'facilities_matrix_backup.csv');
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -103,6 +121,7 @@ function exportToExcel() {
     }
 }
 </script>
+ 
     
     </div>
 
