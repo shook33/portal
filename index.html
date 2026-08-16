@@ -67,62 +67,48 @@ function exportToExcel() {
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
-    // 1. Loop through each individual facility block card container directly
-    const cards = Array.from(container.children);
+    // 1. Cut the big single text block apart wherever an HR line divider sits
+    const rawContent = container.innerHTML || "";
+    const facilityHTMLBlocks = rawContent.split(/<hr[^>]*>/i);
+    
     let rowsCount = 0;
 
-    cards.forEach(card => {
-        // Skip purely decorative lines or header titles
-        if (!card.innerText || card.innerText.trim().length < 15 || card.innerText.includes('Download Excel')) return;
+    facilityHTMLBlocks.forEach(htmlBlock => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlBlock;
+        
+        let blockText = tempDiv.innerText || "";
+        if (blockText.trim().length < 15 || blockText.includes('Download Excel')) return;
 
         excelTemplate += '<tr>';
 
-        // 2. Safely grab your five layout columns by matching Bootstrap grid column segments
-        const columns = card.querySelectorAll('[class*="col-"], .cell, td');
+        let cleanText = blockText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+        const lines = cleanText.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+        
+        let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
 
-        if (columns.length >= 4) {
-            // If the card matches your standard layout grid structure
-            for (let i = 0; i < 5; i++) {
-                let col = columns[i];
-                let cellText = "";
-                
-                if (col) {
-                    // Extract text while cleaning out button names
-                    cellText = col.innerText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-                    cellText = cellText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                }
-                excelTemplate += `<td>${cellText}</td>`;
+        // 2. Sort the broken text lines into the 5 distinct target cells
+        lines.forEach(line => {
+            if (line.toLowerCase().includes('primary') || line.toLowerCase().includes('email:') || line.toLowerCase().includes('second')) {
+                col2.push(line);
+            } else if (line.toLowerCase().includes('series') || line.toLowerCase().includes('programs:')) {
+                col3.push(line);
+            } else if (line.toLowerCase().includes('status:') || line.toLowerCase().includes('signed:')) {
+                col4.push(line);
+            } else if (line.toLowerCase().includes('$') || line.toLowerCase().includes('unpaid') || line.toLowerCase().includes('paid')) {
+                col5.push(line);
+            } else {
+                col1.push(line);
             }
-        } else {
-            // Fallback: If it's a stacked card text blob, split it evenly
-            const textBlocks = card.innerText.split('\n').map(t => t.trim()).filter(t => t.length > 0);
-            let facilityData = [], contactData = [], seriesData = [], statusData = [], ledgerData = [];
+        });
 
-            textBlocks.forEach(line => {
-                let cleanLine = line.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-                if (!cleanLine) return;
-
-                if (cleanLine.toLowerCase().includes('primary') || cleanLine.toLowerCase().includes('email:') || cleanLine.toLowerCase().includes('second')) {
-                    contactData.push(cleanLine);
-                } else if (cleanLine.toLowerCase().includes('series') || cleanLine.toLowerCase().includes('programs:')) {
-                    seriesData.push(cleanLine);
-                } else if (cleanLine.toLowerCase().includes('status:') || cleanLine.toLowerCase().includes('signed:') || cleanLine.toLowerCase().includes('sent:')) {
-                    statusData.push(cleanLine);
-                } else if (cleanLine.toLowerCase().includes('$') || cleanLine.toLowerCase().includes('unpaid') || cleanLine.toLowerCase().includes('paid')) {
-                    ledgerData.push(cleanLine);
-                } else {
-                    facilityData.push(cleanLine);
-                }
-            });
-
-            const cleanCell = (arr) => arr.join('\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            excelTemplate += `<td>${cleanCell(facilityData)}</td>`;
-            excelTemplate += `<td>${cleanCell(contactData)}</td>`;
-            excelTemplate += `<td>${cleanCell(seriesData)}</td>`;
-            excelTemplate += `<td>${cleanCell(statusData)}</td>`;
-            excelTemplate += `<td>${cleanCell(ledgerData)}</td>`;
-        }
-
+        const wrapCell = (arr) => arr.join('\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        
+        excelTemplate += '<td>' + wrapCell(col1) + '</td>';
+        excelTemplate += '<td>' + wrapCell(col2) + '</td>';
+        excelTemplate += '<td>' + wrapCell(col3) + '</td>';
+        excelTemplate += '<td>' + wrapCell(col4) + '</td>';
+        excelTemplate += '<td>' + wrapCell(col5) + '</td>';
         excelTemplate += '</tr>';
         rowsCount++;
     });
@@ -130,17 +116,16 @@ function exportToExcel() {
     excelTemplate += '</tbody></table></body></html>';
 
     if (rowsCount === 0) {
-        alert('No active profiles detected.');
+        alert("Data layout is still initializing. Please wait 2 seconds and click again!");
         return;
     }
 
     const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
     const link = document.createElement('a');
-    
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', 'facilities_directory_backup.xls');
+        link.setAttribute('download', 'facilities_sorted_backup.xls');
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -148,6 +133,7 @@ function exportToExcel() {
     }
 }
 </script>
+
 
 
 
