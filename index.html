@@ -67,6 +67,7 @@ function exportToExcel() {
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
+    // 1. Isolate each separate facility card component wrapper
     const cards = container.querySelectorAll('.facility-row, [style*="grid"], [style*="flex"], .panel-body > div');
     let rowsCount = 0;
 
@@ -76,84 +77,73 @@ function exportToExcel() {
 
         excelTemplate += '<tr>';
 
-        let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
-
-        // 1. EXTRACT FROM ACTIVE TEXT INPUT BOXES AND DROPDOWNS FIRST
-        const inputElements = Array.from(card.querySelectorAll('input, select'));
-        let textInputValues = [];
-
-        inputElements.forEach(el => {
-            if (el.tagName === 'INPUT' && el.type !== 'checkbox' && el.type !== 'radio') {
-                if (el.value && el.value.trim()) {
-                    textInputValues.push(el.value.trim());
-                }
-            }
-            if (el.tagName === 'SELECT' && el.options[el.selectedIndex]) {
-                let dropdownText = el.options[el.selectedIndex].text;
-                if (dropdownText && !dropdownText.toLowerCase().includes('select')) {
-                    col3.push(dropdownText.trim()); // Send dropdown choices directly to Column C
-                }
-            }
+        // 2. Identify the 5 main visual column blocks layout on your screen layout
+        // This grabs the flexbox or grid division panels directly
+        let UICols = Array.from(card.children).filter(el => {
+            let className = el.className ? el.className.toLowerCase() : "";
+            return className.includes('col-') || className.includes('cell') || el.tagName === 'DIV';
         });
 
-        // The first text box on your dashboard is always the Facility Name
-        if (textInputValues.length > 0) {
-            col1.push(textInputValues[0]); // Force Facility Name into Column A
-        }
-        // The second text box is the Contact Person Name
-        if (textInputValues.length > 1) {
-            col2.push("Primary: " + textInputValues[1]);
-        }
-        // The third text box is the Email Address
-        if (textInputValues.length > 2) {
-            col2.push("Email: " + textInputValues[2]);
+        // Fallback to deeper search if the column segments are nested inside an inner panel
+        if (UICols.length < 4) {
+            UICols = Array.from(card.querySelectorAll('[class*="col-"], .cell'));
         }
 
-        // 2. SCRAPE AND SORT THE REMAINING LABELS AND CHECKBOXES ON THE CARD
-        const items = card.querySelectorAll('*');
-        items.forEach(item => {
-            // Process checked boxes cleanly
-            if (item.tagName === 'INPUT' && (item.type === 'checkbox' || item.type === 'radio') && item.checked) {
-                let label = item.nextSibling?.innerText || item.parentElement?.innerText || "";
-                label = label.replace(/View Logs/gi).replace(/Delete/gi).trim();
+        // 3. Process exactly 5 slots to map directly to Excel columns A, B, C, D, E
+        for (let i = 0; i < 5; i++) {
+            let colBox = UICols[i];
+            let cellTextParts = [];
+
+            if (colBox) {
+                // First, look for any direct text nodes or headings inside THIS column block
+                const childNodes = colBox.querySelectorAll('*');
                 
-                let lowerLabel = label.toLowerCase();
-                if (lowerLabel.includes('status') || lowerLabel.includes('active') || lowerLabel.includes('pending')) {
-                    col4.push("[X] " + label);
+                if (childNodes.length === 0 && colBox.innerText.trim()) {
+                    cellTextParts.push(colBox.innerText.trim());
                 } else {
-                    col5.push("[X] " + label);
+                    childNodes.forEach(node => {
+                        // Gather normal static text labels
+                        if (node.children.length === 0 && node.innerText && node.innerText.trim()) {
+                            let text = node.innerText.trim();
+                            if (text !== "Primary:" && text !== "Email:" && text !== "Second:") {
+                                cellTextParts.push(text);
+                            }
+                        }
+                        // Gather text inputs or date picker values inside THIS column block
+                        if (node.tagName === 'INPUT') {
+                            if (node.type === 'checkbox' || node.type === 'radio') {
+                                if (node.checked) {
+                                    let label = node.nextSibling?.innerText || node.parentElement?.innerText || "";
+                                    label = label.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+                                    cellTextParts.push("[X] " + label);
+                                }
+                            } else if (node.value && node.value.trim()) {
+                                cellTextParts.push(node.value.trim());
+                            }
+                        }
+                        // Gather dropdown items selections inside THIS column block
+                        if (node.tagName === 'SELECT' && node.options[node.selectedIndex]) {
+                            let dropdownVal = node.options[node.selectedIndex].text;
+                            if (dropdownVal && !dropdownVal.toLowerCase().includes('select')) {
+                                cellTextParts.push(dropdownVal.trim());
+                            }
+                        }
+                    });
                 }
             }
 
-            // Gather plain text fields for layout descriptions
-            if (item.children.length === 0 && item.innerText && item.innerText.trim()) {
-                let txt = item.innerText.trim();
-                let lowerTxt = txt.toLowerCase();
+            // 4. Clean up the extracted text block and strip user interface action buttons
+            let cleanCellText = cellTextParts
+                .map(t => t.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim())
+                .filter((t, idx, self) => t.length > 0 && self.indexOf(t) === idx)
+                .join(' | '); // Lock data perfectly inside one cell row
 
-                // Clean dashboard system control text
-                txt = txt.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-                if (!txt || txt === "Primary:" || txt === "Email:" || txt === "Second:") return;
+            // Protect HTML string character encoding sets
+            cleanCellText = cleanCellText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-                if (lowerTxt.includes('status:') || lowerTxt.includes('signed:')) {
-                    col4.push(txt);
-                } else if (lowerTxt.includes('inv sent:') || lowerTxt.includes('chk rec\'d:') || lowerTxt.includes('$') || lowerTxt.includes('ledger')) {
-                    col5.push(txt);
-                } else {
-                    // Send phone or addresses to Column A if it doesn't match other column rules
-                    if (txt.length > 2 && !lowerTxt.includes('@') && txt !== textInputValues[0] && txt !== textInputValues[1]) {
-                        col1.push(txt);
-                    }
-                }
-            }
-        });
+            excelTemplate += '<td>' + cleanCellText + '</td>';
+        }
 
-        const wrapCell = (arr) => arr.join(' | ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-        excelTemplate += '<td>' + wrapCell(col1) + '</td>';
-        excelTemplate += '<td>' + wrapCell(col2) + '</td>';
-        excelTemplate += '<td>' + wrapCell(col3) + '</td>';
-        excelTemplate += '<td>' + wrapCell(col4) + '</td>';
-        excelTemplate += '<td>' + wrapCell(col5) + '</td>';
         excelTemplate += '</tr>';
         rowsCount++;
     });
@@ -173,6 +163,7 @@ function exportToExcel() {
     }
 }
 </script>
+
 
 
    
