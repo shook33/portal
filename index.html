@@ -62,96 +62,83 @@ function exportToExcel() {
     }
 
     let excelTemplate = '<html><head><meta charset="UTF-8">';
-    excelTemplate += '<style>td { vertical-align: top; padding: 6px; border: 1px solid #ccc; mso-number-format:"\\@"; }</style>';
+    excelTemplate += '<style>td { vertical-align: top; white-space: pre-wrap; padding: 6px; border: 1px solid #ccc; mso-number-format:"\\@"; }</style>';
     excelTemplate += '</head><body><table border="1"><thead><tr>';
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
-    // 1. Isolate each separate facility card component wrapper
-    const cards = container.querySelectorAll('.facility-row, [style*="grid"], [style*="flex"], .panel-body > div');
-    let rowsCount = 0;
+    // 1. Direct Extraction: Get all direct children blocks inside the list
+    const items = Array.from(container.children);
+    let rowsAdded = 0;
 
-    cards.forEach(card => {
-        if (!card.innerText || card.innerText.trim().length < 20 || card.innerText.includes('Download Excel')) return;
-        if (card.querySelectorAll('.facility-row, [style*="grid"]').length > 0) return;
+    items.forEach(item => {
+        // Skip purely decorative lines or completely empty spacer elements
+        if (!item.innerText || item.innerText.trim().length < 10) return;
 
-        excelTemplate += '<tr>';
+        // Clean up interactive dashboard buttons from the raw text
+        let cleanText = item.innerText
+            .replace(/View Logs/gi, '')
+            .replace(/Delete/gi, '')
+            .trim();
 
-        // 2. Identify the 5 main visual column blocks layout on your screen layout
-        // This grabs the flexbox or grid division panels directly
-        let UICols = Array.from(card.children).filter(el => {
-            let className = el.className ? el.className.toLowerCase() : "";
-            return className.includes('col-') || className.includes('cell') || el.tagName === 'DIV';
-        });
+        // Split the card text into sections based on your stacked line breaks
+        let blocks = cleanText.split('\n').map(b => b.trim()).filter(b => b.length > 0);
 
-        // Fallback to deeper search if the column segments are nested inside an inner panel
-        if (UICols.length < 4) {
-            UICols = Array.from(card.querySelectorAll('[class*="col-"], .cell'));
-        }
+        if (blocks.length > 0) {
+            excelTemplate += '<tr>';
+            
+            // Distribute your text pieces across the 5 target cells
+            let col1 = []; // Facility Info
+            let col2 = []; // Contacts Matrix
+            let col3 = []; // Series Subscribed
+            let col4 = []; // Contract Status
+            let col5 = []; // Invoice Ledger
 
-        // 3. Process exactly 5 slots to map directly to Excel columns A, B, C, D, E
-        for (let i = 0; i < 5; i++) {
-            let colBox = UICols[i];
-            let cellTextParts = [];
-
-            if (colBox) {
-                // First, look for any direct text nodes or headings inside THIS column block
-                const childNodes = colBox.querySelectorAll('*');
-                
-                if (childNodes.length === 0 && colBox.innerText.trim()) {
-                    cellTextParts.push(colBox.innerText.trim());
+            blocks.forEach(line => {
+                let lowerLine = line.toLowerCase();
+                if (lowerLine.includes('primary') || lowerLine.includes('email') || lowerLine.includes('phone') || lowerLine.includes('@')) {
+                    col2.push(line);
+                } else if (lowerLine.includes('series') || lowerLine.includes('subscribed') || lowerLine.includes('payment |') || lowerLine.includes('half payment')) {
+                    col3.push(line);
+                } else if (lowerLine.includes('status') || lowerLine.includes('active') || lowerLine.includes('pending')) {
+                    col4.push(line);
+                } else if (lowerLine.includes('$') || lowerLine.includes('invoice') || lowerLine.includes('paid') || lowerLine.includes('sent:') || lowerLine.includes('rec\'d:')) {
+                    col5.push(line);
                 } else {
-                    childNodes.forEach(node => {
-                        // Gather normal static text labels
-                        if (node.children.length === 0 && node.innerText && node.innerText.trim()) {
-                            let text = node.innerText.trim();
-                            if (text !== "Primary:" && text !== "Email:" && text !== "Second:") {
-                                cellTextParts.push(text);
-                            }
-                        }
-                        // Gather text inputs or date picker values inside THIS column block
-                        if (node.tagName === 'INPUT') {
-                            if (node.type === 'checkbox' || node.type === 'radio') {
-                                if (node.checked) {
-                                    let label = node.nextSibling?.innerText || node.parentElement?.innerText || "";
-                                    label = label.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-                                    cellTextParts.push("[X] " + label);
-                                }
-                            } else if (node.value && node.value.trim()) {
-                                cellTextParts.push(node.value.trim());
-                            }
-                        }
-                        // Gather dropdown items selections inside THIS column block
-                        if (node.tagName === 'SELECT' && node.options[node.selectedIndex]) {
-                            let dropdownVal = node.options[node.selectedIndex].text;
-                            if (dropdownVal && !dropdownVal.toLowerCase().includes('select')) {
-                                cellTextParts.push(dropdownVal.trim());
-                            }
-                        }
-                    });
+                    col1.push(line);
                 }
-            }
+            });
 
-            // 4. Clean up the extracted text block and strip user interface action buttons
-            let cleanCellText = cellTextParts
-                .map(t => t.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim())
-                .filter((t, idx, self) => t.length > 0 && self.indexOf(t) === idx)
-                .join(' | '); // Lock data perfectly inside one cell row
+            // Pack them securely into HTML table columns using spaces/pipes instead of crashing line breaks
+            const cleanCell = (arr) => arr.join(' | ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-            // Protect HTML string character encoding sets
-            cleanCellText = cleanCellText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-            excelTemplate += '<td>' + cleanCellText + '</td>';
+            excelTemplate += '<td>' + cleanCell(col1) + '</td>';
+            excelTemplate += '<td>' + cleanCell(cleanLinesFromDuplicateLabels(col2)) + '</td>';
+            excelTemplate += '<td>' + cleanCell(col3) + '</td>';
+            excelTemplate += '<td>' + cleanCell(col4) + '</td>';
+            excelTemplate += '<td>' + cleanCell(col5) + '</td>';
+            
+            excelTemplate += '</tr>';
+            rowsAdded++;
         }
-
-        excelTemplate += '</tr>';
-        rowsCount++;
     });
+
+    // Helper utility to clean visual clutter
+    function cleanLinesFromDuplicateLabels(arr) {
+        return arr.filter(t => t !== "Primary:" && t !== "Email:");
+    }
 
     excelTemplate += '</tbody></table></body></html>';
 
+    if (rowsAdded === 0) {
+        alert('Could not parse any active profiles. Please make sure the data is fully loaded on the screen.');
+        return;
+    }
+
+    // 2. Download the file natively
     const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
     const link = document.createElement('a');
+    
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
