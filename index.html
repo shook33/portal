@@ -62,20 +62,16 @@ function exportToExcel() {
     }
 
     let excelTemplate = '<html><head><meta charset="UTF-8">';
-    excelTemplate += '<style>td { vertical-align: top; white-space: pre-wrap; padding: 6px; border: 1px solid #ccc; mso-number-format:"\\@"; }</style>';
+    excelTemplate += '<style>td { vertical-align: top; padding: 6px; border: 1px solid #ccc; mso-number-format:"\\@"; }</style>';
     excelTemplate += '</head><body><table border="1"><thead><tr>';
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
-    // 1. Target the exact layout blocks matching each separate facility profile
     const cards = container.querySelectorAll('.facility-row, [style*="grid"], [style*="flex"], .panel-body > div');
     let rowsCount = 0;
 
     cards.forEach(card => {
-        // Skip administrative action toolbars or headers
         if (!card.innerText || card.innerText.trim().length < 20 || card.innerText.includes('Download Excel')) return;
-        
-        // Skip parent container double-triggers by ensuring it's a direct individual child card
         if (card.querySelectorAll('.facility-row, [style*="grid"]').length > 0) return;
 
         excelTemplate += '<tr>';
@@ -99,7 +95,8 @@ function exportToExcel() {
             }
         });
 
-        const wrapCell = (arr) => arr.join('\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        // JOIN WITH A SPACE INSTEAD OF A NEWLINE TO PREVENT EXCEL ROW ACCIDENTS
+        const wrapCell = (arr) => arr.join(' | ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         
         excelTemplate += '<td>' + wrapCell(col1) + '</td>';
         excelTemplate += '<td>' + wrapCell(col2) + '</td>';
@@ -112,35 +109,12 @@ function exportToExcel() {
 
     excelTemplate += '</tbody></table></body></html>';
 
-    // Fallback split logic if element queries are restricted
-    if (rowsCount <= 1) {
-        // Secondary fallback to chop the text text cleanly on keyword triggers
-        const textBlob = container.innerText.replace(/View Logs/gi, '').replace(/Delete/gi, '');
-        const blocks = textBlob.split(/(?=Aviva Senior Living|Bay Village|Test 2|Facility Profile)/i);
-        
-        let fallbackTemplate = excelTemplate.split('<tbody>')[0] + '<tbody>';
-        blocks.forEach(block => {
-            if (block.trim().length < 20) return;
-            fallbackTemplate += '<tr><td>' + block.trim().replace(/\n/g, '<br>') + '</td><td></td><td></td><td></td><td></td></tr>';
-        });
-        fallbackTemplate += '</tbody></table></body></html>';
-        
-        const blob = new Blob([fallbackTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.setAttribute('href', URL.createObjectURL(blob));
-        link.setAttribute('download', 'facilities_directory_backup.xls');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        return;
-    }
-
     const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
     const link = document.createElement('a');
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', 'facilities_sorted_backup.xls');
+        link.setAttribute('download', 'facilities_perfect_backup.xls');
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
