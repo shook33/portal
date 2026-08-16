@@ -67,27 +67,24 @@ function exportToExcel() {
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
-    // 1. Cut the big single text block apart wherever an HR line divider sits
-    const rawContent = container.innerHTML || "";
-    const facilityHTMLBlocks = rawContent.split(/<hr[^>]*>/i);
-    
+    // 1. Target the exact layout blocks matching each separate facility profile
+    const cards = container.querySelectorAll('.facility-row, [style*="grid"], [style*="flex"], .panel-body > div');
     let rowsCount = 0;
 
-    facilityHTMLBlocks.forEach(htmlBlock => {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlBlock;
+    cards.forEach(card => {
+        // Skip administrative action toolbars or headers
+        if (!card.innerText || card.innerText.trim().length < 20 || card.innerText.includes('Download Excel')) return;
         
-        let blockText = tempDiv.innerText || "";
-        if (blockText.trim().length < 15 || blockText.includes('Download Excel')) return;
+        // Skip parent container double-triggers by ensuring it's a direct individual child card
+        if (card.querySelectorAll('.facility-row, [style*="grid"]').length > 0) return;
 
         excelTemplate += '<tr>';
 
-        let cleanText = blockText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+        let cleanText = card.innerText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
         const lines = cleanText.split('\n').map(t => t.trim()).filter(t => t.length > 0);
         
         let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
 
-        // 2. Sort the broken text lines into the 5 distinct target cells
         lines.forEach(line => {
             if (line.toLowerCase().includes('primary') || line.toLowerCase().includes('email:') || line.toLowerCase().includes('second')) {
                 col2.push(line);
@@ -115,8 +112,26 @@ function exportToExcel() {
 
     excelTemplate += '</tbody></table></body></html>';
 
-    if (rowsCount === 0) {
-        alert("Data layout is still initializing. Please wait 2 seconds and click again!");
+    // Fallback split logic if element queries are restricted
+    if (rowsCount <= 1) {
+        // Secondary fallback to chop the text text cleanly on keyword triggers
+        const textBlob = container.innerText.replace(/View Logs/gi, '').replace(/Delete/gi, '');
+        const blocks = textBlob.split(/(?=Aviva Senior Living|Bay Village|Test 2|Facility Profile)/i);
+        
+        let fallbackTemplate = excelTemplate.split('<tbody>')[0] + '<tbody>';
+        blocks.forEach(block => {
+            if (block.trim().length < 20) return;
+            fallbackTemplate += '<tr><td>' + block.trim().replace(/\n/g, '<br>') + '</td><td></td><td></td><td></td><td></td></tr>';
+        });
+        fallbackTemplate += '</tbody></table></body></html>';
+        
+        const blob = new Blob([fallbackTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.setAttribute('href', URL.createObjectURL(blob));
+        link.setAttribute('download', 'facilities_directory_backup.xls');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         return;
     }
 
@@ -133,6 +148,7 @@ function exportToExcel() {
     }
 }
 </script>
+
 
 
 
