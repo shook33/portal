@@ -62,83 +62,74 @@ function exportToExcel() {
     }
 
     let excelTemplate = '<html><head><meta charset="UTF-8">';
-    excelTemplate += '<style>td { vertical-align: top; white-space: pre-wrap; padding: 6px; border: 1px solid #ccc; mso-number-format:"\\@"; }</style>';
+    excelTemplate += '<style>td { vertical-align: top; white-space: pre-wrap; padding: 8px; border: 1px solid #ccc; mso-number-format:"\\@"; }</style>';
     excelTemplate += '</head><body><table border="1"><thead><tr>';
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
-    // 1. Direct Extraction: Get all direct children blocks inside the list
-    const items = Array.from(container.children);
-    let rowsAdded = 0;
+    // 1. Read all the text on the screen, clean up operational buttons
+    let fullPortalText = container.innerText
+        .replace(/View Logs/gi, '')
+        .replace(/Delete/gi, '')
+        .trim();
 
-    items.forEach(item => {
-        // Skip purely decorative lines or completely empty spacer elements
-        if (!item.innerText || item.innerText.trim().length < 10) return;
+    // 2. MAGIC STEP: Split the massive text block right before every facility name
+    // This instantly breaks your giant clump into 4 distinct profile sections!
+    const profiles = fullPortalText.split(/(?=Aviva Senior Living|Bay Village|Kathie Test|Test 2)/i);
+    let totalRows = 0;
 
-        // Clean up interactive dashboard buttons from the raw text
-        let cleanText = item.innerText
-            .replace(/View Logs/gi, '')
-            .replace(/Delete/gi, '')
-            .trim();
+    profiles.forEach(profile => {
+        if (profile.trim().length < 15) return;
 
-        // Split the card text into sections based on your stacked line breaks
-        let blocks = cleanText.split('\n').map(b => b.trim()).filter(b => b.length > 0);
+        excelTemplate += '<tr>';
 
-        if (blocks.length > 0) {
-            excelTemplate += '<tr>';
-            
-            // Distribute your text pieces across the 5 target cells
-            let col1 = []; // Facility Info
-            let col2 = []; // Contacts Matrix
-            let col3 = []; // Series Subscribed
-            let col4 = []; // Contract Status
-            let col5 = []; // Invoice Ledger
+        // Split this specific facility profile down into individual lines of text
+        let lines = profile.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-            blocks.forEach(line => {
-                let lowerLine = line.toLowerCase();
-                if (lowerLine.includes('primary') || lowerLine.includes('email') || lowerLine.includes('phone') || lowerLine.includes('@')) {
-                    col2.push(line);
-                } else if (lowerLine.includes('series') || lowerLine.includes('subscribed') || lowerLine.includes('payment |') || lowerLine.includes('half payment')) {
-                    col3.push(line);
-                } else if (lowerLine.includes('status') || lowerLine.includes('active') || lowerLine.includes('pending')) {
-                    col4.push(line);
-                } else if (lowerLine.includes('$') || lowerLine.includes('invoice') || lowerLine.includes('paid') || lowerLine.includes('sent:') || lowerLine.includes('rec\'d:')) {
-                    col5.push(line);
-                } else {
-                    col1.push(line);
-                }
-            });
+        let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
 
-            // Pack them securely into HTML table columns using spaces/pipes instead of crashing line breaks
-            const cleanCell = (arr) => arr.join(' | ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        lines.forEach(line => {
+            let lowerLine = line.toLowerCase();
 
-            excelTemplate += '<td>' + cleanCell(col1) + '</td>';
-            excelTemplate += '<td>' + cleanCell(cleanLinesFromDuplicateLabels(col2)) + '</td>';
-            excelTemplate += '<td>' + cleanCell(col3) + '</td>';
-            excelTemplate += '<td>' + cleanCell(col4) + '</td>';
-            excelTemplate += '<td>' + cleanCell(col5) + '</td>';
-            
-            excelTemplate += '</tr>';
-            rowsAdded++;
-        }
+            // Clear out cluttering empty tracking labels
+            if (line === "Primary:" || line === "Email:" || line === "Second:") return;
+
+            // Route lines to their respective columns based on keyword patterns
+            if (lowerLine.includes('@') || lowerLine.includes('phone') || lowerLine.includes('contact')) {
+                col2.push(line);
+            } else if (lowerLine.includes('series') || lowerLine.includes('programs') || lowerLine.includes('subscribed') || lowerLine.includes('half payment')) {
+                col3.push(line);
+            } else if (lowerLine.includes('status') || lowerLine.includes('active') || lowerLine.includes('pending')) {
+                col4.push(line);
+            } else if (lowerLine.includes('$') || lowerLine.includes('invoice') || lowerLine.includes('paid') || lowerLine.includes('sent:') || lowerLine.includes('rec\'d:')) {
+                col5.push(line);
+            } else {
+                col1.push(line); // Name and address elements go to Column A
+            }
+        });
+
+        // Pack each column safely on its own continuous line inside the cell
+        const cleanCell = (arr) => arr.join(' | ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        excelTemplate += '<td>' + cleanCell(col1) + '</td>';
+        excelTemplate += '<td>' + cleanCell(col2) + '</td>';
+        excelTemplate += '<td>' + cleanCell(col3) + '</td>';
+        excelTemplate += '<td>' + cleanCell(col4) + '</td>';
+        excelTemplate += '<td>' + cleanCell(col5) + '</td>';
+        excelTemplate += '</tr>';
+        totalRows++;
     });
-
-    // Helper utility to clean visual clutter
-    function cleanLinesFromDuplicateLabels(arr) {
-        return arr.filter(t => t !== "Primary:" && t !== "Email:");
-    }
 
     excelTemplate += '</tbody></table></body></html>';
 
-    if (rowsAdded === 0) {
-        alert('Could not parse any active profiles. Please make sure the data is fully loaded on the screen.');
+    if (totalRows === 0) {
+        alert('Could not isolate any profile lines. Please wait for the database to load.');
         return;
     }
 
-    // 2. Download the file natively
+    // 3. Fire download process natively
     const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
     const link = document.createElement('a');
-    
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
@@ -150,7 +141,6 @@ function exportToExcel() {
     }
 }
 </script>
-
 
 
    
