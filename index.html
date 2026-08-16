@@ -76,69 +76,77 @@ function exportToExcel() {
 
         excelTemplate += '<tr>';
 
-        // 1. Find every single element that contains actual text or value data inside this card
-        const formElements = card.querySelectorAll('div, p, span, h1, h2, h3, h4, h5, h6, strong, b, input, select');
-        
-        // Setting up 5 empty buckets for our 5 Excel columns
-        let columnsData = [[], [], [], [], []];
+        // 1. Collect all static text pieces and dynamic input values inside this card
+        let allValues = [];
+        const elements = card.querySelectorAll('*');
 
-        // 2. Measure the exact left-edge monitor coordinate of the parent container card
-        const cardLeft = card.getBoundingClientRect().left;
-        const cardWidth = card.getBoundingClientRect().width || 1200;
-        const columnSlotWidth = cardWidth / 5; // Divide the card width into 5 equal vertical screen slots
-
-        formElements.forEach(el => {
-            let extractedText = "";
-
-            // Gather standard plain text
+        elements.forEach(el => {
+            // Read plain text elements
             if (el.children.length === 0 && el.innerText && el.innerText.trim()) {
-                extractedText = el.innerText.trim();
+                allValues.push(el.innerText.trim());
             }
-            // Gather input field text box values
+            // Read active typed input boxes
             if (el.tagName === 'INPUT') {
                 if (el.type === 'checkbox' || el.type === 'radio') {
                     if (el.checked) {
                         let label = el.nextSibling?.innerText || el.parentElement?.innerText || "";
-                        extractedText = "[X] " + label.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+                        allValues.push("[X] " + label.trim());
                     }
                 } else if (el.value && el.value.trim()) {
-                    extractedText = el.value.trim();
+                    allValues.push(el.value.trim());
                 }
             }
-            // Gather dropdown selection menus
+            // Read dynamic dropdown choice components
             if (el.tagName === 'SELECT' && el.options[el.selectedIndex]) {
-                let selectedVal = el.options[el.selectedIndex].text;
-                if (selectedVal && !selectedVal.toLowerCase().includes('select')) {
-                    extractedText = selectedVal.trim();
+                let dropdownText = el.options[el.selectedIndex].text;
+                if (dropdownText && !dropdownText.toLowerCase().includes('select')) {
+                    allValues.push(dropdownText.trim());
                 }
-            }
-
-            // Strip administrative action text
-            extractedText = extractedText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-
-            if (extractedText && extractedText.length > 0) {
-                // Calculate exactly which of the 5 horizontal screen slots this element rests in
-                const elementLeft = el.getBoundingClientRect().left;
-                const relativeX = elementLeft - cardLeft;
-                
-                let columnIndex = Math.floor(relativeX / columnSlotWidth);
-                if (columnIndex < 0) columnIndex = 0;
-                if (columnIndex > 4) columnIndex = 4;
-
-                columnsData[columnIndex].push(extractedText);
             }
         });
 
-        // 3. Map our 5 physical pixel slots straight into Excel cells
-        for (let i = 0; i < 5; i++) {
-            let cleanCellText = columnsData[i]
-                .filter((t, idx, self) => t.length > 0 && self.indexOf(t) === idx)
-                .join(' | ');
+        // Clean out buttons and remove duplicate values
+        let cleanValues = allValues.map(v => {
+            return v.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+        }).filter((v, idx, self) => v.length > 0 && self.indexOf(v) === idx);
 
-            cleanCellText = cleanCellText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            excelTemplate += '<td>' + cleanCellText + '</td>';
-        }
+        let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
 
+        // 2. Sort the values into the 5 target spreadsheet columns using exact phrases
+        cleanValues.forEach(val => {
+            let lower = val.toLowerCase();
+
+            // Column B: Contacts
+            if (lower.includes('primary:') || lower.includes('email:') || lower.includes('second:') || lower.includes('@') || lower.includes('phone:') || val === "brian hook" || val === "richard geifman" || val === "Kathie Westpheling") {
+                col2.push(val);
+            }
+            // Column C: Series Subscribed (Any mention of programs, tracks, sub options, or series)
+            else if (lower.includes('series') || lower.includes('programs') || lower.includes('subscribed') || lower.includes('track') || lower.includes('matrix')) {
+                col3.push(val);
+            }
+            // Column D: Contract Status
+            else if (lower.includes('status:') || lower.includes('signed:') || lower.includes('active') || lower.includes('pending')) {
+                col4.push(val);
+            }
+            // Column E: Invoice Ledger
+            else if (lower.includes('inv sent:') || lower.includes('chk rec\'d:') || lower.includes('$') || lower.includes('unpaid') || lower.includes('paid') || lower.includes('half payment') || lower.includes('ledger')) {
+                col5.push(val);
+            }
+            // Column A: Facility Info (Fallback for names, addresses, and physical locations)
+            else {
+                if (val.length > 2 && !lower.includes('inv sent') && !lower.includes('chk rec')) {
+                    col1.push(val);
+                }
+            }
+        });
+
+        const wrapCell = (arr) => arr.join(' | ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        excelTemplate += '<td>' + wrapCell(col1) + '</td>';
+        excelTemplate += '<td>' + wrapCell(col2) + '</td>';
+        excelTemplate += '<td>' + wrapCell(col3) + ' + </td>'; // Temporary marker to see what hits Column C
+        excelTemplate += '<td>' + wrapCell(col4) + '</td>';
+        excelTemplate += '<td>' + wrapCell(col5) + '</td>';
         excelTemplate += '</tr>';
         rowsCount++;
     });
