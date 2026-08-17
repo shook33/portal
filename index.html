@@ -67,58 +67,84 @@ function exportToExcel() {
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
-    let fullPortalText = container.innerText
-        .replace(/View Logs/gi, '')
-        .replace(/Delete/gi, '')
-        .trim();
+    // 1. Isolate each individual card row wrapper on the screen
+    // This targets the separate blocks for Aviva, Bay Village, Kathie, etc.
+    const rows = Array.from(container.children).filter(el => {
+        return el.innerText && el.innerText.trim().length > 20 && !el.innerText.includes('Download Excel');
+    });
 
-    // 1. SPLIT REGEX ONLY ON VALID FACILITY BOUNDARIES TO ELIMINATE THE TOP ROW CLUTTER
-    const profiles = fullPortalText.split(/(?=Aviva Senior Living|Bay Village|Kathie test|Test 2)/);
-    let totalRows = 0;
+    if (rows.length === 0) {
+        alert('No active layout rows detected.');
+        return;
+    }
 
-    profiles.forEach(profile => {
-        let trimmedProfile = profile.trim();
-        if (trimmedProfile.length < 15) return;
-        
-        // 2. EXPLICIT GUARD: Skip raw header blocks that contain zero address or name tokens
-        if (trimmedProfile.toLowerCase().includes('contacts matrix series') && !trimmedProfile.toLowerCase().includes('avenue') && !trimmedProfile.toLowerCase().includes('cir')) return;
-        if (trimmedProfile.startsWith('Facility Info Contacts Matrix')) return;
-
+    rows.forEach(row => {
         excelTemplate += '<tr>';
 
-        let lines = trimmedProfile.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        // 2. Extract standard labels from the background text
+        let backgroundText = row.innerText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+        let textLines = backgroundText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
         let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
 
-        lines.forEach(line => {
-            let lowerLine = line.toLowerCase();
+        // Distribute background text values (names, addresses, phone text)
+        textLines.forEach(line => {
+            let lower = line.toLowerCase();
+            if (line === "Primary:" || line === "Email:" || line === "Second:" || lower.includes('series subscribed') || lower.includes('contract status') || lower.includes('invoice & payment')) return;
 
-            if (line === "Primary:" || line === "Email:" || line === "Second:") return;
-            if (lowerLine.includes('facility info contacts matrix series')) return;
-
-            // Strip out emojis, icon characters, and formatting pipes cleanly
-            let cleanLine = line
-                .replace(/[\u2190-\u21FF]|[\u2600-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDC00-\uDFFF]/g, '')
-                .replace(/\|\s*$/g, '')
-                .trim();
-
-            if (cleanLine === "" || cleanLine === "|") return;
-
-            if (lowerLine.includes('@') || lowerLine.includes('phone') || lowerLine.includes('contact') || lowerLine.includes('202744') || lowerLine.includes('941284') || lowerLine.includes('703220')) {
-                col2.push(cleanLine);
-            } else if (lowerLine.includes('series') || lowerLine.includes('programs') || lowerLine.includes('subscribed') || lowerLine.includes('half payment')) {
-                col3.push(cleanLine);
-            } else if (lowerLine.includes('status') || lowerLine.includes('active') || lowerLine.includes('pending') || lowerLine.includes('signed:')) {
-                col4.push(cleanLine);
-            } else if (lowerLine.includes('$') || lowerLine.includes('invoice') || lowerLine.includes('paid') || lowerLine.includes('sent:') || lowerLine.includes('rec\'d:') || lowerLine.includes('unpaid')) {
-                col5.push(cleanLine);
+            if (lower.includes('@') || lower.includes('phone') || lower.includes('202744') || lower.includes('941284') || lower.includes('703220')) {
+                col2.push(line);
+            } else if (lower.includes('status') || lower.includes('signed:')) {
+                col4.push(line);
+            } else if (lower.includes('$') || lower.includes('sent:') || lower.includes('rec\'d:')) {
+                col5.push(line);
             } else {
-                col1.push(cleanLine);
+                col1.push(line);
             }
         });
 
+        // 3. TARGET ALL INTERACTIVE DROPDOWNS AND FORM VALUE SELECTIONS
+        // This explicitly harvests your active series and payment ledger choices
+        const selectFields = row.querySelectorAll('select');
+        selectFields.forEach(select => {
+            if (select.options[select.selectedIndex]) {
+                let pickedValue = select.options[select.selectedIndex].text.trim();
+                // Skip default instructions like "--Select--"
+                if (pickedValue && !pickedValue.toLowerCase().includes('select')) {
+                    let lowerVal = pickedValue.toLowerCase();
+                    // Route to series column or status column based on wording
+                    if (lowerVal.includes('mm') || lowerVal.includes('gi') || lowerVal.includes('series')) {
+                        col3.push(pickedValue);
+                    } else if (lowerVal.includes('paid') || lowerLine.includes('unpaid') || lowerVal.includes('invoice')) {
+                        col5.push(pickedValue);
+                    } else {
+                        col4.push(pickedValue);
+                    }
+                }
+            }
+        });
+
+        // 4. HARVEST CHECKED BOX VALUE LABELS
+        const checkboxes = row.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                let boxLabel = cb.nextSibling?.innerText || cb.parentElement?.innerText || "";
+                boxLabel = boxLabel.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+                if (boxLabel) {
+                    let lowerBox = boxLabel.toLowerCase();
+                    if (lowerBox.includes('paid') || lowerBox.includes('sent') || lowerBox.includes('unpaid') || lowerBox.includes('$')) {
+                        col5.push("[X] " + boxLabel);
+                    } else {
+                        col4.push("[X] " + boxLabel);
+                    }
+                }
+            }
+        });
+
+        // 5. Clean up array sets for cell packaging
         const cleanCell = (arr) => {
-            let cellText = arr.join(', ').trim();
-            cellText = cellText.replace(/^,|,$/g, '').replace(/,\s*,/g, ',').replace(/\s*\|\s*/g, ', ');
+            let cellText = arr.filter((v, i, self) => v.length > 0 && self.indexOf(v) === i).join(', ').trim();
+            cellText = cellText.replace(/^,|,$/g, '').replace(/,\s*,/g, ',');
             return cellText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         };
 
@@ -128,7 +154,6 @@ function exportToExcel() {
         excelTemplate += '<td>' + cleanCell(col4) + '</td>';
         excelTemplate += '<td>' + cleanCell(col5) + '</td>';
         excelTemplate += '</tr>';
-        totalRows++;
     });
 
     excelTemplate += '</tbody></table></body></html>';
@@ -138,7 +163,7 @@ function exportToExcel() {
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', 'facilities_perfect_backup.xls');
+        link.setAttribute('download', 'facilities_live_backup.xls');
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
