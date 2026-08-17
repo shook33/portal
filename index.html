@@ -68,7 +68,6 @@ function exportToExcel() {
     excelTemplate += '</tr></thead><tbody>';
 
     // 1. Isolate each individual card row wrapper on the screen
-    // This targets the separate blocks for Aviva, Bay Village, Kathie, etc.
     const rows = Array.from(container.children).filter(el => {
         return el.innerText && el.innerText.trim().length > 20 && !el.innerText.includes('Download Excel');
     });
@@ -109,13 +108,14 @@ function exportToExcel() {
         selectFields.forEach(select => {
             if (select.options[select.selectedIndex]) {
                 let pickedValue = select.options[select.selectedIndex].text.trim();
-                // Skip default instructions like "--Select--"
+                
                 if (pickedValue && !pickedValue.toLowerCase().includes('select')) {
-                    let lowerVal = pickedValue.toLowerCase();
+                    let lowerVal = pickedValue.toLowerCase(); // FIXED LINE
+                    
                     // Route to series column or status column based on wording
                     if (lowerVal.includes('mm') || lowerVal.includes('gi') || lowerVal.includes('series')) {
                         col3.push(pickedValue);
-                    } else if (lowerVal.includes('paid') || lowerLine.includes('unpaid') || lowerVal.includes('invoice')) {
+                    } else if (lowerVal.includes('paid') || lowerVal.includes('unpaid') || lowerVal.includes('invoice')) {
                         col5.push(pickedValue);
                     } else {
                         col4.push(pickedValue);
