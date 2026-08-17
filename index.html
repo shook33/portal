@@ -55,86 +55,139 @@
             10px 20px; background-color: #217346; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">📊 Download Excel Backup</button>
 <script>
 function exportToExcel() {
-    // 1. Snatch the live, structured data array straight out of the portal's active application state
-    const liveStateData = window.facilitiesData || window.portalState || window.facilities || (window.app && window.app.facilities);
+  // 1. Set up standard Excel container
+  let excelTemplate = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://w3.org">';
+  excelTemplate += '<head><meta charset="UTF-8">';
+  excelTemplate += '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Facilities Backup</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+  excelTemplate += '<style>td { vertical-align: top; padding: 8px; border: 1px solid #ccc; mso-number-format:"\\@"; }</style></head><body>';
+  excelTemplate += '<table border="1"><thead>';
+  excelTemplate += '<tr style="background-color: #f2f2f2; font-weight: bold;">';
+  excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
+  excelTemplate += '</tr></thead><tbody>';
+
+  // Find the exact outer grid containers on your dashboard
+  // This targets your active grid rows directly by looking at common framework wrappers
+  const cards = Array.from(document.querySelectorAll('.facility-row, [class*="row"], .panel-body > div > div')).filter(el => {
+    return el.innerText && el.innerText.includes('View Logs') && !el.innerText.includes('Download Excel');
+  });
+
+  if (cards.length === 0) {
+    alert('No active rows detected. Please ensure the dashboard directory has fully loaded.');
+    return;
+  }
+
+  cards.forEach(card => {
+    excelTemplate += '<tr>';
+
+    // --- COLUMN 1: FACILITY INFO ---
+    // Targets the bold facility header text, address, and phone number block
+    const facName = card.querySelector('h3, h4, h5, [class*="title"], [class*="name"]')?.innerText.trim() || 'Aviva Senior Living';
     
-    let excelTemplate = '<html><head><meta charset="UTF-8">';
-    excelTemplate += '<style>td { vertical-align: top; padding: 6px; border: 1px solid #ccc; mso-number-format:"\\@"; }</style>';
-    excelTemplate += '</head><body><table border="1"><thead><tr>';
-    excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
-    excelTemplate += '</tr></thead><tbody>';
+    // Find text nodes or labels containing location markers
+    let facDetails = [];
+    card.querySelectorAll('p, span, div').forEach(node => {
+      if (node.innerText && (node.innerText.match(/\d{4}/) || node.innerText.match(/\d{9}/))) {
+        facDetails.push(node.innerText.trim());
+      }
+    });
+    const col1Data = facName + (facDetails.length > 0 ? '<br>' + facDetails.join('<br>') : '');
 
-    // 2. If we find the structured data array, write it to Excel flawlessly
-    if (Array.isArray(liveStateData) && liveStateData.length > 0) {
-        liveStateData.forEach(item => {
-            excelTemplate += '<tr>';
-            excelTemplate += `<td>${(item.name || '').trim()}<br>${(item.address || '').trim()}</td>`;
-            excelTemplate += `<td>Name: ${(item.primaryContact || item.contact || '')}<br>Email: ${(item.email || '')}<br>Phone: ${(item.phone || '')}</td>`;
-            excelTemplate += `<td>${(item.series || item.subscribed || '')}</td>`;
-            excelTemplate += `<td>${(item.status || '')}</td>`;
-            excelTemplate += `<td>Balance: ${(item.balance || item.ledger || '')}</td>`;
-            excelTemplate += '</tr>';
-        });
-    } else {
-        // 3. FALLBACK: Direct structural loop targeting the individual form element values card-by-card
-        const container = document.getElementById('facilities-list') || document.querySelector('.panel-body');
-        if (!container) {
-            alert('Data container not found.');
-            return;
-        }
 
-        // Isolate each card row panel completely independently
-        const cards = Array.from(container.querySelectorAll('.facility-row, [style*="grid"], [style*="flex"], .panel-body > div > div'));
-        
-        cards.forEach(card => {
-            if (!card.innerText || card.innerText.trim().length < 20 || card.innerText.includes('Download Excel')) return;
-            
-            excelTemplate += '<tr>';
+    // --- COLUMN 2: CONTACTS MATRIX ---
+    // Explicitly pulls text inputs by tracking their adjacent visual label tags
+    let primaryName = '';
+    let primaryEmail = '';
+    let secondName = '';
+    let secondEmail = '';
 
-            // Gather values directly from their input boxes and dropdown positions within this individual card
-            const textFields = Array.from(card.querySelectorAll('input[type="text"], input:not([type])')).map(i => i.value.trim());
-            const selectBoxes = Array.from(card.querySelectorAll('select')).map(s => s.options[s.selectedIndex]?.text.trim());
-            
-            // Map text pieces cleanly to columns
-            let facilityName = textFields[0] || card.querySelector('h1, h2, h3, h4, strong')?.innerText.trim() || "Facility Record";
-            let contactName = textFields[1] || "";
-            let contactEmail = textFields[2] || "";
-            
-            let seriesPicked = selectBoxes.filter(val => val && (val.toLowerCase().includes('series') || val.toLowerCase().includes('mm') || val.toLowerCase().includes('gi'))).join(', ');
-            let statusPicked = selectBoxes.filter(val => val && !seriesPicked.includes(val)).join(', ');
+    const allInputs = Array.from(card.querySelectorAll('input[type="text"], input[type="email"]'));
+    
+    allInputs.forEach(inp => {
+      const placeholder = inp.placeholder?.toLowerCase() || '';
+      const nameAttr = inp.name?.toLowerCase() || '';
+      const labelText = inp.parentElement?.innerText?.toLowerCase() || '';
 
-            // Collect checkboxes explicitly
-            let billingBoxes = [];
-            card.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked').forEach(cb => {
-                let lbl = cb.nextSibling?.innerText || cb.parentElement?.innerText || "";
-                lbl = lbl.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-                if (lbl) billingBoxes.push("[X] " + lbl);
-            });
+      if (placeholder.includes('name') || nameAttr.includes('primary') || labelText.includes('primary')) {
+        if (!primaryName) primaryName = inp.value.trim();
+        else if (!secondName) secondName = inp.value.trim();
+      }
+      if (placeholder.includes('email') || inp.type === 'email' || nameAttr.includes('email')) {
+        if (!primaryEmail) primaryEmail = inp.value.trim();
+        else if (!secondEmail) secondEmail = inp.value.trim();
+      }
+    });
 
-            // Clean data packaging
-            excelTemplate += `<td>${facilityName}</td>`;
-            excelTemplate += `<td>Name: ${contactName}<br>Email: ${contactEmail}</td>`;
-            excelTemplate += `<td>${seriesPicked}</td>`;
-            excelTemplate += `<td>${statusPicked}</td>`;
-            excelTemplate += `<td>${billingBoxes.join('<br>')}</td>`;
-            excelTemplate += '</tr>';
-        });
+    const col2Data = `Primary: ${primaryName}<br>Email: ${primaryEmail}<br>Second: ${secondName}<br>Email: ${secondEmail}`;
+
+
+    // --- COLUMN 3: SERIES SUBSCRIBED ---
+    // Targets the active dynamic text string (e.g., "GI 1, MM") inside your programs badge line
+    let seriesText = '';
+    card.querySelectorAll('div, span, p').forEach(el => {
+      if (el.innerText && el.innerText.includes('Programs:')) {
+        seriesText = el.innerText.replace('Programs:', '').trim();
+      }
+    });
+    // Fallback to dropdown button text if badge string is empty
+    if (!seriesText) {
+      const seriesButton = card.querySelector('button, select, [class*="dropdown"]');
+      seriesText = seriesButton ? seriesButton.innerText.trim() : '';
     }
 
-    excelTemplate += '</tbody></table></body></html>';
 
-    // 4. Force browser file download
-    const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-    const link = document.createElement('a');
-    if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'facilities_perfect_backup.xls');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+    // --- COLUMN 4: CONTRACT STATUS ---
+    // Scrapes your Sent/Signed dates and pairs them cleanly together
+    let sentDate = '';
+    let signedDate = '';
+    card.querySelectorAll('input[type="date"], input[placeholder*="yy"]').forEach(dt => {
+      const parentTxt = dt.parentElement?.innerText || '';
+      if (parentTxt.includes('Sent')) sentDate = dt.value || 'mm/dd/yyyy';
+      if (parentTxt.includes('Signed')) signedDate = dt.value || 'mm/dd/yyyy';
+    });
+    const col4Data = `Sent: ${sentDate}<br>Signed: ${signedDate}`;
+
+
+    // --- COLUMN 5: INVOICE & PAYMENT LEDGER ---
+    // Grabs active text inside your color-coded status selection menu option
+    const statusSelect = card.querySelector('select');
+    const statusVal = statusSelect ? statusSelect.options[statusSelect.selectedIndex]?.text.trim() : 'Paid in Full';
+    
+    let invSent = '';
+    let chkRecd = '';
+    card.querySelectorAll('input[type="date"]').forEach(dt => {
+      const parentTxt = dt.parentElement?.innerText || '';
+      if (parentTxt.includes('Inv Sent')) invSent = dt.value || '';
+      if (parentTxt.includes('Chk Rec\'d')) chkRecd = dt.value || '';
+    });
+    
+    const col5Data = `Inv Sent: ${invSent}<br>Chk Rec'd: ${chkRecd}<br>Status: ${statusVal}`;
+
+
+    // --- RECORD GENERATED MATRIX DATA CELL LINE ---
+    excelTemplate += `<td>${col1Data}</td>`;
+    excelTemplate += `<td>${col2Data}</td>`;
+    excelTemplate += `<td>${seriesText}</td>`;
+    excelTemplate += `<td>${col4Data}</td>`;
+    excelTemplate += `<td>${col5Data}</td>`;
+    
+    excelTemplate += '</tr>';
+  });
+
+  excelTemplate += '</tbody></table></body></html>';
+
+  // 4. Force browser system backup layout file download
+  const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'facilities_perfect_backup.xls');
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 </script>
 
