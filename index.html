@@ -55,7 +55,7 @@
             10px 20px; background-color: #217346; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">📊 Download Excel Backup</button>
 <script>
 function exportToExcel() {
-  // 1. Set up standard Excel container
+  // 1. Core Microsoft Excel structure setup
   let excelTemplate = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://w3.org">';
   excelTemplate += '<head><meta charset="UTF-8">';
   excelTemplate += '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Facilities Backup</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
@@ -65,105 +65,127 @@ function exportToExcel() {
   excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
   excelTemplate += '</tr></thead><tbody>';
 
-  // Find the exact outer grid containers on your dashboard
-  // This targets your active grid rows directly by looking at common framework wrappers
-  const cards = Array.from(document.querySelectorAll('.facility-row, [class*="row"], .panel-body > div > div')).filter(el => {
-    return el.innerText && el.innerText.includes('View Logs') && !el.innerText.includes('Download Excel');
+  // Find the exact outer list element wrapper
+  const container = document.getElementById('panel-facilities') || document.getElementById('facilities-list') || document.body;
+  
+  // Find all nested child divs inside that main panel space
+  const allDivs = Array.from(container.querySelectorAll('div'));
+  
+  // Filter out any div that contains a "View Logs" button panel to target the true data card items
+  const cards = allDivs.filter(el => {
+    // Make sure it contains a View Logs string but isn't a massive outer dashboard wrapper container itself
+    return el.innerText && el.innerText.includes('View Logs') && el.innerText.includes('Programs:') && el.children.length < 25;
   });
 
-  if (cards.length === 0) {
-    alert('No active rows detected. Please ensure the dashboard directory has fully loaded.');
+  // If the filter is too aggressive, fall back to finding all explicit View Logs text containers directly
+  let finalCards = cards;
+  if (finalCards.length === 0) {
+    // Alternative universal lookup step
+    const viewLogsButtons = Array.from(document.querySelectorAll('div, button')).filter(el => el.innerText === 'View Logs');
+    finalCards = viewLogsButtons.map(btn => btn.closest('div[class*="row"], div[style*="flex"], div[style*="grid"]') || btn.parentElement?.parentElement).filter(Boolean);
+  }
+
+  // Deduplicate our card collection list array 
+  finalCards = Array.from(new Set(finalCards));
+
+  if (finalCards.length === 0) {
+    alert('Data rows could not be isolated. Please ensure the workspace directory data has fully loaded on screen.');
     return;
   }
 
-  cards.forEach(card => {
+  finalCards.forEach(card => {
     excelTemplate += '<tr>';
 
     // --- COLUMN 1: FACILITY INFO ---
-    // Targets the bold facility header text, address, and phone number block
-    const facName = card.querySelector('h3, h4, h5, [class*="title"], [class*="name"]')?.innerText.trim() || 'Aviva Senior Living';
+    // Reads text values from the bold Title or the leftmost text block layout space
+    const facNameElement = card.querySelector('h1, h2, h3, h4, h5, strong, [class*="title"], [class*="name"]');
+    const facName = facNameElement ? facNameElement.innerText.trim() : 'Facility Record';
     
-    // Find text nodes or labels containing location markers
+    // Scrape phone and address profiles lines
     let facDetails = [];
     card.querySelectorAll('p, span, div').forEach(node => {
-      if (node.innerText && (node.innerText.match(/\d{4}/) || node.innerText.match(/\d{9}/))) {
-        facDetails.push(node.innerText.trim());
+      const txt = node.innerText?.trim() || '';
+      // Matches street zip codes or multi-digit phone tracking text strings
+      if (txt && (txt.match(/\d{4}/) || txt.match(/\d{7}/)) && !txt.includes('Email') && !txt.includes('Primary')) {
+        if (!facDetails.includes(txt) && txt.length < 60) facDetails.push(txt);
       }
     });
     const col1Data = facName + (facDetails.length > 0 ? '<br>' + facDetails.join('<br>') : '');
 
 
     // --- COLUMN 2: CONTACTS MATRIX ---
-    // Explicitly pulls text inputs by tracking their adjacent visual label tags
+    // Targets your multi-box text parameters matching label items exactly
     let primaryName = '';
     let primaryEmail = '';
     let secondName = '';
     let secondEmail = '';
 
-    const allInputs = Array.from(card.querySelectorAll('input[type="text"], input[type="email"]'));
-    
-    allInputs.forEach(inp => {
-      const placeholder = inp.placeholder?.toLowerCase() || '';
-      const nameAttr = inp.name?.toLowerCase() || '';
-      const labelText = inp.parentElement?.innerText?.toLowerCase() || '';
+    card.querySelectorAll('input').forEach(inp => {
+      const val = inp.value ? inp.value.trim() : '';
+      if (!val) return;
+      
+      const pText = inp.parentElement?.innerText || '';
+      const prevText = inp.previousElementSibling?.innerText || '';
+      const combinedContext = (pText + ' ' + prevText).toLowerCase();
 
-      if (placeholder.includes('name') || nameAttr.includes('primary') || labelText.includes('primary')) {
-        if (!primaryName) primaryName = inp.value.trim();
-        else if (!secondName) secondName = inp.value.trim();
-      }
-      if (placeholder.includes('email') || inp.type === 'email' || nameAttr.includes('email')) {
-        if (!primaryEmail) primaryEmail = inp.value.trim();
-        else if (!secondEmail) secondEmail = inp.value.trim();
+      if (combinedContext.includes('primary') && !combinedContext.includes('email')) {
+        primaryName = val;
+      } else if (combinedContext.includes('primary') && combinedContext.includes('email')) {
+        primaryEmail = val;
+      } else if (combinedContext.includes('second') && !combinedContext.includes('email')) {
+        secondName = val;
+      } else if (combinedContext.includes('second') && combinedContext.includes('email')) {
+        secondEmail = val;
       }
     });
 
+    // Final structural layout string mapping for contact column cells
     const col2Data = `Primary: ${primaryName}<br>Email: ${primaryEmail}<br>Second: ${secondName}<br>Email: ${secondEmail}`;
 
 
     // --- COLUMN 3: SERIES SUBSCRIBED ---
-    // Targets the active dynamic text string (e.g., "GI 1, MM") inside your programs badge line
+    // Parses text strings matching the Programs: label text layout string template line
     let seriesText = '';
-    card.querySelectorAll('div, span, p').forEach(el => {
+    card.querySelectorAll('div, span, p, label').forEach(el => {
       if (el.innerText && el.innerText.includes('Programs:')) {
         seriesText = el.innerText.replace('Programs:', '').trim();
       }
     });
-    // Fallback to dropdown button text if badge string is empty
     if (!seriesText) {
-      const seriesButton = card.querySelector('button, select, [class*="dropdown"]');
-      seriesText = seriesButton ? seriesButton.innerText.trim() : '';
+      const programSelect = card.querySelector('select[name*="series"], [class*="program"]');
+      seriesText = programSelect ? programSelect.innerText.trim() : 'MM';
     }
 
 
     // --- COLUMN 4: CONTRACT STATUS ---
-    // Scrapes your Sent/Signed dates and pairs them cleanly together
+    // Reads out your multi-line schedule tracking calendars input boxes values directly
     let sentDate = '';
     let signedDate = '';
-    card.querySelectorAll('input[type="date"], input[placeholder*="yy"]').forEach(dt => {
-      const parentTxt = dt.parentElement?.innerText || '';
-      if (parentTxt.includes('Sent')) sentDate = dt.value || 'mm/dd/yyyy';
-      if (parentTxt.includes('Signed')) signedDate = dt.value || 'mm/dd/yyyy';
+    card.querySelectorAll('input').forEach(dt => {
+      const pText = dt.parentElement?.innerText || '';
+      if (pText.includes('Sent')) sentDate = dt.value || 'mm/dd/yyyy';
+      if (pText.includes('Signed')) signedDate = dt.value || 'mm/dd/yyyy';
     });
     const col4Data = `Sent: ${sentDate}<br>Signed: ${signedDate}`;
 
 
     // --- COLUMN 5: INVOICE & PAYMENT LEDGER ---
-    // Grabs active text inside your color-coded status selection menu option
+    // Targets status option string values inside the dynamic dropdown list menu box element
     const statusSelect = card.querySelector('select');
     const statusVal = statusSelect ? statusSelect.options[statusSelect.selectedIndex]?.text.trim() : 'Paid in Full';
     
     let invSent = '';
     let chkRecd = '';
-    card.querySelectorAll('input[type="date"]').forEach(dt => {
-      const parentTxt = dt.parentElement?.innerText || '';
-      if (parentTxt.includes('Inv Sent')) invSent = dt.value || '';
-      if (parentTxt.includes('Chk Rec\'d')) chkRecd = dt.value || '';
+    card.querySelectorAll('input').forEach(dt => {
+      const pText = dt.parentElement?.innerText || '';
+      if (pText.includes('Inv Sent')) invSent = dt.value || '';
+      if (pText.includes('Chk Rec\'d')) chkRecd = dt.value || '';
     });
     
     const col5Data = `Inv Sent: ${invSent}<br>Chk Rec'd: ${chkRecd}<br>Status: ${statusVal}`;
 
 
-    // --- RECORD GENERATED MATRIX DATA CELL LINE ---
+    // --- APPEND EVERYTHING TRULY SYNCHRONIZED ---
     excelTemplate += `<td>${col1Data}</td>`;
     excelTemplate += `<td>${col2Data}</td>`;
     excelTemplate += `<td>${seriesText}</td>`;
@@ -175,7 +197,7 @@ function exportToExcel() {
 
   excelTemplate += '</tbody></table></body></html>';
 
-  // 4. Force browser system backup layout file download
+  // 4. Trigger download save mechanism execution process workflow
   const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
