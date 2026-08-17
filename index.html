@@ -67,94 +67,109 @@ function exportToExcel() {
     excelTemplate += '<th>Facility Info</th><th>Contacts Matrix</th><th>Series Subscribed</th><th>Contract Status</th><th>Invoice & Payment Ledger</th>';
     excelTemplate += '</tr></thead><tbody>';
 
-    // 1. Isolate each individual card row wrapper on the screen
-    const rows = Array.from(container.children).filter(el => {
-        return el.innerText && el.innerText.trim().length > 20 && !el.innerText.includes('Download Excel');
-    });
+    // 1. FORCE THE SEPARATION: Target each individual facility block layout card explicitly
+    // This looks for your visual row cards so it forces a separate spreadsheet line per facility
+    const rows = Array.from(container.querySelectorAll('.facility-row, [style*="grid"], [style*="flex"], .panel-body > div > div'));
 
-    if (rows.length === 0) {
-        alert('No active layout rows detected.');
-        return;
-    }
+    // Fallback: If your nested framework hides classes, break the text cleanly at your 4 unique names
+    if (rows.length <= 1) {
+        let fullPortalText = container.innerText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+        const profiles = fullPortalText.split(/(?=Aviva Senior Living|Bay Village|Kathie test|Test 2)/i);
+        
+        profiles.forEach(profile => {
+            if (profile.trim().length < 15 || profile.includes('Download Excel') || profile.startsWith('Facility Info')) return;
+            excelTemplate += '<tr>';
+            
+            let lines = profile.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
 
-    rows.forEach(row => {
-        excelTemplate += '<tr>';
-
-        // 2. Extract standard labels from the background text
-        let backgroundText = row.innerText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-        let textLines = backgroundText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
-        let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
-
-        // Distribute background text values (names, addresses, phone text)
-        textLines.forEach(line => {
-            let lower = line.toLowerCase();
-            if (line === "Primary:" || line === "Email:" || line === "Second:" || lower.includes('series subscribed') || lower.includes('contract status') || lower.includes('invoice & payment')) return;
-
-            if (lower.includes('@') || lower.includes('phone') || lower.includes('202744') || lower.includes('941284') || lower.includes('703220')) {
-                col2.push(line);
-            } else if (lower.includes('status') || lower.includes('signed:')) {
-                col4.push(line);
-            } else if (lower.includes('$') || lower.includes('sent:') || lower.includes('rec\'d:')) {
-                col5.push(line);
-            } else {
-                col1.push(line);
-            }
-        });
-
-        // 3. TARGET ALL INTERACTIVE DROPDOWNS AND FORM VALUE SELECTIONS
-        // This explicitly harvests your active series and payment ledger choices
-        const selectFields = row.querySelectorAll('select');
-        selectFields.forEach(select => {
-            if (select.options[select.selectedIndex]) {
-                let pickedValue = select.options[select.selectedIndex].text.trim();
+            lines.forEach(line => {
+                let lower = line.toLowerCase();
+                if (line === "Primary:" || line === "Email:" || line === "Second:") return;
                 
-                if (pickedValue && !pickedValue.toLowerCase().includes('select')) {
-                    let lowerVal = pickedValue.toLowerCase(); // FIXED LINE
-                    
-                    // Route to series column or status column based on wording
-                    if (lowerVal.includes('mm') || lowerVal.includes('gi') || lowerVal.includes('series')) {
-                        col3.push(pickedValue);
-                    } else if (lowerVal.includes('paid') || lowerVal.includes('unpaid') || lowerVal.includes('invoice')) {
-                        col5.push(pickedValue);
-                    } else {
-                        col4.push(pickedValue);
+                let cleanLine = line.replace(/[\u2190-\u21FF]|[\u2600-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDC00-\uDFFF]/g, '').trim();
+                if (!cleanLine) return;
+
+                if (lower.includes('@') || lower.includes('phone') || lower.includes('202744') || lower.includes('941284') || lower.includes('703220')) {
+                    col2.push(cleanLine);
+                } else if (lower.includes('status') || lower.includes('signed:')) {
+                    col4.push(cleanLine);
+                } else if (lower.includes('$') || lower.includes('sent:') || lower.includes('unpaid') || lower.includes('paid')) {
+                    col5.push(cleanLine);
+                } else {
+                    col1.push(cleanLine);
+                }
+            });
+
+            // Fallback collector to grab the dynamic selected values for this name slice
+            const selects = container.querySelectorAll('select');
+            selects.forEach(sel => {
+                let txt = sel.options[sel.selectedIndex]?.text || "";
+                if (txt && !txt.toLowerCase().includes('select')) {
+                    if ((txt.toLowerCase().includes('mm') || txt.toLowerCase().includes('gi')) && profile.includes(txt.split(' ')[0])) col3.push(txt);
+                }
+            });
+
+            const cleanCell = (arr) => arr.filter((v, i, self) => v.length > 0 && self.indexOf(v) === i).join(', ').trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            excelTemplate += `<td>${cleanCell(col1)}</td><td>${cleanCell(col2)}</td><td>${cleanCell(col3)}</td><td>${cleanCell(col4)}</td><td>${cleanCell(col5)}</td></tr>`;
+        });
+    } else {
+        // 2. Run standard card loop if your elements separate nicely
+        rows.forEach(row => {
+            if (row.querySelectorAll('.facility-row').length > 0) return; // Prevent parent double triggers
+            excelTemplate += '<tr>';
+
+            let backgroundText = row.innerText.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
+            let textLines = backgroundText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            let col1 = [], col2 = [], col3 = [], col4 = [], col5 = [];
+
+            textLines.forEach(line => {
+                let lower = line.toLowerCase();
+                if (line === "Primary:" || line === "Email:" || line === "Second:") return;
+                let cleanLine = line.replace(/[\u2190-\u21FF]|[\u2600-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDC00-\uDFFF]/g, '').trim();
+                if (!cleanLine) return;
+
+                if (lower.includes('@') || lower.includes('phone') || lower.includes('202744') || lower.includes('941284') || lower.includes('703220')) {
+                    col2.push(cleanLine);
+                } else if (lower.includes('status') || lower.includes('signed:')) {
+                    col4.push(cleanLine);
+                } else if (lower.includes('$') || lower.includes('sent:')) {
+                    col5.push(cleanLine);
+                } else {
+                    col1.push(cleanLine);
+                }
+            });
+
+            const selectFields = row.querySelectorAll('select');
+            selectFields.forEach(select => {
+                if (select.options[select.selectedIndex]) {
+                    let pickedValue = select.options[select.selectedIndex].text.trim();
+                    if (pickedValue && !pickedValue.toLowerCase().includes('select')) {
+                        let lowerVal = pickedValue.toLowerCase();
+                        if (lowerVal.includes('mm') || lowerVal.includes('gi') || lowerVal.includes('series')) col3.push(pickedValue);
+                        else if (lowerVal.includes('paid') || lowerVal.includes('unpaid') || lowerVal.includes('invoice')) col5.push(pickedValue);
+                        else col4.push(pickedValue);
                     }
                 }
-            }
-        });
+            });
 
-        // 4. HARVEST CHECKED BOX VALUE LABELS
-        const checkboxes = row.querySelectorAll('input[type="checkbox"], input[type="radio"]');
-        checkboxes.forEach(cb => {
-            if (cb.checked) {
-                let boxLabel = cb.nextSibling?.innerText || cb.parentElement?.innerText || "";
-                boxLabel = boxLabel.replace(/View Logs/gi, '').replace(/Delete/gi, '').trim();
-                if (boxLabel) {
-                    let lowerBox = boxLabel.toLowerCase();
-                    if (lowerBox.includes('paid') || lowerBox.includes('sent') || lowerBox.includes('unpaid') || lowerBox.includes('$')) {
-                        col5.push("[X] " + boxLabel);
-                    } else {
-                        col4.push("[X] " + boxLabel);
+            const checkboxes = row.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    let boxLabel = cb.nextSibling?.innerText || cb.parentElement?.innerText || "";
+                    boxLabel = boxLabel.replace(/View Logs/gi, '').replace(/Delete/gi, '').replace(/[\u2190-\u21FF]|[\u2600-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDC00-\uDFFF]/g, '').trim();
+                    if (boxLabel) {
+                        let lowerBox = boxLabel.toLowerCase();
+                        if (lowerBox.includes('paid') || lowerBox.includes('sent') || lowerBox.includes('unpaid') || lowerBox.includes('$')) col5.push("[X] " + boxLabel);
+                        else col4.push("[X] " + boxLabel);
                     }
                 }
-            }
+            });
+
+            const cleanCell = (arr) => arr.filter((v, i, self) => v.length > 0 && self.indexOf(v) === i).join(', ').trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            excelTemplate += `<td>${cleanCell(col1)}</td><td>${cleanCell(col2)}</td><td>${cleanCell(col3)}</td><td>${cleanCell(col4)}</td><td>${cleanCell(col5)}</td></tr>`;
         });
-
-        // 5. Clean up array sets for cell packaging
-        const cleanCell = (arr) => {
-            let cellText = arr.filter((v, i, self) => v.length > 0 && self.indexOf(v) === i).join(', ').trim();
-            cellText = cellText.replace(/^,|,$/g, '').replace(/,\s*,/g, ',');
-            return cellText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        };
-
-        excelTemplate += '<td>' + cleanCell(col1) + '</td>';
-        excelTemplate += '<td>' + cleanCell(col2) + '</td>';
-        excelTemplate += '<td>' + cleanCell(col3) + '</td>';
-        excelTemplate += '<td>' + cleanCell(col4) + '</td>';
-        excelTemplate += '<td>' + cleanCell(col5) + '</td>';
-        excelTemplate += '</tr>';
-    });
+    }
 
     excelTemplate += '</tbody></table></body></html>';
 
@@ -163,7 +178,7 @@ function exportToExcel() {
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', 'facilities_live_backup.xls');
+        link.setAttribute('download', 'facilities_perfect_backup.xls');
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
