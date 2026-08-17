@@ -55,111 +55,136 @@
             10px 20px; background-color: #217346; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">📊 Download Excel Backup</button>
 <script>
 function exportToExcel() {
-  // 1. Structural Microsoft Excel XML layout parameters configuration
+  // 1. Establish core Microsoft XML spreadsheet environment configurations
   let excelTemplate = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://w3.org">';
   excelTemplate += '<head><meta charset="UTF-8">';
-  excelTemplate += '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Facilities Ledger Backup</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+  excelTemplate += '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Backup Ledger</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
   excelTemplate += '<style>td { vertical-align: top; padding: 10px; border: 1px solid #ccc; mso-number-format:"\\@"; white-space: normal; }</style></head><body>';
   excelTemplate += '<table border="1"><thead>';
   excelTemplate += '<tr style="background-color: #0070c0; color: white; font-weight: bold;">';
   excelTemplate += '<th>Facility Info & Addresses</th><th>Contacts Matrix</th><th>Series Subscribed (GI 1 / GI 2 / MM)</th><th>Contract Tracking Status</th><th>Invoice & Payment Ledger Status</th>';
   excelTemplate += '</tr></thead><tbody>';
 
-  // Find all facility entries. We extract them via the text fingerprint "View Logs" 
-  const allElements = Array.from(document.querySelectorAll('div, tr, li, .facility-row, .card'));
+  // 2. Safely find the master card blocks by targeting individual panel divs
+  // This looks for elements that explicitly contain a "View Logs" dashboard action button
+  const allElements = Array.from(document.querySelectorAll('div, tr, li, [style*="flex"], [style*="grid"]'));
   const cards = allElements.filter(el => {
-    return el.innerText && el.innerText.includes('View Logs') && el.innerText.includes('Inv Sent') && el.children.length < 25;
+    return el.innerText && el.innerText.includes('View Logs') && el.innerText.includes('Inv Sent') && el.children.length < 20;
   });
 
   if (cards.length === 0) {
-    alert('Data source rows could not be found. Please ensure your 13 facilities are fully loaded visible on the dashboard panel before exporting.');
+    alert('Data grid rows could not be found. Please ensure the dashboard is fully loaded.');
     return;
   }
 
   cards.forEach(card => {
     excelTemplate += '<tr>';
 
-    // --- STRATEGY: COMPRESS MULTI-LINE FIELDS TO ELIMINATE EXCEL ROW DRIFT ---
-    
+    // Collect all input elements inside THIS specific card only to prevent data bleeding
+    const rowInputs = Array.from(card.querySelectorAll('input'));
+    const rowSelects = Array.from(card.querySelectorAll('select'));
+
     // --- COLUMN 1: FACILITY INFO ---
-    // Safely reads the master text and formats all address components side-by-side using horizontal spacing
-    const facHeader = card.querySelector('h1, h2, h3, h4, h5, strong, [class*="title"], [class*="name"]')?.innerText.trim() || 'Facility Record';
+    // Targets the standalone bold heading inside the card panel boundary
+    const titleElement = card.querySelector('h1, h2, h3, h4, h5, strong, b');
+    let facilityName = titleElement ? titleElement.innerText.trim() : '';
     
-    let infoLines = [];
-    card.querySelectorAll('p, span, div').forEach(node => {
-      const text = node.innerText?.trim() || '';
-      // Grab strings containing numbers (street addresses, ZIP codes, telephone tracking metrics)
-      if (text && (text.match(/\d{3}/) || text.match(/\d-?/)) && !text.includes('Email') && !text.includes('Primary') && !text.includes('Status') && !text.includes('Inv') && text.length < 60) {
-        if (!infoLines.includes(text) && text !== facHeader) infoLines.push(text);
-      }
-    });
-    // Join details with flat spaces instead of vertical elements so Excel stays completely aligned
-    const col1Data = `${facHeader} — ${infoLines.join(', ')}`;
+    // Clean up dashboard text remnants from the facility name title
+    facilityName = facilityName.replace(/View logs/gi, '').replace(/Delete/gi, '').trim();
+    if (!facilityName || facilityName.length > 50) {
+      facilityName = 'Facility Record';
+    }
+
+    // Capture the first typed address value from your inputs
+    let textFields = rowInputs.filter(inp => inp.type === 'text' && inp.value);
+    let streetAddress = '';
+    
+    // Look for standard zip/street pattern characters in the inputs
+    const addressMatch = textFields.find(inp => inp.value.match(/\d/) && !inp.value.includes('@'));
+    if (addressMatch) {
+      streetAddress = addressMatch.value.trim();
+    }
+
+    const col1Data = streetAddress ? `${facilityName} — ${streetAddress}` : facilityName;
 
 
     // --- COLUMN 2: CONTACTS MATRIX ---
-    // Grabs active strings directly from the live interactive text boxes 
-    let pName = '', pEmail = '', sName = '', sEmail = '';
-    card.querySelectorAll('input').forEach(inp => {
-      const value = inp.value ? inp.value.trim() : '';
-      if (!value) return;
-      
-      const parentLabel = (inp.parentElement?.innerText || '').toLowerCase();
-      const placeholder = (inp.placeholder || '').toLowerCase();
-      const context = parentLabel + ' ' + placeholder;
-
-      if (context.includes('primary') && !context.includes('email')) pName = value;
-      else if ((context.includes('primary') || inp.type === 'email') && context.includes('email')) pEmail = value;
-      else if (context.includes('second') && !context.includes('email')) sName = value;
-      else if (context.includes('second') && context.includes('email')) sEmail = value;
+    // Targets your primary and secondary text inputs cleanly by filtering out dates and email fields
+    const contactInputs = rowInputs.filter(inp => {
+      const isDate = inp.type === 'date' || inp.placeholder?.includes('yy') || inp.value?.includes('-');
+      const isCheck = inp.type === 'checkbox' || inp.type === 'radio';
+      return !isDate && !isCheck;
     });
+
+    let pName = '', pEmail = '', sName = '', sEmail = '';
+
+    // Step through fields sequentially based on how they sit on your screen layout
+    contactInputs.forEach(inp => {
+      const val = inp.value.trim();
+      if (!val) return;
+
+      if (val.includes('@')) {
+        if (!pEmail) pEmail = val;
+        else if (!sEmail) sEmail = val;
+      } else {
+        // Exclude matched street address fields from the contact profile strings
+        if (val !== streetAddress && !val.match(/^\d{5}$/)) {
+          if (!pName) pName = val;
+          else if (!sName) sName = val;
+        }
+      }
+    });
+
     const col2Data = `Primary: ${pName} (${pEmail}) | Secondary: ${sName} (${sEmail})`;
 
 
     // --- COLUMN 3: SERIES SUBSCRIBED ---
-    // Explicitly targets the core scheduling tokens: GI 1, GI 2, or MM
+    // Looks for your dynamic schedule indicators (GI 1, GI 2, or MM) directly inside the text area
     let activeSeries = 'Not Selected';
     const cardText = card.innerText || '';
+    
     if (cardText.includes('GI 1')) activeSeries = 'GI 1';
     else if (cardText.includes('GI 2')) activeSeries = 'GI 2';
     else if (cardText.includes('MM')) activeSeries = 'MM';
-    
-    // Look for a custom dropdown choice override if text badges are missing
-    const programDropdown = card.querySelector('select[name*="series"], [class*="program"]');
-    if (programDropdown && programDropdown.selectedIndex !== -1) {
-      activeSeries = programDropdown.options[programDropdown.selectedIndex].text.trim();
+
+    // Check if a select box choice overrides the background string labels
+    if (rowSelects.length > 0) {
+      const seriesSelect = rowSelects.find(s => s.innerText.includes('GI') || s.innerText.includes('MM'));
+      if (seriesSelect && seriesSelect.selectedIndex !== -1) {
+        activeSeries = seriesSelect.options[seriesSelect.selectedIndex].text.trim();
+      }
     }
     const col3Data = activeSeries;
 
 
     // --- COLUMN 4: CONTRACT STATUS ---
-    // Isolates the precise administrative pipeline dates
-    let sentDate = 'mm/dd/yyyy';
-    let signedDate = 'mm/dd/yyyy';
-    card.querySelectorAll('input').forEach(inputField => {
-      const parentContext = (inputField.parentElement?.innerText || '');
-      if (parentContext.includes('Sent')) sentDate = inputField.value || 'mm/dd/yyyy';
-      if (parentContext.includes('Signed')) signedDate = inputField.value || 'mm/dd/yyyy';
-    });
+    // Isolates the first pair of administrative dashboard calendar inputs
+    const dateInputs = rowInputs.filter(inp => inp.type === 'date' || inp.value.match(/^\d{4}-\d{2}-\d{2}$/));
+    
+    const sentDate = dateInputs[0] ? dateInputs[0].value : 'mm/dd/yyyy';
+    const signedDate = dateInputs[1] ? dateInputs[1].value : 'mm/dd/yyyy';
     const col4Data = `Sent: ${sentDate} | Signed: ${signedDate}`;
 
 
     // --- COLUMN 5: INVOICE & PAYMENT LEDGER ---
-    // Captures view-only ledger records, balance statements, and payment settings dropdowns
-    const ledgerSelect = card.querySelector('select');
-    const paymentDropdownStatus = ledgerSelect ? ledgerSelect.options[ledgerSelect.selectedIndex]?.text.trim() : 'Paid in Full';
+    // Reads out your invoicing schedule dates and matches them with your ledger selection boxes
+    const invSentDate = dateInputs[2] ? dateInputs[2].value : 'N/A';
+    const chkRecdDate = dateInputs[3] ? dateInputs[3].value : 'N/A';
     
-    let invSentDate = 'N/A';
-    let chkRecdDate = 'N/A';
-    card.querySelectorAll('input').forEach(inputField => {
-      const parentContext = (inputField.parentElement?.innerText || '');
-      if (parentContext.includes('Inv Sent')) invSentDate = inputField.value || 'N/A';
-      if (parentContext.includes('Chk Rec\'d')) chkRecdDate = inputField.value || 'N/A';
-    });
-    const col5Data = `Inv Sent: ${invSentDate} | Received: ${chkRecdDate} | Status: ${paymentDropdownStatus}`;
+    // Safely reads the text value from your active ledger selection dropdown box
+    let ledgerStatus = 'Paid in Full';
+    if (rowSelects.length > 0) {
+      // Grabs the last dropdown element in the card (where the payment settings sit)
+      const finalSelect = rowSelects[rowSelects.length - 1];
+      if (finalSelect && finalSelect.selectedIndex !== -1) {
+        ledgerStatus = finalSelect.options[finalSelect.selectedIndex].text.trim();
+      }
+    }
+
+    const col5Data = `Inv Sent: ${invSentDate} | Received: ${chkRecdDate} | Status: ${ledgerStatus}`;
 
 
-    // --- WRITE COMPACTED STABLE ROWS TO EXCEL OUTPUT ---
+    // --- MOUNT SOLID CELL STRINGS SECURELY ---
     excelTemplate += `<td>${col1Data}</td>`;
     excelTemplate += `<td>${col2Data}</td>`;
     excelTemplate += `<td style="text-align: center; font-weight: bold;">${col3Data}</td>`;
@@ -170,7 +195,7 @@ function exportToExcel() {
 
   excelTemplate += '</tbody></table></body></html>';
 
-  // 4. Instantiate immediate secure browser export execution flow
+  // 4. Instantiate immediate local browser backup utility download
   const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
