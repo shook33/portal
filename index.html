@@ -553,13 +553,8 @@ function loadDataFromCloud() {
                 const isPaid = fac.payment_status === "Paid" || fac.payment_status === "Paid in Full";
                 const isHalf = fac.payment_status === "Half Paid" || fac.payment_status === "Half Payment";
                 let badgeStyle = isPaid ? "background:#dcfce7;color:#15803d;" : (isHalf ? "background:#fef9c3;color:#a16207;" : "background:#fee2e2;color:#ef4444;");
-                tableHTML += `<tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 14px 18px; vertical-align: middle;">
-                        <div style="font-weight: 800; font-size: 1.25rem !important; color: #0369a1; line-height: 1.3;">🏢 ${fac.name}</div>
- <div style="font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 500;">📍 ${fac.address || 'No Address'}</div>
- <div style="font-size: 12px; color: #475569; margin-top: 2px; font-weight: 600;">📞 ${fac.phone || 'No Phone'}</div>
+tableHTML += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 14px 18px; vertical-align: middle;"><input type="text" value="${fac.name}" data-field="name" style="font-size: 1.25rem !important; font-weight: 800; color: #0369a1; line-height: 1.3; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%; padding: 2px 4px; margin-bottom: 4px; background: transparent;"><textarea data-field="address" style="font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 500; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%; padding: 2px 4px; resize: none; background: transparent; height: 42px;">${fac.address || ''}</textarea><input type="text" value="${fac.phone || ''}" data-field="phone" style="font-size: 12px; color: #475569; margin-top: 2px; font-weight: 600; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%; padding: 2px 4px; background: transparent;"></td>`
 
-                    </td>
                                     <td style="padding: 14px 18px; vertical-align: middle;">
                         <div style="display:flex; flex-direction:column; gap:6px;">
                             <!-- Primary Representative Cluster Box -->
