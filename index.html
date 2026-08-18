@@ -547,53 +547,31 @@ function loadDataFromCloud() {
             mockLeads.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
             const isReadonly = userRole === "board" ? "readonly disabled style='background:#f1f5f9; color:#64748b; cursor:not-allowed;'" : "";
             
-                // Render Facilities Table (Restored to Original Flat Workspace Theme)
-        let tableHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px; margin-bottom: 24px;"><table style="width: 100%; border-collapse: collapse;">`;
+              // Render Facilities Table (Flat Clean Mode)
+        let tableHTML = '<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px; margin-bottom: 24px;"><table style="width: 100%; border-collapse: collapse;">';
         mockFacilities.forEach(fac => {
             const isPaid = fac.payment_status === "Paid" || fac.payment_status === "Paid in Full";
             const isHalf = fac.payment_status === "Half Paid" || fac.payment_status === "Half Payment";
             let badgeStyle = isPaid ? "background:#dcfce7;color:#15803d;" : (isHalf ? "background:#fef9c3;color:#a16207;" : "background:#fee2e2;color:#ef4444;");
             
-            tableHTML += `<tr style="border-bottom: 1px solid #e2e8f0;">
-                <!-- Section 1: Facility Info Column -->
-                <td style="padding: 14px 18px; vertical-align: top; width: 220px;">
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <div style="display: flex; align-items: center; gap: 4px;">
-                            <span style="font-size: 1.25rem; font-weight: 800; color: #0369a1;">🏢</span>
-                            <input type="text" value="${fac.name}" data-field="name" style="font-size: 1.25rem !important; font-weight: 800; color: #0369a1; border: none; background: transparent; width: 100%; padding: 0; margin: 0; outline: none; font-family: inherit;">
-                        </div>
-                        <div style="display: flex; align-items: flex-start; gap: 4px;">
-                            <span style="font-size: 13px; color: #64748b; margin-top: 2px;">📍</span>
-                            <textarea data-field="address" style="font-size: 13px; color: #64748b; font-weight: 500; border: none; background: transparent; width: 100%; padding: 0; margin: 0; outline: none; resize: none; height: 38px; font-family: inherit; line-height: 1.3;">${fac.address || ''}</textarea>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 4px;">
-                            <span style="font-size: 12px; color: #475569;">📞</span>
-                            <input type="text" value="${fac.phone || ''}" data-field="phone" style="font-size: 12px; color: #475569; font-weight: 600; border: none; background: transparent; width: 100%; padding: 0; margin: 0; outline: none; font-family: inherit;">
-                        </div>
-                    </div>
-                </td>
+            tableHTML += '<tr style="border-bottom: 1px solid #e2e8f0;">';
+            tableHTML += '<td style="padding: 14px 18px; vertical-align: top; width: 220px;">';
+            tableHTML += '<div style="display: flex; flex-direction: column; gap: 4px;">';
+            tableHTML += '<div style="display: flex; align-items: center; gap: 4px;"><span style="font-size: 1.25rem; font-weight: 800; color: #0369a1;">🏢</span><input type="text" value="' + fac.name + '" data-field="name" style="font-size: 1.25rem !important; font-weight: 800; color: #0369a1; border: none; background: transparent; width: 100%; padding: 0; margin: 0; outline: none; font-family: inherit;"></div>';
+            tableHTML += '<div style="display: flex; align-items: flex-start; gap: 4px;"><span style="font-size: 13px; color: #64748b; margin-top: 2px;">📍</span><textarea data-field="address" style="font-size: 13px; color: #64748b; font-weight: 500; border: none; background: transparent; width: 100%; padding: 0; margin: 0; outline: none; resize: none; height: 38px; font-family: inherit; line-height: 1.3;">' + (fac.address || '') + '</textarea></div>';
+            tableHTML += '<div style="display: flex; align-items: center; gap: 4px;"><span style="font-size: 12px; color: #475569;">📞</span><input type="text" value="' + (fac.phone || '') + '" data-field="phone" style="font-size: 12px; color: #475569; font-weight: 600; border: none; background: transparent; width: 100%; padding: 0; margin: 0; outline: none; font-family: inherit;"></div>';
+            tableHTML += '</div></td>';
+            tableHTML += '<td style="padding: 14px 18px; vertical-align: middle; width: 210px;">';
+            tableHTML += '<div style="display:flex; flex-direction:column; gap:6px;">';
+            tableHTML += '<div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;"><div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#0369a1; width:52px;">Primary:</span> ' + (fac.primary_rep || 'None') + '</div><div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">Email:</span> ' + (fac.primary_email || 'None') + '</div></div>';
+            tableHTML += '<div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;"><div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#475569; width:52px;">Second:</span> ' + (fac.secondary_rep || 'None') + '</div><div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">Email:</span> ' + (fac.secondary_email || 'None') + '</div></div>';
+            tableHTML += '</div></td>';
+            tableHTML += '<td style="padding: 14px 18px; vertical-align: middle; width: 175px;">';
+            tableHTML += '<select style="font-size: 13px !important; padding: 6px 8px; font-weight: 700; border-radius: 4px; border: 1px solid #cbd5e1; width: 100%; color: #334155; background: #ffffff;" onchange="const matched = mockFacilities.find(f => f.id === \'' + fac.id + '\'); if (matched) { matched.series_count = this.value; matched.series = this.value === \'2\' ? \'GI 1, MM\' : \'MM\'; saveDataToCloud(); renderDashboard(); }">';
+            tableHTML += '<option value="1" ' + (fac.series_count === '1' || fac.series === 'MM' ? 'selected' : '') + '>1 Series ($1,500)</option>';
+            tableHTML += '<option value="2" ' + (fac.series_count === '2' || fac.series !== 'MM' ? 'selected' : '') + '>2 Series ($2,300)</option>';
+            tableHTML += '</select></td>';
 
-                <!-- Section 2: Contacts Matrix Column -->
-                <td style="padding: 14px 18px; vertical-align: middle; width: 210px;">
-                    <div style="display:flex; flex-direction:column; gap:6px;">
-                        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;">
-                            <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#0369a1; width:52px;">Primary:</span> ${fac.primary_rep || 'None'}</div>
-                            <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">Email:</span> ${fac.primary_email || 'None'}</div>
-                        </div>
-                        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;">
-                            <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#475569; width:52px;">Second:</span> ${fac.secondary_rep || 'None'}</div>
-                            <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">Email:</span> ${fac.secondary_email || 'None'}</div>
-                        </div>
-                    </div>
-                </td>
-
-                <!-- Section 3: Series Subscribed Column -->
-                <td style="padding: 14px 18px; vertical-align: middle; width: 175px;">
-                    <select style="font-size: 13px !important; padding: 6px 8px; font-weight: 700; border-radius: 4px; border: 1px solid #cbd5e1; width: 100%; color: #334155; background: #ffffff;" onchange="const matched = mockFacilities.find(f => f.id === '${fac.id}'); if (matched) { matched.series_count = this.value; matched.series = this.value === '2' ? 'GI 1, MM' : 'MM'; saveDataToCloud(); renderDashboard(); }">
-                        <option value="1" ${fac.series_count === '1' || fac.series === 'MM' ? 'selected' : ''}>1 Series ($1,500)</option>
-                        <option value="2" ${fac.series_count === '2' || fac.series !== 'MM' ? 'selected' : ''}>2 Series ($2,300)</option>
-                    </select>
-                </td>`;
 
                      <!-- 📋 Combined Contract Milestones Box: Sent & Signed Tracking -->
                     <td style="padding: 14px 18px; vertical-align: middle;">
