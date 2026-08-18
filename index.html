@@ -587,13 +587,14 @@ function loadDataFromCloud() {
                     </div>
                 </td>
 
-                <!-- Column 3: Series Dropdown Selection -->
+                            <!-- Column 3: Series Dropdown Selection -->
                 <td style="padding: 14px 18px; vertical-align: middle; width: 175px;">
                     <select style="font-size: 13px !important; padding: 6px 8px; font-weight: 700; border-radius: 4px; border: 1px solid #cbd5e1; width: 100%; color: #334155; background: #ffffff;" onchange="const m = mockFacilities.find(f => f.id === '${fac.id}'); if (m) { m.series_count = this.value; m.series = this.value === '2' ? 'GI 1, MM' : 'MM'; saveDataToCloud(); renderDashboard(); }">
                         <option value="1" ${fac.series_count === '1' || fac.series === 'MM' ? 'selected' : ''}>1 Series ($1,500)</option>
                         <option value="2" ${fac.series_count === '2' || fac.series !== 'MM' ? 'selected' : ''}>2 Series ($2,300)</option>
                     </select>
                 </td>
+
 
                 <!-- Column 4: Contract Milestones -->
                 <td style="padding: 14px 18px; vertical-align: middle; width: 180px;">
@@ -603,7 +604,7 @@ function loadDataFromCloud() {
                     </div>
                 </td>
 
-                <!-- Column 5: Invoice Processing -->
+                               <!-- Column 5: Invoice Processing -->
                 <td style="padding: 14px 18px; vertical-align: middle; width: 240px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <div style="display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 10px; color: #64748b; font-weight: 600;">Inv Sent:</span><input type="date" value="${fac.invoice_sent_date || ''}" style="padding: 2px 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px;" onchange="const m = mockFacilities.find(f => f.id === '${fac.id}'); if(m){ m.invoice_sent_date = this.value; saveDataToCloud(); }"></div>
@@ -617,17 +618,14 @@ function loadDataFromCloud() {
                         </div>
                     </div>
                 </td>
-
+         
                 <!-- Column 6: Delete Module -->
                 <td style="vertical-align: middle; text-align: center; width: 90px;">
                     <button style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 12px;" onclick="if(confirm('Delete facility?')){ mockFacilities = mockFacilities.filter(f => f.id !== '${fac.id}'); saveDataToCloud(); renderDashboard(); }">Delete</button>
                 </td>
-            </tr>`;
- 
-                  
-                             <td style="padding:14px 18px; text-align:center; vertical-align: middle;"><div style="display:flex; justify-content:center; gap:8px;"><button type="button" class="btn" style="background:#e2e8f0; color:#0f172a; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:600; cursor:pointer; border:1px solid #cbd5e1;" onclick="event.stopPropagation(); switchTab('notes'); document.getElementById('n-fac-id').value='${fac.id}'; filterNotesByFacility();">🔎 View Logs</button><button type="button" style="background:#fee2e2; color:#ef4444; border:1px solid #fca5a5; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;" ${isReadonly} onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete the facility: ${fac.name.replace(/'/g, "\\'")}?')){ mockFacilities=mockFacilities.filter(f=>f.id!=='${fac.id}'); saveDataToCloud(); renderDashboard(); }">❌ Delete</button></div></td>
-                </tr>`;
-            });
+                     </tr>\`;
+        });
+
 
             tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
                                // 🔮 Render Marketing Pipeline Table (Widescreen Horizontal Bar Layout Upgrades with Email)
