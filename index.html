@@ -552,7 +552,7 @@ function loadDataFromCloud() {
         mockFacilities.forEach(fac => {
             const isPaid = fac.payment_status === "Paid" || fac.payment_status === "Paid in Full";
             const isHalf = fac.payment_status === "Half Paid" || fac.payment_status === "Half Payment";
-            let badgestyle = isPaid ? "background:#dcfce7;color:#15803d;" : (isHalf ? "background:#fef9c3;color:#a16207;" : "background:#fee2e2;color:#ef4444;");
+            let badgeStyle = isPaid ? "background:#dcfce7;color:#15803d;" : (isHalf ? "background:#fef9c3;color:#a16207;" : "background:#fee2e2;color:#ef4444;");
             
             tableHTML += `<tr style="border-bottom: 1px solid #e2e8f0;">
                 <td style="padding: 14px 18px; vertical-align: middle;">
