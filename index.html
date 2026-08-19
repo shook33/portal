@@ -79,10 +79,10 @@
                             <option value="2">Select Subscription: 2 Series Bundle ($2,300)</option> 
                         </select> 
                     </div> 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;"> 
-                        <input type="text" id="f-series-names" placeholder="Type Program Initials (e.g. MM, GI 1)" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;" required> 
-                        <input type="text" id="f-cname" placeholder="Primary Contact Name" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;"> 
-                    </div> 
+                   <div style="display:grid; grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+    <input type="text" id="f-cname" placeholder="Primary Contact Name" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;">
+</div>
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;"> 
                         <input type="email" id="f-cemail" placeholder="Primary Contact Email" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;"> 
                         <input type="text" id="f-cname-alt" placeholder="Secondary Contact Name" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;"> 
@@ -309,8 +309,9 @@ function loadDataFromCloud() {
                 name: document.getElementById('f-name').value,
                 address: document.getElementById('f-add').value || '',
                 phone: document.getElementById('f-ph').value || '',
-                series: document.getElementById('f-series-names').value || '',
-                series_count: document.getElementById('f-series-count').value,
+                                   series_count: document.getElementById('f-series-count').value,
+                    series: document.getElementById('f-series-count').value === "2" ? "GI 1, MM" : "MM",
+
                 rep_name: document.getElementById('f-cname').value || '',
                 rep_email: document.getElementById('f-cemail').value || '',
                 alt_name: document.getElementById('f-cname-alt').value || '',
