@@ -217,8 +217,8 @@ function getApiKeyForRole() {
     return TREASURER_KEY; // Gives admin/treasurer full update access
 }
 
-              function logoutPortal() {
-            // Turn off the exit guard right before shifting screens
+                       function logoutPortal() {
+            // Unconditionally remove the exit lock when explicitly signing out
             window.removeEventListener('beforeunload', handleBeforeUnload);
             
             if(document.getElementById('board-playground-banner')) {
@@ -231,6 +231,7 @@ function getApiKeyForRole() {
                 document.getElementById('portal-console').classList.add('hidden');
             }
         }
+
 
 
 function loadDataFromCloud() {
@@ -274,7 +275,8 @@ function loadDataFromCloud() {
 
         async function saveDataToCloud() {
     if (userRole === "board") return;
-    
+       window.addEventListener('beforeunload', handleBeforeUnload);
+ 
     // 💾 Safety Backup: Keep local browser data synced as a fallback
     localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
     localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
@@ -718,19 +720,11 @@ function loadDataFromCloud() {
             
             if (typeof populateDropdown === "function") populateDropdown();
         }
-// 🔒 Define the guard function handler
+// 🔒 Define the clean guard function handler
 function handleBeforeUnload(e) {
-    const consoleView = document.getElementById('portal-console');
-    
-    // Only lock the browser if the user has successfully logged past the login screen!
-    if (consoleView && !consoleView.classList.contains('hidden')) {
-        e.preventDefault();
-        e.returnValue = 'Data session active.';
-    }
+    e.preventDefault();
+    e.returnValue = 'Data session active.';
 }
-
-// 🔒 Activate the guard function globally on startup
-window.addEventListener('beforeunload', handleBeforeUnload);
 
 
 
