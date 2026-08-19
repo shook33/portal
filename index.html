@@ -720,8 +720,13 @@ function loadDataFromCloud() {
         }
 // 🔒 Define the guard function handler
 function handleBeforeUnload(e) {
-    e.preventDefault();
-    e.returnValue = 'Data session active.';
+    const consoleView = document.getElementById('portal-console');
+    
+    // Only lock the browser if the user has successfully logged past the login screen!
+    if (consoleView && !consoleView.classList.contains('hidden')) {
+        e.preventDefault();
+        e.returnValue = 'Data session active.';
+    }
 }
 
 // 🔒 Activate the guard function globally on startup
