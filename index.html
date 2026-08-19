@@ -714,10 +714,11 @@ function loadDataFromCloud() {
             
             if (typeof populateDropdown === "function") populateDropdown();
         }
-window.addEventListener('popstate', function(event) {
-    window.history.pushState({ noBack: true }, '');
-    alert("🔄 Portal Guard: Click on one of the workspace tabs at the top of the screen to change views! The browser back arrow is disabled to protect your open workspace data session.");
+window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = 'Data session active.';
 });
+
 
     </script>
 </body>
