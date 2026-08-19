@@ -217,7 +217,10 @@ function getApiKeyForRole() {
     return TREASURER_KEY; // Gives admin/treasurer full update access
 }
 
-        function logoutPortal() {
+              function logoutPortal() {
+            // Turn off the exit guard right before shifting screens
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            
             if(document.getElementById('board-playground-banner')) {
                 document.getElementById('board-playground-banner').style.display = 'none';
             }
@@ -228,6 +231,7 @@ function getApiKeyForRole() {
                 document.getElementById('portal-console').classList.add('hidden');
             }
         }
+
 
 function loadDataFromCloud() {
     // Hide or show entry forms instantly based on role
@@ -714,10 +718,15 @@ function loadDataFromCloud() {
             
             if (typeof populateDropdown === "function") populateDropdown();
         }
-window.addEventListener('beforeunload', function (e) {
+// 🔒 Define the guard function handler
+function handleBeforeUnload(e) {
     e.preventDefault();
     e.returnValue = 'Data session active.';
-});
+}
+
+// 🔒 Activate the guard function globally on startup
+window.addEventListener('beforeunload', handleBeforeUnload);
+
 
 
     </script>
