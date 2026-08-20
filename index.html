@@ -171,30 +171,28 @@
             event.preventDefault();
             const code = document.getElementById('access-code').value.trim();
             
-                   if (code === "SillSelect") {
-            userRole = "admin";
-            sessionStorage.setItem('isUserLoggedIn', 'true');
-            document.getElementById('login-frame').classList.add('hidden');
-            document.getElementById('portal-console').classList.remove('hidden');
-            setTimeout(loadDataFromCloud, 100);
-        } else if (code === "Select2027") {
+            if (code === "SillSelect") {
+                userRole = "admin";
+                document.getElementById('login-frame').classList.add('hidden');
+                document.getElementById('portal-console').classList.remove('hidden');
+                setTimeout(loadDataFromCloud, 100);
+           } else if (code === "Select2027") {
             userRole = "treasurer";
-            sessionStorage.setItem('isUserLoggedIn', 'true');
             document.getElementById('login-frame').classList.add('hidden');
             document.getElementById('portal-console').classList.remove('hidden');
             setTimeout(loadDataFromCloud, 100);
         } else if (code === "Sillselect2027") {
             userRole = "board";
-            sessionStorage.setItem('isUserLoggedIn', 'true');
             document.getElementById('board-playground-banner').style.display = 'block';
-            
+
             document.getElementById('login-frame').classList.add('hidden');
             document.getElementById('portal-console').classList.remove('hidden');
             setTimeout(loadDataFromCloud, 100);
-           } else {
-            alert("⚠️ Invalid Access Password Profile. Please re-enter.");
+        
+            } else {
+                alert("⚠️ Invalid Access Password Profile. Please re-enter.");
+            }
         }
-    }
 
         function switchTab(tabName) {
             const panels = document.querySelectorAll('.tab-panel');
@@ -218,13 +216,8 @@ function getApiKeyForRole() {
     }
     return TREASURER_KEY; // Gives admin/treasurer full update access
 }
-        function logoutPortal() {
-            // Completely clear the login tracking flag out of memory
-            sessionStorage.removeItem('isUserLoggedIn');
-            
-            // Unconditionally remove the exit lock when explicitly signing out
-            window.removeEventListener('beforeunload', handleBeforeUnload);
 
+        function logoutPortal() {
             if(document.getElementById('board-playground-banner')) {
                 document.getElementById('board-playground-banner').style.display = 'none';
             }
@@ -235,8 +228,6 @@ function getApiKeyForRole() {
                 document.getElementById('portal-console').classList.add('hidden');
             }
         }
-
-
 
 function loadDataFromCloud() {
     // Hide or show entry forms instantly based on role
@@ -279,8 +270,7 @@ function loadDataFromCloud() {
 
         async function saveDataToCloud() {
     if (userRole === "board") return;
-       window.addEventListener('beforeunload', handleBeforeUnload);
- 
+    
     // 💾 Safety Backup: Keep local browser data synced as a fallback
     localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
     localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
@@ -724,14 +714,8 @@ function loadDataFromCloud() {
             
             if (typeof populateDropdown === "function") populateDropdown();
         }
-// 🔒 Define the clean guard function handler
-function handleBeforeUnload(e) {
-    e.preventDefault();
-    e.returnValue = 'Data session active.';
-}
-
-
-
+window.addEventListener('load', function() { window.history.pushState({ noBack: true }, ''); window.history.pushState({ noBack: true }, ''); });
+window.addEventListener('popstate', function(event) { window.history.pushState({ noBack: true }, ''); alert("🔄 Navigation Guard Active."); });
     </script>
 </body>
 </html>
