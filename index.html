@@ -714,12 +714,8 @@ function loadDataFromCloud() {
             
             if (typeof populateDropdown === "function") populateDropdown();
         }
-window.addEventListener('beforeunload', function (e) {
-    e.preventDefault();
-    e.returnValue = 'Data session active.';
-});
-
-
+window.addEventListener('load', function() { window.history.pushState({ noBack: true }, ''); window.history.pushState({ noBack: true }, ''); });
+window.addEventListener('popstate', function(event) { window.history.pushState({ noBack: true }, ''); alert("🔄 Navigation Guard Active."); });
     </script>
 </body>
 </html>
