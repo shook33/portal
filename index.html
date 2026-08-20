@@ -191,8 +191,10 @@
             document.getElementById('login-frame').classList.add('hidden');
             document.getElementById('portal-console').classList.remove('hidden');
             setTimeout(loadDataFromCloud, 100);
-        } else {
-
+           } else {
+            alert("⚠️ Invalid Access Password Profile. Please re-enter.");
+        }
+    }
 
         function switchTab(tabName) {
             const panels = document.querySelectorAll('.tab-panel');
