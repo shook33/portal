@@ -171,28 +171,28 @@
             event.preventDefault();
             const code = document.getElementById('access-code').value.trim();
             
-            if (code === "SillSelect") {
-                userRole = "admin";
-                document.getElementById('login-frame').classList.add('hidden');
-                document.getElementById('portal-console').classList.remove('hidden');
-                setTimeout(loadDataFromCloud, 100);
-           } else if (code === "Select2027") {
+                   if (code === "SillSelect") {
+            userRole = "admin";
+            sessionStorage.setItem('isUserLoggedIn', 'true');
+            document.getElementById('login-frame').classList.add('hidden');
+            document.getElementById('portal-console').classList.remove('hidden');
+            setTimeout(loadDataFromCloud, 100);
+        } else if (code === "Select2027") {
             userRole = "treasurer";
+            sessionStorage.setItem('isUserLoggedIn', 'true');
             document.getElementById('login-frame').classList.add('hidden');
             document.getElementById('portal-console').classList.remove('hidden');
             setTimeout(loadDataFromCloud, 100);
         } else if (code === "Sillselect2027") {
             userRole = "board";
+            sessionStorage.setItem('isUserLoggedIn', 'true');
             document.getElementById('board-playground-banner').style.display = 'block';
-
+            
             document.getElementById('login-frame').classList.add('hidden');
             document.getElementById('portal-console').classList.remove('hidden');
             setTimeout(loadDataFromCloud, 100);
-        
-            } else {
-                alert("⚠️ Invalid Access Password Profile. Please re-enter.");
-            }
-        }
+        } else {
+
 
         function switchTab(tabName) {
             const panels = document.querySelectorAll('.tab-panel');
@@ -216,11 +216,13 @@ function getApiKeyForRole() {
     }
     return TREASURER_KEY; // Gives admin/treasurer full update access
 }
-
-                       function logoutPortal() {
+        function logoutPortal() {
+            // Completely clear the login tracking flag out of memory
+            sessionStorage.removeItem('isUserLoggedIn');
+            
             // Unconditionally remove the exit lock when explicitly signing out
             window.removeEventListener('beforeunload', handleBeforeUnload);
-            
+
             if(document.getElementById('board-playground-banner')) {
                 document.getElementById('board-playground-banner').style.display = 'none';
             }
