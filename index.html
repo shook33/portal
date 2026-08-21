@@ -494,6 +494,8 @@ function loadDataFromCloud() {
                                 <div style="display: flex; gap: 8px; white-space: nowrap; align-items: center;">
                                     <button type="button" id="note-edit-btn-${selectedId}-${nIdx}" onclick="enableInlineNoteEdit('${selectedId}', ${nIdx})" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">✏️ Edit</button>
                                     <button type="button" id="note-save-btn-${selectedId}-${nIdx}" onclick="saveInlineNoteEdit('${selectedId}', ${nIdx})" style="display: none; background: #047857; color: #ffffff; border: none; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">💾 Save</button>
+                                     <button type="button" id="note-delete-btn-${selectedId}-${nIdx}" onclick="if(confirm('Delete this note?')) { deleteSelectedNote('${selectedId}', ${nIdx}); }" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Delete</button>
+
                                 </div>
                             </div>`;
                     });
@@ -537,8 +539,16 @@ function loadDataFromCloud() {
                 }
                 saveDataToCloud();
                 filterNotesByFacility();
-            }
-        }
+                
+                   function deleteSelectedNote(facId, idx) {
+    const fac = mockFacilities.find(f => f.id === facId);
+    if (fac && fac.notes) {
+        fac.notes.splice(idx, 1);
+        saveDataToCloud();
+        filterNotesByFacility();
+    }
+}
+
         function renderDashboard() {
             const fList = document.getElementById('facilities-list');
             const ledger = document.getElementById('ledger-list');
