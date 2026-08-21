@@ -720,9 +720,8 @@ function saveInlineLeadNoteEdit(leadId, idx) {
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; margin-top: 4px; background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #ea580c; border-radius: 4px; font-size: 13.5px; color: #0f172a;">
                             <div style="flex-grow: 1; padding-right: 15px; line-height: 1.5;">🗓️ <strong>${n.date}</strong>: <span id="lead-body-text-${lead.id}-${lIdx}">${n.text}</span></div>
                             <div style="display: flex; gap: 4px; white-space: nowrap;">
-                                <button type="button" id="lead-edit-btn-${lead.id}-${lIdx}" onclick="enableInlineLeadNoteEdit('${lead.id}', lIdx)" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">✏️ Edit</button>
-                                <button type="button" id="lead-save-btn-${lead.id}-${lIdx}" onclick="saveInlineLeadEdit('${lead.id}', lIdx)" style="display: none; background: #047857; color: #ffffff; border: none; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">💾 Save</button>
-                            </div>
+            <button type="button" id="lead-save-btn-${lead.id}-${lIdx}" onclick="saveInlineLeadNoteEdit('${lead.id}', ${lIdx})" style="display: none; background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Save</button>
+              </div>    
                         </div>`).join('');
                 } else { currentNotesHTML = `<span style="font-size: 12px; color: #94a3b8; font-style: italic; padding-left: 4px;">No interactions.</span>`; }
                 leadsHTML += `<tr style="border-bottom: 1px dashed #cbd5e1; background-color: #fafafa;">
