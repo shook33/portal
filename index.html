@@ -763,6 +763,23 @@ function saveInlineLeadNoteEdit(leadId, idx) {
 
     if (typeof populateDropdown === "function") populateDropdown();
 }
+function downloadDatabaseBackup() {
+    const backupData = {
+        facilities: JSON.parse(localStorage.getItem('sill_facilities')) || [],
+        leads: JSON.parse(localStorage.getItem('sill_leads')) || [],
+        matrix: JSON.parse(localStorage.getItem('sill_schedule_matrix')) || []
+    };
+    const jsonString = JSON.stringify(backupData, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `sill_database_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
 
 
 window.addEventListener('load', function() { window.history.pushState({ noBack: true }, ''); window.history.pushState({ noBack: true }, ''); });
