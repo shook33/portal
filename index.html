@@ -552,6 +552,43 @@ function loadDataFromCloud() {
     }
 }
 
+function enableInlineLeadNoteEdit(leadId, idx) {
+    const bodySpan = document.getElementById(`lead-body-text-${leadId}-${idx}`);
+    const editBtn = document.getElementById(`lead-edit-btn-${leadId}-${idx}`);
+    const saveBtn = document.getElementById(`lead-save-btn-${leadId}-${idx}`);
+    if (!bodySpan || !editBtn || !saveBtn) return;
+
+    const currentText = bodySpan.innerText;
+    bodySpan.innerHTML = `<input type="text" id="lead-edit-input-${leadId}-${idx}" value="${currentText.replace(/"/g, '&quot;')}" style="width: 100%; padding: 4px; font-size: 13px;">`;
+    editBtn.style.display = 'none';
+    saveBtn.style.display = 'inline-block';
+}
+
+function saveInlineLeadNoteEdit(leadId, idx) {
+    const inputField = document.getElementById(`lead-edit-input-${leadId}-${idx}`);
+    if (!inputField) return;
+
+    const updatedText = inputField.value.trim();
+    if (!updatedText) return;
+
+    const lead = mockLeads.find(l => l.id === leadId);
+    if (lead && lead.notes && lead.notes[idx]) {
+        if (typeof lead.notes[idx] === 'object') {
+            lead.notes[idx].text = updatedText;
+        } else {
+            lead.notes[idx] = { date: new Date().toLocaleDateString(), text: updatedText };
+        }
+        
+        const editBtn = document.getElementById(`lead-edit-btn-${leadId}-${idx}`);
+        const saveBtn = document.getElementById(`lead-save-btn-${leadId}-${idx}`);
+        if (editBtn) editBtn.style.display = 'inline-block';
+        if (saveBtn) saveBtn.style.display = 'none';
+
+        saveDataToCloud();
+        renderDashboard(); 
+    }
+}
+ 
         function renderDashboard() {
             const fList = document.getElementById('facilities-list');
             const ledger = document.getElementById('ledger-list');
