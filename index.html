@@ -47,7 +47,9 @@
                 <h1 style="font-size: 2rem; margin: 0; font-weight: bold; color:#0369a1;">SILL Select</h1> 
                 <p class="text-muted" style="margin-top: 0.25rem;">Aiven MySQL Cloud Pipeline Cluster Fully Operational</p> 
             </div> 
-            <button onclick="if(typeof saveDataToCloud === 'function'){ saveDataToCloud(); } window.location.reload();" style="background-color:#e2e8f0; border:1px solid #cbd5e1; color:#475569; padding:0.5rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:bold;">[→ Sign Out</button> 
+            <button type="button" onclick="downloadDatabaseBackup()" style="background-color: #2563eb; border: 1px solid #1d4ed8; color: #ffffff; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; font-weight: bold; margin-right: 0.5rem;">💾 Download Backup</button>
+
+            <button onclick="if(typeof saveDataToCloud === 'function'){ saveDataToCloud(); } window.location.reload();" style="background-color:#e2e8f0; border:1px solid #cbd5e1; color:#334155; padding:0.5rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:bold;">🚪 Sign Out</button>
         </div> 
         <div id="admin-tabs-bar" style="display: flex; gap: 0.75rem; margin-bottom: 2rem; border-bottom: 1px solid #cbd5e1; padding-bottom: 0.75rem;"> 
             <button onclick="switchTab('facilities')" id="tab-facilities" class="btn-nav" style="background:#0369a1; color:#ffffff;">🏢 Facilities & Contacts</button> 
@@ -494,6 +496,8 @@ function loadDataFromCloud() {
                                 <div style="display: flex; gap: 8px; white-space: nowrap; align-items: center;">
                                     <button type="button" id="note-edit-btn-${selectedId}-${nIdx}" onclick="enableInlineNoteEdit('${selectedId}', ${nIdx})" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">✏️ Edit</button>
                                     <button type="button" id="note-save-btn-${selectedId}-${nIdx}" onclick="saveInlineNoteEdit('${selectedId}', ${nIdx})" style="display: none; background: #047857; color: #ffffff; border: none; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">💾 Save</button>
+                                     <button type="button" id="note-delete-btn-${selectedId}-${nIdx}" onclick="if(confirm('Delete this note?')) { deleteSelectedNote('${selectedId}', ${nIdx}); }" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Delete</button>
+
                                 </div>
                             </div>`;
                     });
@@ -537,8 +541,56 @@ function loadDataFromCloud() {
                 }
                 saveDataToCloud();
                 filterNotesByFacility();
-            }
+    }
+}
+
+
+                   function deleteSelectedNote(facId, idx) {
+    const fac = mockFacilities.find(f => f.id === facId);
+    if (fac && fac.notes) {
+        fac.notes.splice(idx, 1);
+        saveDataToCloud();
+        filterNotesByFacility();
+    }
+}
+
+function enableInlineLeadNoteEdit(leadId, idx) {
+    const bodySpan = document.getElementById(`lead-body-text-${leadId}-${idx}`);
+    const editBtn = document.getElementById(`lead-edit-btn-${leadId}-${idx}`);
+    const saveBtn = document.getElementById(`lead-save-btn-${leadId}-${idx}`);
+    if (!bodySpan || !editBtn || !saveBtn) return;
+
+    const currentText = bodySpan.innerText;
+    bodySpan.innerHTML = `<input type="text" id="lead-edit-input-${leadId}-${idx}" value="${currentText.replace(/"/g, '&quot;')}" style="width: 100%; padding: 4px; font-size: 13px;">`;
+    editBtn.style.display = 'none';
+    saveBtn.style.display = 'inline-block';
+}
+
+function saveInlineLeadNoteEdit(leadId, idx) {
+    const inputField = document.getElementById(`lead-edit-input-${leadId}-${idx}`);
+    if (!inputField) return;
+
+    const updatedText = inputField.value.trim();
+    if (!updatedText) return;
+
+    const lead = mockLeads.find(l => l.id === leadId);
+    if (lead && lead.notes && lead.notes[idx]) {
+        if (typeof lead.notes[idx] === 'object') {
+            lead.notes[idx].text = updatedText;
+        } else {
+            lead.notes[idx] = { date: new Date().toLocaleDateString(), text: updatedText };
         }
+        
+        const editBtn = document.getElementById(`lead-edit-btn-${leadId}-${idx}`);
+        const saveBtn = document.getElementById(`lead-save-btn-${leadId}-${idx}`);
+        if (editBtn) editBtn.style.display = 'inline-block';
+        if (saveBtn) saveBtn.style.display = 'none';
+
+        saveDataToCloud();
+        renderDashboard(); 
+    }
+}
+ 
         function renderDashboard() {
             const fList = document.getElementById('facilities-list');
             const ledger = document.getElementById('ledger-list');
@@ -670,9 +722,9 @@ function loadDataFromCloud() {
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; margin-top: 4px; background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #ea580c; border-radius: 4px; font-size: 13.5px; color: #0f172a;">
                             <div style="flex-grow: 1; padding-right: 15px; line-height: 1.5;">🗓️ <strong>${n.date}</strong>: <span id="lead-body-text-${lead.id}-${lIdx}">${n.text}</span></div>
                             <div style="display: flex; gap: 4px; white-space: nowrap;">
-                                <button type="button" id="lead-edit-btn-${lead.id}-${lIdx}" onclick="enableInlineLeadEdit('${lead.id}', lIdx)" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">✏️ Edit</button>
-                                <button type="button" id="lead-save-btn-${lead.id}-${lIdx}" onclick="saveInlineLeadEdit('${lead.id}', lIdx)" style="display: none; background: #047857; color: #ffffff; border: none; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">💾 Save</button>
-                            </div>
+            <button type="button" id="lead-edit-btn-${lead.id}-${lIdx}" onclick="enableInlineLeadNoteEdit('${lead.id}', ${lIdx})" style="background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px;">Edit</button>
+            <button type="button" id="lead-save-btn-${lead.id}-${lIdx}" onclick="saveInlineLeadNoteEdit('${lead.id}', ${lIdx})" style="display: none; background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px;">Save</button>
+                   
                         </div>`).join('');
                 } else { currentNotesHTML = `<span style="font-size: 12px; color: #94a3b8; font-style: italic; padding-left: 4px;">No interactions.</span>`; }
                 leadsHTML += `<tr style="border-bottom: 1px dashed #cbd5e1; background-color: #fafafa;">
@@ -681,9 +733,8 @@ function loadDataFromCloud() {
                     <td style="padding: 14px 18px;"><input type="text" value="${lead.rep || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').rep=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px;"><input type="text" value="${lead.email || ''}" placeholder="Contact Email" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').email=this.value; saveDataToCloud();"></td>
                     <td style="padding: 14px 18px;"><input type="text" value="${lead.phone || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').phone=this.value; saveDataToCloud();"></td>
-                    <td style="padding: 14px 18px;"><input type="text" value="${lead.source || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="mockLeads.find(l=>l.id==='${lead.id}').source=this.value; saveDataToCloud();"></td>
-                    <td style="padding: 14px 18px; text-align: center;"><button type="button" onclick="deleteLeadRecord('${lead.id}')" style="background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;" ${isReadonly}>❌ Delete</button></td>
-                </tr>
+                    <td style="padding: 14px 18px; text-align: center;"><button type="button" onclick="if(confirm('Are you sure you want to delete this lead record?')) { deleteLeadRecord('${lead.id}'); }" style="background: #fee2e2; color: #ef4444; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">Delete</button></td>
+                   </tr>
                 <tr style="border-bottom: 4px solid #475569; background-color: #f8fafc;">
                     <td colspan="7" style="padding: 24px 24px 32px 24px;">
                         <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -703,17 +754,36 @@ function loadDataFromCloud() {
             });
             leadsHTML += `</tbody></table></div>`; leadsList.innerHTML = leadsHTML;
 
-            mockFacilities.forEach(f => {
-                const activeSeriesText = (f.series || '').trim();
-                const seriesArray = activeSeriesText ? activeSeriesText.split(/[\s,]+/).filter(Boolean) : [];
-                const total = (seriesArray.length >= 2 || f.series_count === "2" || activeSeriesText.toLowerCase().includes('series 2')) ? 2300 : 1500;
-                const paid = f.payment_status === "Paid" || f.payment_status === "Paid in Full" ? total : (f.payment_status === "Half Payment" ? total/2 : 0);
-                const bal = total - paid;
-                if (ledger) ledger.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px dashed #cbd5e1; font-size:13px;"><strong>📊 ${f.name}:</strong> <span>Baseline: $${total} | Receipts: <span style="color:green;font-weight:bold;">$${paid}</span> | Balance: <span style="color:red;font-weight:bold;">$${bal}</span></span></div>`;
-            });
-            
-            if (typeof populateDropdown === "function") populateDropdown();
-        }
+               mockFacilities.forEach(f => {
+        const activeSeriesText = (f.series || '').trim();
+        const seriesArray = activeSeriesText ? activeSeriesText.split(/[\s,]+/).filter(Boolean) : [];
+        const total = (seriesArray.length >= 2 || f.series_count === "2" || activeSeriesText.toLowerCase().includes('series 2')) ? 2300 : 1500;
+        const paid = f.payment_status === "Paid" || f.payment_status === "Paid in Full" ? total : (f.payment_status === "Half Payment" ? total / 2 : 0);
+        const bal = total - paid;
+        if (ledger) ledger.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px dashed #cbd5e1; font-size:13px;">${f.name || 'Unnamed Facility'}: $${total} | Receipts: <span style="color:green;font-weight:bold;">$${paid}</span> | Balance: <span style="color:red;font-weight:bold;">$${bal}</span></div>`;
+    });
+
+    if (typeof populateDropdown === "function") populateDropdown();
+}
+function downloadDatabaseBackup() {
+    const backupData = {
+        facilities: JSON.parse(localStorage.getItem('sill_facilities')) || [],
+        leads: JSON.parse(localStorage.getItem('sill_leads')) || [],
+        matrix: JSON.parse(localStorage.getItem('sill_schedule_matrix')) || []
+    };
+    const jsonString = JSON.stringify(backupData, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `sill_database_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+
 window.addEventListener('load', function() { window.history.pushState({ noBack: true }, ''); window.history.pushState({ noBack: true }, ''); });
 window.addEventListener('popstate', function(event) { window.history.pushState({ noBack: true }, ''); alert("🔄 Navigation Guard Active."); });
     </script>
