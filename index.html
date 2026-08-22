@@ -760,7 +760,7 @@ function saveInlineLeadNoteEdit(leadId, idx) {
         const total = (seriesArray.length >= 2 || f.series_count === "2" || activeSeriesText.toLowerCase().includes('series 2')) ? 2300 : 1500;
         const paid = f.payment_status === "Paid" || f.payment_status === "Paid in Full" ? total : (f.payment_status === "Half Payment" ? total / 2 : 0);
         const bal = total - paid;
-        if (ledger) ledger.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px dashed #cbd5e1; font-size:13px;">${f.name || 'Unnamed Facility'}: $${total} | Receipts: <span style="color:green;font-weight:bold;">$${paid}</span> | Balance: <span style="color:red;font-weight:bold;">$${bal}</span></div>`;
+if (ledger) ledger.innerHTML += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 8px; border-bottom: 1px dashed #cbd5e1; font-size: 14px;"><strong style="color: #0f172a;">📊 ${f.name}:</strong> <span style="color: #475569; font-weight: 500;">Baseline: $${total} | Receipts: <span style="color: green; font-weight: bold;">$${paid}</span> | Balance: <span style="color: red; font-weight: bold;">$${bal}</span></span></div>`;
     });
 
     if (typeof populateDropdown === "function") populateDropdown();
