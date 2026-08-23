@@ -324,30 +324,31 @@ function loadDataFromCloud() {
             saveDataToCloud(); renderDashboard(); e.target.reset();
         }
 
-    function addNewNote(e) {
-    if (e) e.preventDefault();
+   function addNewNote(event) {
+    if (event) event.preventDefault();
     if (userRole === "board") return;
     
     const facId = document.getElementById('n-fac-id').value;
     const text = document.getElementById('n-text').value;
     if (!facId || !text.trim()) return;
 
-    const fac = mockFacilities.find(f => f.id === facId);
+    // 💡 Changed to loose equality (==) to seamlessly match string IDs with number IDs
+    const fac = mockFacilities.find(f => f.id == facId);
     if (fac) {
         if (!fac.notes) fac.notes = [];
-        fac.notes.unshift({ date: new Date().toLocaleDateString(), text: text });
+        fac.notes.unshift({ date: new Date().toLocaleDateString(), text: text.trim() });
         
         saveDataToCloud();
         renderDashboard();
         
-        // 📌 Pinned View: Forces the dashboard to stay right here on your notes timeline!
         if (typeof switchTab === 'function') switchTab('notes');
         
         document.getElementById('n-fac-id').value = facId;
         filterNotesByFacility();
-    }
-    
-    document.getElementById('n-text').value = '';
+        
+        // 🧼 Clears out the typing field instantly so you know the save succeeded!
+        document.getElementById('n-text').value = '';
+       }
 }
 
 
