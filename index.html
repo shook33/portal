@@ -363,7 +363,7 @@ function filterNotesByFacility() {
         return;
     }
 
-    const fac = mockFacilities.find(f => f.id === selectedId);
+    const fac = mockFacilities.find(f => f.id == selectedId);
     if (!fac) return;
 
     if (!fac.notes || fac.notes.length === 0) {
