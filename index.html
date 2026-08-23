@@ -755,9 +755,9 @@ if (ledger) ledger.innerHTML += `<div style="display: grid; grid-template-column
 }
 function downloadDatabaseBackup() {
     const backupData = {
-        facilities: JSON.parse(localStorage.getItem('sill_facilities')) || [],
-        leads: JSON.parse(localStorage.getItem('sill_leads')) || [],
-        matrix: JSON.parse(localStorage.getItem('sill_schedule_matrix')) || []
+        facilities: typeof mockFacilities !== 'undefined' ? mockFacilities : [],
+        leads: typeof mockLeads !== 'undefined' ? mockLeads : [],
+        matrix: typeof mockScheduleMatrix !== 'undefined' ? mockScheduleMatrix : (typeof masterSchedule !== 'undefined' ? masterSchedule : [])
     };
     const jsonString = JSON.stringify(backupData, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
@@ -770,6 +770,7 @@ function downloadDatabaseBackup() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 }
+
 
 
 window.addEventListener('load', function() { window.history.pushState({ noBack: true }, ''); window.history.pushState({ noBack: true }, ''); });
