@@ -591,106 +591,7 @@
             mockLeads.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
             const isReadonly = userRole === "board" ? "readonly disabled style='background:#f1f5f9; color:#64748b; cursor:not-allowed;'" : "";
             
-            let tableHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px; margin-bottom: 24px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:22%;">Facility Info</th><th style="padding:14px 18px; font-weight:700; width:22%;">Contacts Matrix</th><th style="padding:14px 18px; font-weight:700; width:10%;">Series Subscribed</th><th style="padding:14px 18px; font-weight:700; width:16%;">📋 Contract Status</th><th style="padding:14px 18px; font-weight:700; width:25%;">💳 Invoice & Payment Ledgers</th><th style="padding:14px 18px; text-align:center; width:5%;">Actions</th></tr></thead><tbody>`;
-            mockFacilities.forEach(fac => {
-                const isPaid = fac.payment_status === "Paid" || fac.payment_status === "Paid in Full";
-                const isHalf = fac.payment_status === "Half Paid" || fac.payment_status === "Half Payment";
-                let badgeStyle = isPaid ? "background:#dcfce7;color:#15803d;" : (isHalf ? "background:#fef9c3;color:#a16207;" : "background:#fee2e2;color:#ef4444;");
-                
-                tableHTML += `<tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 14px 18px; vertical-align: middle;">
-                        <div style="display: flex; flex-direction: column; width: 100%;">
-                            <div style="display: flex; align-items: center; font-weight: 800; font-size: 1.25rem !important; color: #0369a1; line-height: 1.3;">
-                                <span>🏢&nbsp;</span>
-                                <textarea style="font-weight: 800; font-size: 1.25rem !important; color: #0369a1; font-family: sans-serif; border: none; background: transparent; padding: 0 !important; margin: 0; outline: none; width: 160px !important; resize: none; height: auto; min-height: 1.4em; line-height: 1.2; overflow: hidden; display: block; white-space: pre-wrap; word-break: break-word;" 
-                                    ${isReadonly} 
-                                    onfocus="this.style.height='auto'; this.style.height=this.scrollHeight+'px';"
-                                    onblur="const m=mockFacilities.find(f=>f.id==='${fac.id}'); if(m && m.name!==this.value){ m.name=this.value; saveDataToCloud(); }"
-                                    onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }">${fac.name || ''}</textarea>
-                            </div>
-                            <div style="display: flex; align-items: flex-start; font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 500;">
-                                <span style="margin-top: 2px;">📍&nbsp;</span>
-                                <textarea style="font-size: 13px !important; color: #64748b; font-weight: 500; font-family: sans-serif; border: none; background: transparent; padding: 0 !important; margin: 0; outline: none; width: 170px !important; resize: none; height: auto; min-height: 1.3em; line-height: 1.3; overflow: hidden; display: block; white-space: pre-wrap; word-break: break-word;" 
-                                    ${isReadonly} 
-                                    onfocus="this.style.height='auto'; this.style.height=this.scrollHeight+'px';"
-                                    onblur="const m=mockFacilities.find(f=>f.id==='${fac.id}'); if(m && m.address!==this.value){ m.address=this.value; saveDataToCloud(); }"
-                                    onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }">${fac.address || ''}</textarea>
-                            </div>
-                            <div style="display: flex; align-items: center; font-size: 12px; color: #475569; margin-top: 2px; font-weight: 600;">
-                                <span>📞&nbsp;</span>
-                                <input type="text" value="${fac.phone || ''}" placeholder="No Phone" 
-                                    style="font-size: 12px !important; color: #475569; font-weight: 600; font-family: sans-serif; border: none; background: transparent; padding: 0 !important; margin: 0; outline: none; width: 100% !important; display: inline-block;" 
-                                    ${isReadonly} 
-                                    onblur="const m=mockFacilities.find(f=>f.id==='${fac.id}'); if(m && m.phone!==this.value){ m.phone=this.value; saveDataToCloud(); }"
-                                    onkeypress="if(event.key==='Enter'){ this.blur(); }">
-                            </div>
-                        </div>
-                    </td>
-                    <td style="padding: 14px 18px; vertical-align: middle;">
-                        <div style="display:flex; flex-direction:column; gap:6px;">
-                            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;">
-                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#0369a1; width:52px;">Primary:</span><input type="text" value="${fac.rep_name || ''}" placeholder="Contact Name" style="padding:3px 6px !important; font-size:12.5px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').rep_name=this.value; saveDataToCloud();"></div>
-                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">📬 Email:</span><input type="text" value="${fac.rep_email || ''}" placeholder="Contact Email" style="padding:3px 6px !important; font-size:12px !important; border:1px solid #cbd5e1; border-radius:4px; flex-grow:1; width:100% !important; color:#475569;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').rep_email=this.value; saveDataToCloud();"></div>
-                            </div>
-                            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;">
-                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#475569; width:52px;">Second:</span><input type="text" value="${fac.alt_name || ''}" placeholder="Alt Name" style="padding:3px 6px !important; font-size:12.5px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').alt_name=this.value; saveDataToCloud();"></div>
-                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">📬 Email:</span><input type="text" value="${fac.alt_email || ''}" placeholder="Alt Email" style="padding:3px 6px !important; font-size:12px !important; border:1px solid #cbd5e1; border-radius:4px; flex-grow:1; width:100% !important; color:#475569;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').alt_email=this.value; saveDataToCloud();"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td style="padding: 14px 18px; vertical-align: middle;">
-                        <select style="font-size: 13px !important; padding: 6px 8px; font-weight: 700; border-radius: 4px; border: 1px solid #cbd5e1; width: 155px; color: #0369a1;" onchange="const matched = mockFacilities.find(f => f.id === '${fac.id}'); if (matched) { matched.series_count = this.value; matched.series = this.value === '2' ? 'GI 1, MM' : 'MM'; saveDataToCloud(); renderDashboard(); }">
-                            <option value="1" ${fac.series_count === '1' || fac.series === 'MM' ? 'selected' : ''}>1 Series ($1,500)</option>
-                            <option value="2" ${fac.series_count === '2' || fac.series !== 'MM' ? 'selected' : ''}>2 Series ($2,300)</option>
-                        </select>
-                        <div style="display:flex; align-items:center; gap:4px; margin-top:6px; justify-content:center;"><span style="font-size:10px; font-weight:700; color:#64748b; white-space:nowrap;">✍️ Programs:</span><input type="text" value="${fac.series || 'MM'}" style="padding:2px 4px !important; font-size:11px !important; border:1px solid #cbd5e1; border-radius:4px; width:75px !important; font-weight:700; color:#0369a1; text-align:center; background:#ffffff;" ${isReadonly} onchange="mockFacilities.find(f=>f.id==='${fac.id}').series=this.value; saveDataToCloud();"></div>
-                    </td>
-                    <td style="padding: 14px 18px; vertical-align: middle;">
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <span style="font-size: 11px; font-weight: 700; color: #475569; width: 65px;">📋 Sent:</span>
-                                <input type="date" value="${fac.contract_sent_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 115px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_sent_date=this.value; saveDataToCloud();">
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <span style="font-size: 11px; font-weight: 700; color: #0369a1; width: 65px;">✍️ Signed:</span>
-                                <input type="date" value="${fac.contract_received_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 115px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').contract_received_date=this.value; saveDataToCloud();">
-                            </div>
-                        </div>
-                    </td>
-                    <td style="padding: 14px 18px; vertical-align: middle;">
-                        <div style="display: flex; flex-direction: column; gap: 6px; width: fit-content;">
-                            <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span style="font-size: 10px; color: #64748b; font-weight: 600;">Inv Sent:</span>
-                                    <input type="date" value="${fac.invoice_sent_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 105px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').invoice_sent_date=this.value; saveDataToCloud();">
-                                </div>
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span style="font-size: 10px; color: #64748b; font-weight: 600;">Chk Rec'd:</span>
-                                    <input type="date" value="${fac.check_received_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 105px;" onchange="mockFacilities.find(f=>f.id==='${fac.id}').check_received_date=this.value; saveDataToCloud();">
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <span style="font-size: 10px; color: #64748b; font-weight: 600; min-width: 42px;">Status:</span>
-                                <select style="font-size: 12px; padding: 4px; font-weight: 700; border-radius: 4px; width: 172px; ${badgeStyle || ''}" onchange="mockFacilities.find(f=>f.id==='${fac.id}').payment_status=this.value; saveDataToCloud(); renderDashboard();">
-                                    <option value="Unpaid" ${fac.payment_status==='Unpaid'?'selected':''}>❌ Unpaid</option>
-                                    <option value="Half Payment" ${fac.payment_status==='Half Payment'?'selected':''}>🌗 Half Payment</option>
-                                    <option value="Paid in Full" ${fac.payment_status==='Paid in Full' || fac.payment_status==='Paid'?'selected':''}>✅ Paid in Full</option>
-                                </select>
-                            </div>
-                        </div>
-                    </td>
-                    <td style="padding:14px 18px; text-align:center; vertical-align: middle;">
-                        <div style="display:flex; justify-content:center; gap:8px;">
-                            <button type="button" class="btn" style="background:#e2e8f0; color:#0f172a; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:600; cursor:pointer; border:1px solid #cbd5e1;" onclick="event.stopPropagation(); switchTab('notes'); document.getElementById('n-fac-id').value='${fac.id}'; filterNotesByFacility();">🔎 View Logs</button>
-                            <button type="button" style="background:#fee2e2; color:#ef4444; border:1px solid #fca5a5; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;" ${isReadonly} onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete the facility: ${fac.name.replace(/'/g, "\\'")}?')){ mockFacilities=mockFacilities.filter(f=>f.id!=='${fac.id}'); saveDataToCloud(); renderDashboard(); }">❌ Delete</button>
-                        </div>
-                    </td>
-                </tr>`;
-            });
-            tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
-            
-            let leadsHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:16%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:16%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:14%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Contact Email</th><th style="padding:14px 18px; font-weight:700; width:13%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:13%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
-                     mockLeads.forEach(lead => {
+            mockLeads.forEach(lead => {
                 let currentNotesHTML = '';
                 if (lead.notes && lead.notes.length > 0) {
                     currentNotesHTML = lead.notes.map((n, lIdx) => `
@@ -763,3 +664,4 @@
     </script>
 </body>
 </html>
+           
