@@ -690,15 +690,15 @@
             tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
             
             let leadsHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:16%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:16%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:14%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Contact Email</th><th style="padding:14px 18px; font-weight:700; width:13%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:13%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
-            mockLeads.forEach(lead => {
+                     mockLeads.forEach(lead => {
                 let currentNotesHTML = '';
                 if (lead.notes && lead.notes.length > 0) {
                     currentNotesHTML = lead.notes.map((n, lIdx) => `
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; margin-top: 4px; background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #ea580c; border-radius: 4px; font-size: 13.5px; color: #0f172a;">
                             <div style="flex-grow: 1; padding-right: 15px; line-height: 1.5;">🗓️ <strong>${n.date}</strong>: <span id="lead-body-text-${lead.id}-${lIdx}">${n.text}</span></div>
                             <div style="display: flex; gap: 4px; white-space: nowrap;">
-                                <button type="button" id="lead-edit-btn-${lead.id}-${lIdx}" onclick="enableInlineLeadNoteEdit('${lead.id}', lIdx)" style="background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px;">Edit</button>
-                                <button type="button" id="lead-save-btn-${lead.id}-${lIdx}" onclick="saveInlineLeadNoteEdit('${lead.id}', lIdx)" style="display: none; background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px;">Save</button>
+                                <button type="button" id="lead-edit-btn-${lead.id}-${lIdx}" onclick="enableInlineLeadNoteEdit('${lead.id}', ${lIdx})" style="background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px;">Edit</button>
+                                <button type="button" id="lead-save-btn-${lead.id}-${lIdx}" onclick="saveInlineLeadNoteEdit('${lead.id}', ${lIdx})" style="display: none; background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px;">Save</button>
                             </div>
                         </div>`).join('');
                 } else { currentNotesHTML = `<span style="font-size: 12px; color: #94a3b8; font-style: italic; padding-left: 4px;">No interactions.</span>`; }
