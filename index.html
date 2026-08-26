@@ -71,13 +71,10 @@
                         <input type="text" id="f-name" placeholder="Facility Name" class="form-input" required style="font-size: 1rem !important; padding: 0.5rem 0.75rem;"> 
                         <input type="text" id="f-add" placeholder="Address, City, ZIP" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;"> 
                     </div> 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;"> 
-                        <input type="text" id="f-ph" placeholder="Primary Phone Number" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;"> 
-                        <select id="f-series-count" class="dropdown-select" onchange="updateEstimatedPricingLabel()" style="font-size: 1rem !important; padding: 0.5rem 0.75rem; width: 97%;"> 
-                            <option value="1">Select Subscription: 1 Series Bundle ($1,500)</option> 
-                            <option value="2">Select Subscription: 2 Series Bundle ($2,300)</option> 
-                        </select> 
-                    </div> 
+                                           <div style="display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                            <input type="text" id="f-ph" placeholder="Primary Phone Number" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;">
+                        </div>
+
                     <div style="display:grid; grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
                         <input type="text" id="f-cname" placeholder="Primary Contact Name" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;">
                     </div>
@@ -89,7 +86,7 @@
                         <input type="email" id="f-cemail-alt" placeholder="Secondary Contact Email" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem; width: 97%;"> 
                     </div> 
                     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 12px;"> 
-                        <span id="price-est-label" style="font-weight: 700; color: #475569; font-size: 0.9rem;">Estimated Standard Invoice: $1,500.00 (Due upon receipt)</span> 
+                        <span id="price-est-label" style="font-weight: 700; color: #475569; font-size: 0.9rem;">ℹ️ Update the facility bundle choices directly within the roster active grid below.</span>
                         <button type="submit" class="btn-green" style="padding: 8px 20px; font-size: 1rem;">🏢 Save Facility Profile</button> 
                     </div> 
                 </form> 
