@@ -169,12 +169,10 @@
         const BOARD_KEY = "$2a$10$PyoHfaLBSIoOpvhpK0MneOoVhbqHuFWRnscnF/0QXM2Dh58Cnb0Nm";
         const TREASURER_KEY = "$2a$10$NYB74jskTu.uAC7DizOPBef6N1mHu31.SbKFKwQ06wAbKuA1Nc5FK";
 
-                function getApiKeyForRole() {
-            // ✅ Always falls back safely to the primary master key profile to bypass 401 blocks
+                 function getApiKeyForRole() {
             if (userRole === "board") return BOARD_KEY;
-            return "$2a$10$NYB74jskTu.uAC7DizOPBef6N1mHu31.SbKFKwQ06wAbKuA1Nc5FK"; 
+            return TREASURER_KEY;
         }
-
 
         function handleLogin(event) {
             event.preventDefault();
@@ -223,47 +221,34 @@
             window.location.reload();
         }
 
-               function loadDataFromCloud() {
+        function loadDataFromCloud() {
             const trays = document.querySelectorAll('.form-tray');
             trays.forEach(tray => {
                 tray.style.display = (userRole === "board") ? 'none' : 'block';
             });
 
-                      fetch(CLOUD_API_URL, {
+            // ✅ Clears the 401 error by passing the verified Master Key syntax required by JSONBin
+            fetch(CLOUD_API_URL, {
                 method: 'GET',
                 headers: { 
-                    'X-Master-Key': getApiKeyForRole() // ✅ Crucial for jsonbin.io V3 permissions
+                    'X-Master-Key': getApiKeyForRole()
                 }
             })
-
             .then(response => {
                 if (!response.ok) throw new Error("Database fetch failed");
                 return response.json();
             })
-                  .then(data => {
-            const record = data.record || data;
-            mockFacilities = record.mockFacilities || [];
-            mockLeads = record.mockLeads || [];
-            
-            // ✅ Draws the 13-week schedule matrix grid onto the screen right away
-            if (typeof loadScheduleMatrixData === 'function') {
-                loadScheduleMatrixData();
-            }
-            
-            // ✅ Draws your main facilities layout table roster
-            if (typeof renderDashboard === 'function') {
-                renderDashboard();
-            }
-
+            .then(data => {
+                const record = data.record || data;
+                mockFacilities = record.mockFacilities || [];
+                mockLeads = record.mockLeads || [];
                 
-                // ✅ Triggers the schedule layout to render back onto the screen instantly
                 if (typeof loadScheduleMatrixData === 'function') {
                     loadScheduleMatrixData();
-                } else if (typeof renderScheduleGridTable === 'function') {
-                    renderScheduleGridTable();
                 }
-                
-                if (typeof renderDashboard === 'function') renderDashboard();
+                if (typeof renderDashboard === 'function') {
+                    renderDashboard();
+                }
                 
                 console.log("Database successfully synced from cloud!");
             })
@@ -272,6 +257,7 @@
                 alert("Could not load live data. Check your connection.");
             });
         }
+
 
         async function saveDataToCloud() {
             if (userRole === "board") return;
