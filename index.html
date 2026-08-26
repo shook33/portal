@@ -221,13 +221,13 @@
             window.location.reload();
         }
 
-        function loadDataFromCloud() {
+               function loadDataFromCloud() {
             const trays = document.querySelectorAll('.form-tray');
             trays.forEach(tray => {
                 tray.style.display = (userRole === "board") ? 'none' : 'block';
             });
 
-            // ✅ Clears the 401 error by passing the verified Master Key syntax required by JSONBin
+            // ✅ Uses 'X-Master-Key' header syntax to allow root bin read queries
             fetch(CLOUD_API_URL, {
                 method: 'GET',
                 headers: { 
@@ -258,7 +258,6 @@
             });
         }
 
-
         async function saveDataToCloud() {
             if (userRole === "board") return;
             
@@ -270,11 +269,12 @@
                 mockLeads: mockLeads
             };
 
+            // ✅ Uses 'X-Master-Key' to allow root updates
             await fetch(CLOUD_API_URL, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Access-Key': getApiKeyForRole()
+                    'X-Master-Key': getApiKeyForRole()
                 },
                 body: JSON.stringify(payload)
             })
