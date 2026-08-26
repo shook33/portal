@@ -550,14 +550,19 @@
                             </div>
                         </div>
                     </td>
-                               <td style="padding: 14px 18px; vertical-align: middle;">
+                                            <td style="padding: 14px 18px; vertical-align: middle;">
                         <!-- Safe isolated dropdown logic -->
                         <select style="font-size: 13px !important; padding: 6px 8px; font-weight: 700; border-radius: 4px; border: 1px solid #cbd5e1; width: 155px; color: #0369a1;" onchange="const matched = mockFacilities.find(f => f.id == ${fac.id}); if (matched) { matched.series_count = this.value; saveDataToCloud(); renderDashboard(); }">
                             <option value="1" ${fac.series_count == '1' ? 'selected' : ''}>1 Series ($1,500)</option>
                             <option value="2" ${fac.series_count == '2' ? 'selected' : ''}>2 Series ($2,300)</option>
                         </select>
-                        <div style="display:flex; align-items:center; gap:4px; margin-top:6px; justify-content:center;"><span style="font-size:10px; font-weight:700; color:#64748b; white-space:nowrap;">✍️ Programs:</span><input type="text" value="${fac.series || ''}" placeholder="None Specified" style="padding:2px 4px !important; font-size:11px !important; border:1px solid #cbd5e1; border-radius:4px; width:75px !important; font-weight:700; color:#0369a1; text-align:center; background:#ffffff;" ${isReadonly} onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.series=this.value; saveDataToCloud(); }"></div>
+                        <!-- ✅ Turned into a fully functional type-in input box field -->
+                        <div style="display:flex; align-items:center; gap:4px; margin-top:6px; justify-content:center;">
+                            <span style="font-size:10px; font-weight:700; color:#64748b; white-space:nowrap;">✍️ Programs:</span>
+                            <input type="text" value="${fac.series || ''}" placeholder="None Specified" style="padding:2px 6px !important; font-size:11px !important; border:1px solid #cbd5e1; border-radius:4px; width:85px !important; font-weight:700; color:#0369a1; text-align:center; background:#ffffff; outline:none;" ${isReadonly} onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.series=this.value; saveDataToCloud(); }">
+                        </div>
                     </td>
+
 
                     <td style="padding: 14px 18px; vertical-align: middle;">
                         <div style="display: flex; flex-direction: column; gap: 6px;">
