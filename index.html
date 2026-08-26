@@ -231,7 +231,7 @@
             fetch(CLOUD_API_URL, {
                 method: 'GET',
                 headers: { 
-                    'X-Master-Key': getApiKeyForRole()
+                    'X-Access-Key': getApiKeyForRole()
                 }
             })
             .then(response => {
@@ -269,12 +269,12 @@
                 mockLeads: mockLeads
             };
 
-            // ✅ Capitalizes 'X-Master-Key' for the saving routine as well
+            // ✅ Capitalizes 'X-Access-Key' for the saving routine as well
             await fetch(CLOUD_API_URL, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Master-Key': getApiKeyForRole()
+                    'X-Access-Key': getApiKeyForRole()
                 },
                 body: JSON.stringify(payload)
             })
