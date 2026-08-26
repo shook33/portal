@@ -221,13 +221,13 @@
             window.location.reload();
         }
 
-               function loadDataFromCloud() {
+                      function loadDataFromCloud() {
             const trays = document.querySelectorAll('.form-tray');
             trays.forEach(tray => {
                 tray.style.display = (userRole === "board") ? 'none' : 'block';
             });
 
-            // ✅ Uses 'X-Master-Key' header syntax to allow root bin read queries
+            // ✅ Uses 'X-Master-Key' (Capital K) to match JSONBin V3 authorization rules exactly
             fetch(CLOUD_API_URL, {
                 method: 'GET',
                 headers: { 
@@ -269,7 +269,7 @@
                 mockLeads: mockLeads
             };
 
-            // ✅ Uses 'X-Master-Key' to allow root updates
+            // ✅ Capitalizes 'X-Master-Key' for the saving routine as well
             await fetch(CLOUD_API_URL, {
                 method: 'PUT',
                 headers: {
@@ -286,6 +286,7 @@
                 console.error("Cloud save error:", error);
             });
         }
+
 
                 function addNewFacility(e) {
             e.preventDefault();
