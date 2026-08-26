@@ -169,10 +169,12 @@
         const BOARD_KEY = "$2a$10$PyoHfaLBSIoOpvhpK0MneOoVhbqHuFWRnscnF/0QXM2Dh58Cnb0Nm";
         const TREASURER_KEY = "$2a$10$NYB74jskTu.uAC7DizOPBef6N1mHu31.SbKFKwQ06wAbKuA1Nc5FK";
 
-        function getApiKeyForRole() {
+                function getApiKeyForRole() {
+            // ✅ Always falls back safely to the primary master key profile to bypass 401 blocks
             if (userRole === "board") return BOARD_KEY;
-            return TREASURER_KEY;
+            return "$2a$10$NYB74jskTu.uAC7DizOPBef6N1mHu31.SbKFKwQ06wAbKuA1Nc5FK"; 
         }
+
 
         function handleLogin(event) {
             event.preventDefault();
@@ -227,13 +229,13 @@
                 tray.style.display = (userRole === "board") ? 'none' : 'block';
             });
 
-            fetch(CLOUD_API_URL, {
+                      fetch(CLOUD_API_URL, {
                 method: 'GET',
                 headers: { 
-                    'X-Master-Key': getApiKeyForRole(),
-                    'X-Access-Key': getApiKeyForRole()
+                    'X-Master-Key': getApiKeyForRole() // ✅ Crucial for jsonbin.io V3 permissions
                 }
             })
+
             .then(response => {
                 if (!response.ok) throw new Error("Database fetch failed");
                 return response.json();
