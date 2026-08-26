@@ -221,7 +221,7 @@
             window.location.reload();
         }
 
-        function loadDataFromCloud() {
+               function loadDataFromCloud() {
             const trays = document.querySelectorAll('.form-tray');
             trays.forEach(tray => {
                 tray.style.display = (userRole === "board") ? 'none' : 'block';
@@ -229,19 +229,39 @@
 
             fetch(CLOUD_API_URL, {
                 method: 'GET',
-                headers: { 'X-Access-Key': getApiKeyForRole() }
+                headers: { 
+                    'X-Master-Key': getApiKeyForRole(),
+                    'X-Access-Key': getApiKeyForRole()
+                }
             })
             .then(response => {
                 if (!response.ok) throw new Error("Database fetch failed");
                 return response.json();
             })
-            .then(data => {
-                const record = data.record;
-                mockFacilities = record.mockFacilities || [];
-                mockLeads = record.mockLeads || [];
+                  .then(data => {
+            const record = data.record || data;
+            mockFacilities = record.mockFacilities || [];
+            mockLeads = record.mockLeads || [];
+            
+            // ✅ Draws the 13-week schedule matrix grid onto the screen right away
+            if (typeof loadScheduleMatrixData === 'function') {
+                loadScheduleMatrixData();
+            }
+            
+            // ✅ Draws your main facilities layout table roster
+            if (typeof renderDashboard === 'function') {
+                renderDashboard();
+            }
+
+                
+                // ✅ Triggers the schedule layout to render back onto the screen instantly
+                if (typeof loadScheduleMatrixData === 'function') {
+                    loadScheduleMatrixData();
+                } else if (typeof renderScheduleGridTable === 'function') {
+                    renderScheduleGridTable();
+                }
                 
                 if (typeof renderDashboard === 'function') renderDashboard();
-                if (typeof loadScheduleMatrixData === 'function') loadScheduleMatrixData();
                 
                 console.log("Database successfully synced from cloud!");
             })
@@ -657,6 +677,63 @@
             });
             if (typeof populateDropdown === "function") populateDropdown();
         }
+                  function loadScheduleMatrixData() {
+            const savedSched = localStorage.getItem('sill_schedule_matrix');
+            if (savedSched) {
+                mockSchedule = JSON.parse(savedSched);
+            } else {
+                mockSchedule = [];
+                for (let w = 1; w <= 13; w++) {
+                    mockSchedule.push({
+                        week: w,
+                        l1_speaker: '', l1_topic: '', l1_url: '',
+                        l2_speaker: '', l2_topic: '', l2_url: '',
+                        l3_speaker: '', l3_topic: '', l3_url: '',
+                    });
+                }
+            }
+            renderScheduleGridTable();
+        }
+
+        function renderScheduleGridTable() {
+            const container = document.getElementById('schedule-matrix-container');
+            if (!container) return;
+            const isReadonly = (typeof userRole !== 'undefined' && userRole === "board") ? "readonly disabled style='background:#f1f5f9; color:#64748b; cursor:not-allowed;'" : "";
+            let html = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding: 14px 18px; font-weight: 700; width: 10%;">WEEK</th><th style="padding: 14px 18px; font-weight: 700; width: 30%; color: #0284c7;">🎼 MUSIC MONDAY</th><th style="padding: 14px 18px; font-weight: 700; width: 30%; color: #b45309;">🌍 GLOBAL ISSUES 1</th><th style="padding: 14px 18px; font-weight: 700; width: 30%; color: #047857;">🌏 GLOBAL ISSUES 2</th></tr></thead><tbody>`;
+            mockSchedule.forEach((row, i) => {
+                html += `<tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 14px 18px; font-weight: 700; color: #475569;">Week ${row.week}</td>
+                    <td style="padding: 14px 18px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" value="${row.l1_speaker || ''}" placeholder="👤 Speaker" onchange="mockSchedule[${i}].l1_speaker=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l1_topic || ''}" placeholder="📝 Topic" onchange="mockSchedule[${i}].l1_topic=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l1_url || ''}" placeholder="🔗 Link" onchange="mockSchedule[${i}].l1_url=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                        </div>
+                    </td>
+                    <td style="padding: 14px 18px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" value="${row.l2_speaker || ''}" placeholder="👤 Speaker" onchange="mockSchedule[${i}].l2_speaker=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l2_topic || ''}" placeholder="📝 Topic" onchange="mockSchedule[${i}].l2_topic=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l2_url || ''}" placeholder="🔗 Link" onchange="mockSchedule[${i}].l2_url=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                        </div>
+                    </td>
+                    <td style="padding: 14px 18px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" value="${row.l3_speaker || ''}" placeholder="👤 Speaker" onchange="mockSchedule[${i}].l3_speaker=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l3_topic || ''}" placeholder="📝 Topic" onchange="mockSchedule[${i}].l3_topic=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l3_url || ''}" placeholder="🔗 Link" onchange="mockSchedule[${i}].l3_url=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                        </div>
+                    </td>`;
+            });
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function saveScheduleToCloud() {
+            if (userRole === "board") return;
+            localStorage.setItem('sill_schedule_matrix', JSON.stringify(mockSchedule));
+        }
+
         function downloadDatabaseBackup() {
             const backupData = {
                 facilities: typeof mockFacilities !== 'undefined' ? mockFacilities : [],
