@@ -631,36 +631,36 @@
             </div>`).join('');
     } else { currentNotesHTML = `<span style="font-size: 12px; color: #94a3b8; font-style: italic; padding-left: 4px;">No interactions.</span>`; }
     
-    leadsHTML += `<tr style="border-bottom: 4px solid #475569; background-color: #fafafa;">
-        <td style="padding: 14px 18px; font-weight: 700; color: #0369a1; font-size: 15px;">🔮 ${lead.name}</td>
-        <td style="padding: 14px 18px;"><input type="text" value="${lead.address || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.address=this.value; saveDataToCloud(); }"></td>
-        <td style="padding: 14px 18px;"><input type="text" value="${lead.rep || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.rep=this.value; saveDataToCloud(); }"></td>
-        <td style="padding: 14px 18px;"><input type="text" value="${lead.email || ''}" placeholder="Contact Email" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.email=this.value; saveDataToCloud(); }"></td>
-                    <td style="padding: 14px 18px;"><input type="text" value="${lead.phone || ''}" placeholder="Phone Number" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.phone=this.value; saveDataToCloud(); }"></td>
-        
-        <!-- FIXED: Placed the correct input element inside the Referred By cell wrapper -->
-                    <td style="padding: 14px 18px;"><input type="text" value="${lead.source || ''}" placeholder="Referred By" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.source=this.value; saveDataToCloud(); }"></td>
-        
-        <!-- FIXED: Moved the Delete button cell cleanly into its own column wrapper under ActionsHeader -->
-        <td style="padding: 14px 18px; text-align: center;"><button type="button" onclick="if(confirm('Are you sure you want to delete this lead record?')) { deleteLeadRecord('${lead.id}'); }" style="background: #fee2e2; color: #ef4444; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">Delete</button></td>
-    </tr>
-    <tr style="border-bottom: 4px solid #475569; background-color: #f8fafc;">
-        <td colspan="7" style="padding: 24px 24px 32px 24px;">
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;">
-                    <span style="font-weight: 700; color: #ea580c; font-size: 13.5px; white-space: nowrap; width: 90px;">📝 Log Note:</span>
-                    <input type="date" id="date-pick-${lead.id}" style="padding: 6px 10px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 150px; background:#ffffff;" ${isReadonly}>
-                    <input type="text" id="note-input-${lead.id}" placeholder="Type conversation milestones here..." style="padding: 6px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; flex-grow: 1; color: #0f172a; background:#ffffff;" ${isReadonly} onkeypress="if(event.key==='Enter'){ addInlineLeadNote('${lead.id}', this.value, document.getElementById('date-pick-${lead.id}').value); this.value=''; }">
-                    <button type="button" style="background: #ea580c; color: #ffffff; border: none; padding: 6px 18px; border-radius: 4px; font-size: 13.5px; font-weight: bold; cursor: pointer; white-space:nowrap;" ${isReadonly} onclick="addInlineLeadNote('${lead.id}', document.getElementById('note-input-${lead.id}').value, document.getElementById('date-pick-${lead.id}').value); document.getElementById('note-input-${lead.id}').value='';">＋ Add Note</button>
-                </div>
-                <div style="margin-top: 4px;">
-                    <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">📋 Logs:</div>
-                    <div style="display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; padding: 4px;">${currentNotesHTML}</div>
-                </div>
-            </div>
-        </td>
-    </tr>`;
-});
+                   leadsHTML += `<tr style="background-color: #ffffff;">
+                    <td style="padding: 14px 18px 6px 18px; font-weight: 700; color: #0369a1; font-size: 15px; border-top: 1px solid #cbd5e1; border-left: 1px solid #cbd5e1;">🔮 ${lead.name}</td>
+                    <td style="padding: 14px 18px 6px 18px; border-top: 1px solid #cbd5e1;"><input type="text" value="${lead.address || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.address=this.value; saveDataToCloud(); }"></td>
+                    <td style="padding: 14px 18px 6px 18px; border-top: 1px solid #cbd5e1;"><input type="text" value="${lead.rep || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.rep=this.value; saveDataToCloud(); }"></td>
+                    <td style="padding: 14px 18px 6px 18px; border-top: 1px solid #cbd5e1;"><input type="text" value="${lead.email || ''}" placeholder="Contact Email" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.email=this.value; saveDataToCloud(); }"></td>
+                    <td style="padding: 14px 18px 6px 18px; border-top: 1px solid #cbd5e1;"><input type="text" value="${lead.phone || ''}" placeholder="Phone Number" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.phone=this.value; saveDataToCloud(); }"></td>
+                    <td style="padding: 14px 18px 6px 18px; border-top: 1px solid #cbd5e1;"><input type="text" value="${lead.source || ''}" placeholder="Referred By" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.source=this.value; saveDataToCloud(); }"></td>
+                    <td style="padding: 14px 18px 6px 18px; text-align: center; border-top: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1;"><button type="button" onclick="if(confirm('Are you sure you want to delete this lead record?')) { deleteLeadRecord('${lead.id}'); }" style="background: #fee2e2; color: #ef4444; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">Delete</button></td>
+                </tr>
+                <tr style="background-color: #ffffff;">
+                    <td colspan="7" style="padding: 0px 18px 20px 18px; border-bottom: 2px solid #cbd5e1; border-left: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1;">
+                        <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 20px;">
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;">
+                                    <span style="font-weight: 700; color: #ea580c; font-size: 13.5px; white-space: nowrap; width: 90px;">📝 Log Note:</span>
+                                    <input type="date" id="date-pick-${lead.id}" style="padding: 6px 10px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 150px; background:#ffffff;" ${isReadonly}>
+                                    <input type="text" id="note-input-${lead.id}" placeholder="Type conversation milestones here..." style="padding: 6px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; flex-grow: 1; color: #0f172a; background:#ffffff;" ${isReadonly} onkeypress="if(event.key==='Enter'){ addInlineLeadNote('${lead.id}', this.value, document.getElementById('date-pick-${lead.id}').value); this.value=''; }">
+                                    <button type="button" style="background: #ea580c; color: #ffffff; border: none; padding: 6px 18px; border-radius: 4px; font-size: 13.5px; font-weight: bold; cursor: pointer; white-space:nowrap;" ${isReadonly} onclick="addInlineLeadNote('${lead.id}', document.getElementById('note-input-${lead.id}').value, document.getElementById('date-pick-${lead.id}').value); document.getElementById('note-input-${lead.id}').value='';">＋ Add Note</button>
+                                </div>
+                                <div style="margin-top: 4px;">
+                                    <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">📋 Logs:</div>
+                                    <div style="display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; padding: 4px;">${currentNotesHTML}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="height: 16px; background-color: #ffffff; margin: 0 -18px -20px -18px;"></div>
+                    </td>
+                </tr>`;
+            });
+
 
             leadsHTML += `</tbody></table></div>`; leadsList.innerHTML = leadsHTML;
             mockFacilities.forEach(f => {
