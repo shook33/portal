@@ -634,7 +634,7 @@
                 </tr>`;
             });
             tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
-             // --- FIXED: PRONOUNCED BACKUP WORKSPACE CONTROL PANEL ---
+                       // --- FIXED: PRONOUNCED BACKUP WORKSPACE CONTROL PANEL ---
             const dashboardParent = document.getElementById('leads-list')?.parentElement;
             if (dashboardParent && !document.getElementById('cloud-utility-panel')) {
                 const utilityCardHTML = `
@@ -653,6 +653,7 @@
                 `;
                 dashboardParent.insertAdjacentHTML('afterbegin', utilityCardHTML);
             }
+
 
             let leadsHTML = `<div style="overflow-x: auto; background: #f1f5f9; padding: 12px; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:16%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:16%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:14%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Contact Email</th><th style="padding:14px 18px; font-weight:700; width:13%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:13%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
                     
