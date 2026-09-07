@@ -1,6 +1,783 @@
 <!DOCTYPE html> 
 <html lang="en"> 
+<head> <!DOCTYPE html> 
+<html lang="en"> 
 <head> 
+    <meta charset="UTF-8"> 
+    <title>SILL Select Portal</title> 
+    <style> 
+        body { background-color: #f1f5f9 !important; color: #0f172a !important; font-family: sans-serif; padding: 2rem; margin: 0; } 
+        .flex-center { display: flex; align-items: center; justify-content: center; min-height: 85vh; } 
+        #login-card { background-color: #ffffff; padding: 2.5rem; border-radius: 1rem; width: 100%; max-width: 450px; text-align: center; border: 1px solid #cbd5e1; margin: 4rem auto; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); } 
+        #portal-console { width: 100%; max-width: 98%; margin: 0 auto; } 
+        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 1.5rem; margin-bottom: 2rem; } 
+        .hidden { display: none !important; } 
+        .form-tray { background-color: #ffffff; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #cbd5e1; margin-bottom: 1.5rem; border-top: 4px solid #0369a1; max-width: 900px; margin-left: auto; margin-right: auto; } 
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; margin-bottom: 0.5rem; } 
+        .form-input, .dropdown-select { background-color: #f8fafc; border: 2px solid #94a3b8; padding: 0.5rem 0.75rem; border-radius: 0.375rem; color: #0f172a; font-size: 1.05rem; font-weight: 500; width: 94%; box-sizing: border-box; } 
+        .btn-nav { background: #e2e8f0; color: #475569; font-weight: bold; border: none; padding: 12px 22px; border-radius: 6px; cursor: pointer; font-size: 1.05rem; } 
+        .btn-green { background-color: #0369a1; color: #ffffff; font-weight: bold; padding: 0.6rem 1.4rem; border-radius: 0.375rem; border: none; cursor: pointer; font-size: 1.05rem; } 
+        .timeline-item { background: #ffffff; padding: 0.85rem 1.25rem; border-radius: 8px; margin-bottom: 8px; font-size: 1.15rem !important; border: 2px solid #cbd5e1; border-left: 6px solid #0369a1; color: #1e293b; line-height: 1.6; } 
+        td, th { font-size: 1.15rem !important; padding: 14px 12px !important; vertical-align: middle; } 
+        td div[style*="color:#0369a1"] { font-size: 1.15rem !important; font-weight: bold !important; line-height: 1.3 !important; } 
+        tr td input[type="text"] { font-size: 1.05rem !important; padding: 6px 10px !important; width: 100% !important; box-sizing: border-box; } 
+        [id^="note-input-"], [id^="date-pick-"] { font-size: 1.05rem !important; padding: 6px 10px !important; } 
+        div[style*="overflow-y:auto"] div, div[style*="overflow-y:auto"] span { font-size: 1.15rem !important; font-weight: 500 !important; color: #0f172a !important; line-height: 1.5 !important; } 
+        div[style*="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #ea580c;"] { font-size: 1.15rem !important; font-weight: 500 !important; padding: 10px 16px !important; } 
+    </style> 
+</head> 
+<body> 
+<div id="board-playground-banner" style="display: none; background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; text-align: center; padding: 12px 24px; font-weight: 700; font-size: 14px; letter-spacing: 0.3px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-bottom: 2px solid #025a87; position: sticky; top: 0; z-index: 9999; font-family: sans-serif;">
+    👋 Board members: Feel free to make changes but they will not be saved. Once you log out, it will revert back to the original.
+</div> 
+    <div id="login-frame" class="flex-center"> 
+        <div id="login-card"> 
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div> 
+            <h2>SILL Select Cloud Login</h2> 
+            <form onsubmit="handleLogin(event)"> 
+                <input type="password" id="access-code" autocomplete="new-password" placeholder="Enter Access Password" style="width:90%; padding:0.75rem; background:#f8fafc; border:1px solid #cbd5e1; text-align:center; margin-bottom:1.5rem; border-radius:0.5rem;" required><br> 
+                <button type="submit" class="btn-green" style="width:100%; padding:0.75rem;">Secure Connect</button> 
+            </form> 
+        </div> 
+    </div> 
+    <div id="portal-console" class="hidden"> 
+        <div class="header-flex"> 
+            <div> 
+                <h1 style="font-size: 2rem; margin: 0; font-weight: bold; color:#0369a1;">SILL Select</h1> 
+                <p class="text-muted" style="margin-top: 0.25rem;">Aiven MySQL Cloud Pipeline Cluster Fully Operational</p> 
+            </div> 
+            <div>
+                <button type="button" onclick="downloadDatabaseBackup()" style="background-color: #2563eb; border: 1px solid #1d4ed8; color: #ffffff; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; font-weight: bold; margin-right: 0.5rem;">💾 Download Backup</button> 
+                <button type="button" onclick="handlePortalLogout()" style="background-color:#e2e8f0; border:1px solid #cbd5e1; color:#334155; padding:0.5rem 1rem; border-radius:0.5rem; cursor:pointer; font-weight:bold;">🚪 Sign Out</button> 
+            </div>
+        </div> 
+        <div id="admin-tabs-bar" style="display: flex; gap: 0.75rem; margin-bottom: 2rem; border-bottom: 1px solid #cbd5e1; padding-bottom: 0.75rem;"> 
+            <button onclick="switchTab('facilities')" id="tab-facilities" class="btn-nav" style="background:#0369a1; color:#ffffff;">🏢 Facilities & Contacts</button> 
+            <button onclick="switchTab('notes')" id="tab-notes" class="btn-nav">📋 Correspondence Notes Logs</button> 
+            <button onclick="switchTab('payments')" id="tab-payments" class="btn-nav">💰 Payment Ledger</button> 
+            <button onclick="switchTab('leads')" id="tab-leads" class="btn-nav">🔮 Marketing Pipeline</button> 
+            <button onclick="switchTab('schedule')" id="tab-schedule" class="btn-nav">📅 Master Schedule Matrix</button> 
+        </div>
+        <div id="panel-facilities" class="tab-panel"> 
+            <!-- 🏢 MAIN ACTIVE DIRECTORY TABLE - PROMINENT, MASSIVE & WIDESCREEN -->
+            <div style="background: #ffffff; padding: 1.75rem; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 2.5rem;">
+                <h2 style="color: #0369a1; font-size: 1.65rem; margin-top: 0; margin-bottom: 1.5rem; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem;">📂 Active Facilities Workspace Directory</h2> 
+                <div id="facilities-list"></div> 
+            </div>
+
+            <!-- ➕ QUICK-ADD PROFILE ENTRY TRAY - CLEAN & STREAMLINED -->
+            <div id="form-tray-facilities" class="form-tray"> 
+                <h3 style="margin: 0 0 1.25rem 0; color: #0369a1; font-weight: 700; font-size: 1.2rem;">➕ Quick-Add New Active Facility Profile</h3> 
+                <form onsubmit="addNewFacility(event)"> 
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;"> 
+                        <input type="text" id="f-name" placeholder="Facility Name" class="form-input" required style="font-size: 1rem !important; padding: 0.5rem 0.75rem;"> 
+                        <input type="text" id="f-add" placeholder="Address, City, ZIP" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;"> 
+                    </div> 
+                                           <div style="display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                            <input type="text" id="f-ph" placeholder="Primary Phone Number" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;">
+                        </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <input type="text" id="f-cname" placeholder="Primary Contact Name" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;"> 
+                        <input type="email" id="f-cemail" placeholder="Primary Contact Email" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;"> 
+                        <input type="text" id="f-cname-alt" placeholder="Secondary Contact Name" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem;"> 
+                    </div> 
+                    <div style="display: grid; grid-template-columns: 1fr; margin-bottom: 1.25rem;"> 
+                        <input type="email" id="f-cemail-alt" placeholder="Secondary Contact Email" class="form-input" style="font-size: 1rem !important; padding: 0.5rem 0.75rem; width: 97%;"> 
+                    </div> 
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 12px;"> 
+                        <span id="price-est-label" style="font-weight: 700; color: #475569; font-size: 0.9rem;">ℹ️ Update the facility bundle choices directly within the roster active grid below.</span>
+                        <button type="submit" class="btn-green" style="padding: 8px 20px; font-size: 1rem;">🏢 Save Facility Profile</button> 
+                    </div> 
+                </form> 
+            </div> 
+        </div> 
+      
+        <div id="panel-notes" class="tab-panel" style="display:none;"> 
+            <!-- 📋 UNIFIED CHRONOLOGICAL NOTES WORKSPACE CARD -->
+            <div style="background: #ffffff; padding: 2rem; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); max-width: 100%;"> 
+                <h2 style="color: #0369a1; font-size: 1.65rem; margin-top: 0; margin-bottom: 1.5rem; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem;">📋 Historical Correspondence Timeline</h2> 
+                
+                <!-- 📝 COMPACT INTEGRATED INPUT TRAY BAR -->
+                <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 1.25rem; border-radius: 8px; margin-bottom: 2.5rem;">
+                    <form onsubmit="addNewNote(event)"> 
+                        <div style="display: flex; gap: 1rem; align-items: center; justify-content: space-between;"> 
+                            <select id="n-fac-id" class="dropdown-select" onchange="filterNotesByFacility()" required style="font-size: 1.05rem !important; padding: 0.5rem 0.75rem; width: 250px; background: #ffffff;"></select> 
+                            <input type="text" id="n-text" placeholder="Type letters, emails, conversation details, or outreach milestones here..." class="form-input" style="font-size: 1.05rem !important; padding: 0.5rem 0.75rem; flex-grow: 1; background: #ffffff;" required> 
+                            <button type="submit" class="btn-green" style="padding: 0.55rem 1.5rem; font-size: 1rem; font-weight: bold; width: auto; white-space: nowrap;">💾 Save Note</button> 
+                        </div> 
+                    </form> 
+                </div>
+
+                <!-- 📜 CHRONOLOGICAL OUTREACH TIMELINE LIST WINDOW -->
+                <div id="master-notes-list">
+                    <div style="padding:16px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; border-radius:6px; font-size:14px; font-weight:500;">📌 System Prompt: Please select an active facility account from the dropdown selection box above to review its historical correspondence timeline logs.</div>
+                </div> 
+            </div> 
+        </div>
+        <div id="panel-payments" class="tab-panel" style="display:none;"> 
+            <div style="background: #ffffff; padding: 2rem; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); max-width: 100%;"> 
+                <h2 style="color: #0369a1; margin-top: 0; font-weight: 800; font-size: 1.65rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">📊 Treasurer Financial Stream Audit Ledger</h2> 
+                <div id="ledger-list"></div> 
+            </div> 
+        </div> 
+
+        <div id="panel-leads" class="tab-panel" style="display:none;"> 
+            <div style="background: #ffffff; padding: 2rem; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); max-width: 100%; margin-bottom: 2.5rem;">
+                <h2 style="color: #0369a1; font-size: 1.65rem; margin-top: 0; margin-bottom: 1.5rem; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem;">🔮 Potential Lead Accounts (Marketing Pipeline)</h2> 
+                <div id="leads-list"></div> 
+            </div>
+            
+                    <div id="form-tray-leads" class="form-tray" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); margin-top: 24px;">
+                <h3 style="margin: 0 0 16px 0; color: #0369a1; font-weight: 800; font-size: 1.5rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">🆕 Register New Potential Referral Lead</h3>
+                <form onsubmit="addNewLead(event)">
+                    <!-- Clean matching layout grid structure for input rows -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" id="l-name" placeholder="Facility Name" class="form-input" required style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" id="l-add" placeholder="Location/Address" class="form-input" style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" id="l-con" placeholder="Contact Person" class="form-input" style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <!-- NEW FORM MATRIX ROW ENTRY: Contact Email mapping binding lookup target -->
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="email" id="l-em" placeholder="Contact Email" class="form-input" style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" id="l-ph" placeholder="Phone Number" class="form-input" style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" id="l-ref" placeholder="Referred By" class="form-input" style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn-green" style="padding: 10px 24px; font-weight: bold; border-radius: 6px; cursor: pointer; min-width: 200px;">Save Pipeline Lead</button>
+                    </div>
+                </form>
+            </div>
+
+
+        <div id="panel-schedule" class="tab-panel" style="display:none;">
+            <div style="background: #ffffff; padding: 2rem; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); max-width: 100%;">
+                <h2 style="color: #0369a1; font-size: 1.65rem; margin-top: 0; margin-bottom: 1.5rem; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem;">📅 Master 13-Week Lecture Schedule Matrix</h2>
+                <div id="schedule-matrix-container"></div>
+                <div style="font-size: 13px; color: #64748b; margin-top: 14px; font-style: italic; text-align: left; font-weight: 500;">
+                    📌 Storage Protocol: Data entries automatically lock into local memory arrays when typed. The board runs in read-only viewer mode.
+                </div>
+            </div>
+        </div>
+    </div>
+
+      <script>
+        let mockFacilities = [];
+        let mockLeads = [];
+        let mockSchedule = [];
+        let userRole = "admin";
+
+      const CLOUD_API_URL = "https://api.jsonbin.io/v3/b/6a7f520af5f4af5e29170934";
+        const BOARD_KEY = "$2a$10$PyoHfaLBSIoOpvhpK0MneOoVhbqHuFWRnscnF/0QXM2Dh58Cnb0Nm";
+        const TREASURER_KEY = "$2a$10$NYB74jskTu.uAC7DizOPBef6N1mHu31.SbKFKwQ06wAbKuA1Nc5FK";
+
+                 function getApiKeyForRole() {
+            if (userRole === "board") return BOARD_KEY;
+            return TREASURER_KEY;
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const code = document.getElementById('access-code').value.trim();
+            
+            if (code === "SillSelect") {
+                userRole = "admin";
+                document.getElementById('login-frame').classList.add('hidden');
+                document.getElementById('portal-console').classList.remove('hidden');
+                setTimeout(loadDataFromCloud, 100);
+            } else if (code === "Select2027") {
+                userRole = "treasurer";
+                document.getElementById('login-frame').classList.add('hidden');
+                document.getElementById('portal-console').classList.remove('hidden');
+                setTimeout(loadDataFromCloud, 100);
+            } else if (code === "Sillselect2027") {
+                userRole = "board";
+                document.getElementById('board-playground-banner').style.display = 'block';
+                document.getElementById('login-frame').classList.add('hidden');
+                document.getElementById('portal-console').classList.remove('hidden');
+                setTimeout(loadDataFromCloud, 100);
+            } else {
+                alert("⚠️ Invalid Access Password Profile. Please re-enter.");
+            }
+        }
+
+        function switchTab(tabName) {
+            const panels = document.querySelectorAll('.tab-panel');
+            const buttons = document.querySelectorAll('.btn-nav');
+            panels.forEach(p => p.style.display = 'none');
+            buttons.forEach(b => { b.style.background = '#e2e8f0'; b.style.color = '#475569'; });
+            
+            document.getElementById('panel-' + tabName).style.display = 'block';
+            document.getElementById('tab-' + tabName).style.background = '#0369a1';
+            document.getElementById('tab-' + tabName).style.color = '#ffffff';
+        }
+
+        async function handlePortalLogout() {
+            if (userRole !== "board" && typeof saveDataToCloud === 'function') {
+                console.log("⏳ Flushing tracking updates cleanly to cloud before window unload...");
+                await saveDataToCloud();
+            }
+            if(document.getElementById('board-playground-banner')) {
+                document.getElementById('board-playground-banner').style.display = 'none';
+            }
+            window.location.reload();
+        }
+
+                      function loadDataFromCloud() {
+            const trays = document.querySelectorAll('.form-tray');
+            trays.forEach(tray => {
+                tray.style.display = (userRole === "board") ? 'none' : 'block';
+            });
+
+            // ✅ Uses 'X-Master-Key' (Capital K) to match JSONBin V3 authorization rules exactly
+            fetch(CLOUD_API_URL, {
+                method: 'GET',
+                headers: { 
+                    'X-Access-Key': getApiKeyForRole()
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Database fetch failed");
+                return response.json();
+            })
+            .then(data => {
+                const record = data.record || data;
+                mockFacilities = record.mockFacilities || [];
+                mockLeads = record.mockLeads || [];
+                
+                if (typeof loadScheduleMatrixData === 'function') {
+                    loadScheduleMatrixData();
+                }
+                if (typeof renderDashboard === 'function') {
+                    renderDashboard();
+                }
+                
+                console.log("Database successfully synced from cloud!");
+            })
+            .catch(error => {
+                console.error("Cloud sync error:", error);
+                alert("Could not load live data. Check your connection.");
+            });
+        }
+
+        async function saveDataToCloud() {
+            if (userRole === "board") return;
+            
+            localStorage.setItem('sill_facilities', JSON.stringify(mockFacilities));
+            localStorage.setItem('sill_leads', JSON.stringify(mockLeads));
+
+            const payload = {
+                mockFacilities: mockFacilities,
+                mockLeads: mockLeads
+            };
+
+            // ✅ Capitalizes 'X-Access-Key' for the saving routine as well
+            await fetch(CLOUD_API_URL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Access-Key': getApiKeyForRole()
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Cloud save failed");
+                console.log("Database successfully backed up to cloud!");
+            })
+            .catch(error => {
+                console.error("Cloud save error:", error);
+            });
+        }
+
+
+                function addNewFacility(e) {
+            e.preventDefault();
+            if (userRole === "board") return;
+            mockFacilities.push({
+                id: Date.now().toString(),
+                name: document.getElementById('f-name').value,
+                address: document.getElementById('f-add').value || '',
+                phone: document.getElementById('f-ph').value || '',
+                series_count: '1',
+                series: '', // ✅ Leaves the custom Programs field completely blank initially
+                rep_name: document.getElementById('f-cname').value || '',
+                rep_email: document.getElementById('f-cemail').value || '',
+                alt_name: document.getElementById('f-cname-alt').value || '',
+                alt_email: document.getElementById('f-cemail-alt').value || '',
+                contract_sent_date: '', contract_received_date: '', invoice_sent_date: '', check_received_date: '',
+                payment_status: 'Unpaid', notes: []
+            });
+            saveDataToCloud(); renderDashboard(); e.target.reset();
+        }
+
+              function addNewNote(event) {
+            if (event) event.preventDefault();
+            if (userRole === "board") return;
+            
+            const facId = document.getElementById('n-fac-id').value;
+            const text = document.getElementById('n-text').value;
+            if (!facId || !text.trim()) return;
+
+            const fac = mockFacilities.find(f => f.id == facId);
+            if (fac) {
+                if (!fac.notes) fac.notes = [];
+                fac.notes.unshift({ date: new Date().toLocaleDateString(), text: text.trim() });
+                
+                saveDataToCloud();
+                renderDashboard();
+                
+                if (typeof switchTab === 'function') switchTab('notes');
+                
+                document.getElementById('n-fac-id').value = facId;
+                filterNotesByFacility();
+                
+                document.getElementById('n-text').value = '';
+            }
+        }
+
+        function filterNotesByFacility() {
+            const facId = document.getElementById('n-fac-id').value;
+            const masterNotes = document.getElementById('master-notes-list');
+            if (!masterNotes) return;
+            masterNotes.innerHTML = '';
+
+            if (!facId) {
+                masterNotes.innerHTML = `<div style="padding:16px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; border-radius:6px; font-size:14px; font-weight:500;">📌 System Prompt: Please select an active facility account from the dropdown selection box above to review its historical correspondence timeline logs.</div>`;
+                return;
+            }
+
+            const fac = mockFacilities.find(f => f.id == facId);
+            if (!fac) return;
+
+            if (!fac.notes || fac.notes.length === 0) {
+                masterNotes.innerHTML = `<div style="padding:14px; color:#64748b; font-style:italic; font-size:13.5px; text-align:center;">No correspondence notes logged for this facility yet.</div>`;
+                return;
+            }
+
+            let notesHTML = `<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">`;
+            
+            fac.notes.forEach((item, idx) => {
+                notesHTML += `
+                <div id="note-row-${facId}-${idx}" class="timeline-item" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; margin-bottom: 0px;">
+                    <div id="note-text-container-${facId}-${idx}" style="flex-grow: 1; padding-right: 24px;">
+                        <span style="font-weight: 700; color: #0284c7; font-size: 13px; margin-right: 8px;">📅 ${item.date}</span>
+                        <span id="note-body-text-${facId}-${idx}" style="font-size: 14px; color: #1e293b; line-height: 1.5; font-weight: 500;">${item.text}</span>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <button type="button" id="note-edit-btn-${facId}-${idx}" class="btn" style="background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer;" onclick="enableInlineNoteEdit('${facId}', ${idx})">✏️ Edit</button>
+                        <button type="button" id="note-save-btn-${facId}-${idx}" class="btn" style="display: none; background: #10b981; color: #ffffff; padding: 4px 12px; font-size: 12px; font-weight: 700; border-radius: 4px; border: none; cursor: pointer;" onclick="saveInlineNoteEdit('${facId}', ${idx})">💾 Save</button>
+                        <button type="button" class="btn" style="background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer;" onclick="deleteSelectedNote('${facId}', ${idx})">❌ Delete</button>
+                    </div>
+                </div>`;
+            });
+
+            notesHTML += `</div>`;
+            masterNotes.innerHTML = notesHTML;
+        }
+        function enableInlineNoteEdit(facId, idx) {
+            const bodySpan = document.getElementById(`note-body-text-${facId}-${idx}`);
+            const editBtn = document.getElementById(`note-edit-btn-${facId}-${idx}`);
+            const saveBtn = document.getElementById(`note-save-btn-${facId}-${idx}`);
+            if (!bodySpan || !editBtn || !saveBtn) return;
+            
+            const currentText = bodySpan.innerText;
+            bodySpan.innerHTML = `<input type="text" id="note-edit-input-${facId}-${idx}" value="${currentText.replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; font-size: 1.1rem; border: 2px solid #0369a1; border-radius: 6px; color: #0f172a; box-sizing: border-box;">`;
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-block';
+        }
+
+        function saveInlineNoteEdit(facId, idx) {
+            const inputField = document.getElementById(`note-edit-input-${facId}-${idx}`);
+            if (!inputField) return;
+            
+            const updatedText = inputField.value.trim();
+            if (!updatedText) return;
+            
+            const fac = mockFacilities.find(f => f.id == facId);
+            if (fac && fac.notes && fac.notes[idx]) {
+                if (typeof fac.notes[idx] === 'object') {
+                    fac.notes[idx].text = updatedText;
+                } else {
+                    fac.notes[idx] = { date: new Date().toLocaleDateString(), text: updatedText };
+                }
+                saveDataToCloud();
+                filterNotesByFacility();
+            }
+        }
+
+        function deleteSelectedNote(facId, idx) {
+            if (confirm("Are you sure you want to delete this note permanent history?")) {
+                const fac = mockFacilities.find(f => f.id == facId);
+                if (fac && fac.notes) {
+                    fac.notes.splice(idx, 1);
+                    saveDataToCloud();
+                    filterNotesByFacility();
+                }
+            }
+        }
+
+   function addNewLead(e) {
+    e.preventDefault();
+    if (userRole === "board") return;
+    mockLeads.push({
+        id: Date.now().toString(),
+        name: document.getElementById('l-name').value,
+        address: document.getElementById('l-add').value || '',
+        rep: document.getElementById('l-con').value || '',
+        email: document.getElementById('l-em').value || '', // ADDED: Grabs the new input value
+        phone: document.getElementById('l-ph').value || '',
+        source: document.getElementById('l-ref').value || '',
+        notes: []
+    });
+    saveDataToCloud(); renderDashboard(); e.target.reset();
+}
+
+
+        function addInlineLeadNote(leadId, noteText, dateVal) {
+            if (userRole === "board") return;
+            if (!noteText.trim()) return;
+            const lead = mockLeads.find(l => l.id == leadId);
+            if (lead) {
+                if (!lead.notes) lead.notes = [];
+                const formattedDate = dateVal ? new Date(dateVal + 'T00:00:00').toLocaleDateString() : new Date().toLocaleDateString();
+                lead.notes.unshift({ date: formattedDate, text: noteText });
+                saveDataToCloud(); renderDashboard();
+            }
+        }
+        function populateDropdown() {
+            const dropdown = document.getElementById('n-fac-id');
+            if (!dropdown) return;
+            dropdown.innerHTML = '<option value="">-- Choose Target Facility --</option>';
+            mockFacilities.forEach(f => {
+                dropdown.innerHTML += `<option value="${f.id}">${f.name}</option>`;
+            });
+        }
+
+        function deleteLeadRecord(id) {
+            mockLeads = mockLeads.filter(l => l.id != id);
+            saveDataToCloud(); renderDashboard();
+        }
+
+        function updateEstimatedPricingLabel() {
+            const label = document.getElementById('price-est-label');
+            if (label) {
+                label.innerText = "Estimated Standard Invoice: $1,500.00 (Due upon receipt)";
+            }
+        }
+
+        function enableInlineLeadNoteEdit(leadId, idx) {
+            const bodySpan = document.getElementById(`lead-body-text-${leadId}-${idx}`);
+            const editBtn = document.getElementById(`lead-edit-btn-${leadId}-${idx}`);
+            const saveBtn = document.getElementById(`lead-save-btn-${leadId}-${idx}`);
+            if (!bodySpan || !editBtn || !saveBtn) return;
+
+            const currentText = bodySpan.innerText;
+            bodySpan.innerHTML = `<input type="text" id="lead-edit-input-${leadId}-${idx}" value="${currentText.replace(/"/g, '&quot;')}" style="width: 100%; padding: 4px; font-size: 13px;">`;
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-block';
+        }
+
+        function saveInlineLeadNoteEdit(leadId, idx) {
+            const inputField = document.getElementById(`lead-edit-input-${leadId}-${idx}`);
+            if (!inputField) return;
+
+            const updatedText = inputField.value.trim();
+            if (!updatedText) return;
+
+            const lead = mockLeads.find(l => l.id == leadId);
+            if (lead && lead.notes && lead.notes[idx]) {
+                if (typeof lead.notes[idx] === 'object') {
+                    lead.notes[idx].text = updatedText;
+                } else {
+                    lead.notes[idx] = { date: new Date().toLocaleDateString(), text: updatedText };
+                }
+                
+                const editBtn = document.getElementById(`lead-edit-btn-${leadId}-${idx}`);
+                const saveBtn = document.getElementById(`lead-save-btn-${leadId}-${idx}`);
+                if (editBtn) editBtn.style.display = 'inline-block';
+                if (saveBtn) saveBtn.style.display = 'none';
+
+                saveDataToCloud();
+                renderDashboard(); 
+            }
+        }
+        function renderDashboard() {
+            const fList = document.getElementById('facilities-list');
+            const ledger = document.getElementById('ledger-list');
+            const leadsList = document.getElementById('leads-list');
+            
+            if (!fList) return; 
+            fList.innerHTML = ''; 
+            if (ledger) ledger.innerHTML = ''; 
+            if (leadsList) leadsList.innerHTML = '';
+            
+            mockFacilities.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            mockLeads.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            const isReadonly = userRole === "board" ? "readonly disabled style='background:#f1f5f9; color:#64748b; cursor:not-allowed;'" : "";
+            
+            let tableHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px; margin-bottom: 24px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:22%;">Facility Info</th><th style="padding:14px 18px; font-weight:700; width:22%;">Contacts Matrix</th><th style="padding:14px 18px; font-weight:700; width:10%;">Series Subscribed</th><th style="padding:14px 18px; font-weight:700; width:16%;">📋 Contract Status</th><th style="padding:14px 18px; font-weight:700; width:25%;">💳 Invoice & Payment Ledgers</th><th style="padding:14px 18px; text-align:center; width:5%;">Actions</th></tr></thead><tbody>`;
+
+            mockFacilities.forEach(fac => {
+                const isPaid = fac.payment_status === "Paid" || fac.payment_status === "Paid in Full";
+                const isHalf = fac.payment_status === "Half Paid" || fac.payment_status === "Half Payment";
+                let badgeStyle = isPaid ? "background:#dcfce7;color:#15803d;" : (isHalf ? "background:#fef9c3;color:#a16207;" : "background:#fee2e2;color:#ef4444;");
+                
+                tableHTML += `<tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 14px 18px; vertical-align: middle;">
+                        <div style="display: flex; flex-direction: column; width: 100%;">
+                            <div style="display: flex; align-items: center; font-weight: 800; font-size: 1.25rem !important; color: #0369a1; line-height: 1.3;">
+                                <span>🏢&nbsp;</span>
+                                <textarea style="font-weight: 800; font-size: 1.25rem !important; color: #0369a1; font-family: sans-serif; border: none; background: transparent; padding: 0 !important; margin: 0; outline: none; width: 160px !important; resize: none; height: auto; min-height: 1.4em; line-height: 1.2; overflow: hidden; display: block; white-space: pre-wrap; word-break: break-word;" 
+                                    ${isReadonly} 
+                                    onfocus="this.style.height='auto'; this.style.height=this.scrollHeight+'px';"
+                                    onblur="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m && m.name!==this.value){ m.name=this.value; saveDataToCloud(); }"
+                                    onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }">${fac.name || ''}</textarea>
+                            </div>
+                            <div style="display: flex; align-items: flex-start; font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 500;">
+                                <span style="margin-top: 2px;">📍&nbsp;</span>
+                                <textarea style="font-size: 13px !important; color: #64748b; font-weight: 500; font-family: sans-serif; border: none; background: transparent; padding: 0 !important; margin: 0; outline: none; width: 170px !important; resize: none; height: auto; min-height: 1.3em; line-height: 1.3; overflow: hidden; display: block; white-space: pre-wrap; word-break: break-word;" 
+                                    ${isReadonly} 
+                                    onfocus="this.style.height='auto'; this.style.height=this.scrollHeight+'px';"
+                                    onblur="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m && m.address!==this.value){ m.address=this.value; saveDataToCloud(); }"
+                                    onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }">${fac.address || ''}</textarea>
+                            </div>
+                            <div style="display: flex; align-items: center; font-size: 12px; color: #475569; margin-top: 2px; font-weight: 600;">
+                                <span>📞&nbsp;</span>
+                                <input type="text" value="${fac.phone || ''}" placeholder="No Phone" 
+                                    style="font-size: 12px !important; color: #475569; font-weight: 600; font-family: sans-serif; border: none; background: transparent; padding: 0 !important; margin: 0; outline: none; width: 100% !important; display: inline-block;" 
+                                    ${isReadonly} 
+                                    onblur="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m && m.phone!==this.value){ m.phone=this.value; saveDataToCloud(); }"
+                                    onkeypress="if(event.key==='Enter'){ this.blur(); }">
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 14px 18px; vertical-align: middle;">
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;">
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#0369a1; width:52px;">Primary:</span><input type="text" value="${fac.rep_name || ''}" placeholder="Contact Name" style="padding:3px 6px !important; font-size:12.5px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important;" ${isReadonly} onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.rep_name=this.value; saveDataToCloud(); }"></div>
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">📬 Email:</span><input type="text" value="${fac.rep_email || ''}" placeholder="Contact Email" style="padding:3px 6px !important; font-size:12px !important; border:1px solid #cbd5e1; border-radius:4px; flex-grow:1; width:100% !important; color:#475569;" ${isReadonly} onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.rep_email=this.value; saveDataToCloud(); }"></div>
+                            </div>
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:3px;">
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:11px; font-weight:700; color:#475569; width:52px;">Second:</span><input type="text" value="${fac.alt_name || ''}" placeholder="Alt Name" style="padding:3px 6px !important; font-size:12.5px !important; border:1px solid #cbd5e1; border-radius:4px; width:145px !important;" ${isReadonly} onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.alt_name=this.value; saveDataToCloud(); }"></div>
+                                <div style="display:flex; align-items:center; gap:4px;"><span style="font-size:10px; font-weight:700; color:#64748b; width:52px;">📬 Email:</span><input type="text" value="${fac.alt_email || ''}" placeholder="Alt Email" style="padding:3px 6px !important; font-size:12px !important; border:1px solid #cbd5e1; border-radius:4px; flex-grow:1; width:100% !important; color:#475569;" ${isReadonly} onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.alt_email=this.value; saveDataToCloud(); }"></div>
+                            </div>
+                        </div>
+                    </td>
+                                              <td style="padding: 14px 18px; vertical-align: middle;">
+                        <!-- Safe isolated dropdown logic -->
+                        <select style="font-size: 13px !important; padding: 6px 8px; font-weight: 700; border-radius: 4px; border: 1px solid #cbd5e1; width: 155px; color: #0369a1;" onchange="const matched = mockFacilities.find(f => f.id == ${fac.id}); if (matched) { matched.series_count = this.value; saveDataToCloud(); renderDashboard(); }">
+                            <option value="1" ${fac.series_count == '1' ? 'selected' : ''}>1 Series ($1,500)</option>
+                            <option value="2" ${fac.series_count == '2' ? 'selected' : ''}>2 Series ($2,300)</option>
+                        </select>
+                        <div style="display:flex; align-items:center; gap:4px; margin-top:6px; justify-content:center;">
+                            <span style="font-size:10px; font-weight:700; color:#64748b; white-space:nowrap;">✍️ Programs:</span>
+                            <!-- ✅ Added autocomplete="off" and cleared placeholder text to block extension overlays -->
+                            <input type="text" value="${fac.series || ''}" placeholder="" autocomplete="off" style="padding:2px 6px !important; font-size:11px !important; border:1px solid #cbd5e1; border-radius:4px; width:85px !important; font-weight:700; color:#0369a1; text-align:center; background:#ffffff; outline:none;" ${isReadonly} onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.series=this.value; saveDataToCloud(); }">
+                        </div>
+                    </td>
+
+
+
+                    <td style="padding: 14px 18px; vertical-align: middle;">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                                              <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <span style="font-size: 11px; font-weight: 700; color: #475569; width: 65px;">📋 Sent:</span>
+                            <input type="date" value="${fac.contract_sent_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 115px;" onchange="const m=mockFacilities.find(f=>f.id=='${fac.id}'); if(m){ m.contract_sent_date=this.value; saveDataToCloud(); }">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <span style="font-size: 11px; font-weight: 700; color: #0369a1; width: 65px;">✍️ Signed:</span>
+                            <input type="date" value="${fac.contract_received_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 115px;" onchange="const m=mockFacilities.find(f=>f.id=='${fac.id}'); if(m){ m.contract_received_date=this.value; saveDataToCloud(); }">
+                        </div>
+                    </div>
+                </td>
+                <td style="padding: 14px 18px; vertical-align: middle;">
+                    <div style="display: flex; flex-direction: column; gap: 6px; width: fit-content;">
+                        <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span style="font-size: 10px; color: #64748b; font-weight: 600;">Inv Sent:</span>
+                                <input type="date" value="${fac.invoice_sent_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 105px;" onchange="const m=mockFacilities.find(f=>f.id=='${fac.id}'); if(m){ m.invoice_sent_date=this.value; saveDataToCloud(); }">
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span style="font-size: 10px; color: #64748b; font-weight: 600;">Chk Rec'd:</span>
+                                <input type="date" value="${fac.check_received_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 105px;" onchange="const m=mockFacilities.find(f=>f.id=='${fac.id}'); if(m){ m.check_received_date=this.value; saveDataToCloud(); }">
+                            </div>
+                        </div>
+                    </div>
+
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 10px; color: #64748b; font-weight: 600; min-width: 42px;">Status:</span>
+                                <select style="font-size: 12px; padding: 4px; font-weight: 700; border-radius: 4px; width: 172px; ${badgeStyle || ''}" onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.payment_status=this.value; saveDataToCloud(); renderDashboard(); }">
+                                    <option value="Unpaid" ${fac.payment_status==='Unpaid'?'selected':''}>❌ Unpaid</option>
+                                    <option value="Half Payment" ${fac.payment_status==='Half Payment'?'selected':''}>🌗 Half Payment</option>
+                                    <option value="Paid in Full" ${fac.payment_status==='Paid in Full' || fac.payment_status==='Paid'?'selected':''}>✅ Paid in Full</option>
+                                </select>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding:14px 18px; text-align:center; vertical-align: middle;">
+                        <div style="display:flex; justify-content:center; gap:8px;">
+                            <button type="button" class="btn" style="background:#e2e8f0; color:#0f172a; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:600; cursor:pointer; border:1px solid #cbd5e1;" onclick="event.stopPropagation(); switchTab('notes'); document.getElementById('n-fac-id').value='${fac.id}'; filterNotesByFacility();">🔎 View Logs</button>
+                            <button type="button" style="background:#fee2e2; color:#ef4444; border:1px solid #fca5a5; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;" ${isReadonly} onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete the facility: ${fac.name.replace(/'/g, "\\'")}?')){ mockFacilities=mockFacilities.filter(f=>f.id!=${fac.id}); saveDataToCloud(); renderDashboard(); }">❌ Delete</button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
+                             let leadsHTML = `<div style="overflow-x: auto; background: #f1f5f9; padding: 12px; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:16%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:16%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:14%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Contact Email</th><th style="padding:14px 18px; font-weight:700; width:13%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:13%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
+                    
+                    mockLeads.forEach(lead => {
+                        let currentNotesHTML = '';
+                        if (lead.notes && lead.notes.length > 0) {
+                            currentNotesHTML = lead.notes.map((n, lIdx) => `
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; margin-top: 4px; background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #94a3b8; border-radius: 4px; font-size: 13.5px; color: #0f172a;">
+                                    <div style="flex-grow: 1; padding-right: 15px; line-height: 1.5;">🗓️ <strong>${n.date}</strong>: <span id="lead-body-text-${lead.id}-${lIdx}">${n.text}</span></div>
+                                    <div style="display: flex; gap: 4px; white-space: nowrap;">
+                                        <button type="button" id="lead-edit-btn-${lead.id}-${lIdx}" onclick="enableInlineLeadNoteEdit('${lead.id}', ${lIdx})" style="background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px;">Edit</button>
+                                        <button type="button" id="lead-save-btn-${lead.id}-${lIdx}" onclick="saveInlineLeadNoteEdit('${lead.id}', ${lIdx})" style="display: none; background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px;">Save</button>
+                                    </div>
+                                </div>`).join('');
+                        } else { currentNotesHTML = `<span style="font-size: 12px; color: #94a3b8; font-style: italic; padding-left: 4px;">No interactions.</span>`; }
+                        
+                        leadsHTML += `<tr style="background-color: #f1f5f9;">
+                            <td style="padding: 18px 18px 0px 18px; font-weight: 700; color: #0369a1; font-size: 15px; background: #ffffff; border-top: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; border-top-left-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);">🔮 ${lead.name}</td>
+                            <td style="padding: 18px 18px 0px 18px; background: #ffffff; border-top: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);"><input type="text" value="${lead.address || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.address=this.value; saveDataToCloud(); }"></td>
+                            <td style="padding: 18px 18px 0px 18px; background: #ffffff; border-top: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);"><input type="text" value="${lead.rep || ''}" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.rep=this.value; saveDataToCloud(); }"></td>
+                            <td style="padding: 18px 18px 0px 18px; background: #ffffff; border-top: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);"><input type="text" value="${lead.email || ''}" placeholder="Contact Email" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.email=this.value; saveDataToCloud(); }"></td>
+                            <td style="padding: 18px 18px 0px 18px; background: #ffffff; border-top: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);"><input type="text" value="${lead.phone || ''}" placeholder="Phone Number" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.phone=this.value; saveDataToCloud(); }"></td>
+                            <td style="padding: 18px 18px 0px 18px; background: #ffffff; border-top: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);"><input type="text" value="${lead.source || ''}" placeholder="Referred By" style="padding: 6px 8px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 92%; color: #334155;" ${isReadonly} onchange="const l=mockLeads.find(le=>le.id=='${lead.id}'); if(l){ l.source=this.value; saveDataToCloud(); }"></td>
+                            <td style="padding: 18px 18px 0px 18px; text-align: center; background: #ffffff; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-top-right-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);"><button type="button" onclick="if(confirm('Are you sure you want to delete this lead record?')) { deleteLeadRecord('${lead.id}'); }" style="background: #fee2e2; color: #ef4444; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">Delete</button></td>
+                        </tr>
+                        <tr style="background-color: #f1f5f9;">
+                            <td colspan="7" style="padding: 0px 18px 18px 18px; background: #ffffff; border-bottom: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);">
+                                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; margin-top: 12px;">
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;">
+                                            <span style="font-weight: 700; color: #475569; font-size: 13.5px; white-space: nowrap; width: 90px;">📝 Log Note:</span>
+                                            <input type="date" id="date-pick-${lead.id}" style="padding: 6px 10px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; width: 150px; background:#ffffff;" ${isReadonly}>
+                                            <input type="text" id="note-input-${lead.id}" placeholder="Type conversation milestones here..." style="padding: 6px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 4px; flex-grow: 1; color: #0f172a; background:#ffffff;" ${isReadonly} onkeypress="if(event.key==='Enter'){ addInlineLeadNote('${lead.id}', this.value, document.getElementById('date-pick-${lead.id}').value); this.value=''; }">
+                                            <button type="button" style="background: #475569; color: #ffffff; border: none; padding: 6px 18px; border-radius: 4px; font-size: 13.5px; font-weight: bold; cursor: pointer; white-space:nowrap;" ${isReadonly} onclick="addInlineLeadNote('${lead.id}', document.getElementById('note-input-${lead.id}').value, document.getElementById('date-pick-${lead.id}').value); document.getElementById('note-input-${lead.id}').value='';">＋ Add Note</button>
+                                        </div>
+                                        <div style="margin-top: 4px;">
+                                            <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">📋 Logs:</div>
+                                            <div style="display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; padding: 4px;">${currentNotesHTML}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="background-color: #f1f5f9; height: 20px;"><td colspan="7" style="padding:0;"></td></tr>`;
+                    });
+
+            leadsHTML += `</tbody></table></div>`; leadsList.innerHTML = leadsHTML;
+
+            mockFacilities.forEach(f => {
+                const activeSeriesText = (f.series || '').trim();
+                const seriesArray = activeSeriesText ? activeSeriesText.split(/[\s,]+/).filter(Boolean) : [];
+                const total = (seriesArray.length >= 2 || f.series_count == "2" || activeSeriesText.toLowerCase().includes('series 2')) ? 2300 : 1500;
+                const paid = f.payment_status === "Paid" || f.payment_status === "Paid in Full" ? total : (f.payment_status === "Half Payment" ? total / 2 : 0);
+                const bal = total - paid;
+                if (ledger) ledger.innerHTML += `<div style="display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 10px 8px; border-bottom: 1px dashed #cbd5e1; font-size: 14px;"><strong style="color: #0f172a; text-align: left;">📊 ${f.name}</strong><span style="text-align: right; font-weight: 500; color: #475569;">Baseline: $${total} | Receipts: <span style="color: green; font-weight: bold;">$${paid}</span> | Balance: <span style="color: red; font-weight: bold;">$${bal}</span></span></div>`;
+            });
+            if (typeof populateDropdown === "function") populateDropdown();
+        }
+                  function loadScheduleMatrixData() {
+            const savedSched = localStorage.getItem('sill_schedule_matrix');
+            if (savedSched) {
+                mockSchedule = JSON.parse(savedSched);
+            } else {
+                mockSchedule = [];
+                for (let w = 1; w <= 13; w++) {
+                    mockSchedule.push({
+                        week: w,
+                        l1_speaker: '', l1_topic: '', l1_url: '',
+                        l2_speaker: '', l2_topic: '', l2_url: '',
+                        l3_speaker: '', l3_topic: '', l3_url: '',
+                    });
+                }
+            }
+            renderScheduleGridTable();
+        }
+
+        function renderScheduleGridTable() {
+            const container = document.getElementById('schedule-matrix-container');
+            if (!container) return;
+            const isReadonly = (typeof userRole !== 'undefined' && userRole === "board") ? "readonly disabled style='background:#f1f5f9; color:#64748b; cursor:not-allowed;'" : "";
+            let html = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding: 14px 18px; font-weight: 700; width: 10%;">WEEK</th><th style="padding: 14px 18px; font-weight: 700; width: 30%; color: #0284c7;">🎼 MUSIC MONDAY</th><th style="padding: 14px 18px; font-weight: 700; width: 30%; color: #b45309;">🌍 GLOBAL ISSUES 1</th><th style="padding: 14px 18px; font-weight: 700; width: 30%; color: #047857;">🌏 GLOBAL ISSUES 2</th></tr></thead><tbody>`;
+            mockSchedule.forEach((row, i) => {
+                html += `<tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 14px 18px; font-weight: 700; color: #475569;">Week ${row.week}</td>
+                    <td style="padding: 14px 18px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" value="${row.l1_speaker || ''}" placeholder="👤 Speaker" onchange="mockSchedule[${i}].l1_speaker=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l1_topic || ''}" placeholder="📝 Topic" onchange="mockSchedule[${i}].l1_topic=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l1_url || ''}" placeholder="🔗 Link" onchange="mockSchedule[${i}].l1_url=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                        </div>
+                    </td>
+                    <td style="padding: 14px 18px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" value="${row.l2_speaker || ''}" placeholder="👤 Speaker" onchange="mockSchedule[${i}].l2_speaker=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l2_topic || ''}" placeholder="📝 Topic" onchange="mockSchedule[${i}].l2_topic=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l2_url || ''}" placeholder="🔗 Link" onchange="mockSchedule[${i}].l2_url=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                        </div>
+                    </td>
+                    <td style="padding: 14px 18px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" value="${row.l3_speaker || ''}" placeholder="👤 Speaker" onchange="mockSchedule[${i}].l3_speaker=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l3_topic || ''}" placeholder="📝 Topic" onchange="mockSchedule[${i}].l3_topic=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                            <input type="text" value="${row.l3_url || ''}" placeholder="🔗 Link" onchange="mockSchedule[${i}].l3_url=this.value; saveScheduleToCloud();" ${isReadonly} style="padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; width:90%;">
+                        </div>
+                    </td>`;
+            });
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function saveScheduleToCloud() {
+            if (userRole === "board") return;
+            localStorage.setItem('sill_schedule_matrix', JSON.stringify(mockSchedule));
+        }
+
+        function downloadDatabaseBackup() {
+            const backupData = {
+                facilities: typeof mockFacilities !== 'undefined' ? mockFacilities : [],
+                leads: typeof mockLeads !== 'undefined' ? mockLeads : []
+            };
+            const jsonString = JSON.stringify(backupData, null, 2);
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `sill_database_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        window.addEventListener('load', function() { 
+            window.history.pushState({ noBack: true }, ''); 
+            window.history.pushState({ noBack: true }, ''); 
+        });
+        window.addEventListener('popstate', function(event) { 
+            window.history.pushState({ noBack: true }, ''); 
+            alert("🔄 Navigation Guard Active."); 
+        });
+    </script>
+</body>
+</html>
     <meta charset="UTF-8"> 
     <title>SILL Select Portal</title> 
     <style> 
