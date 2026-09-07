@@ -618,7 +618,9 @@
             });
             tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
             let leadsHTML = `<div style="overflow-x: auto; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:16%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:16%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:14%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Contact Email</th><th style="padding:14px 18px; font-weight:700; width:13%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:13%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
-        let currentNotesHTML = '';
+                          mockLeads.forEach(lead => {
+                        let currentNotesHTML = '';
+
     if (lead.notes && lead.notes.length > 0) {
         currentNotesHTML = lead.notes.map((n, lIdx) => `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; margin-top: 4px; background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #94a3b8; border-radius: 4px; font-size: 13.5px; color: #0f172a;">
