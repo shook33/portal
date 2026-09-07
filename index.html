@@ -573,28 +573,31 @@
 
                     <td style="padding: 14px 18px; vertical-align: middle;">
                         <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <span style="font-size: 11px; font-weight: 700; color: #475569; width: 65px;">📋 Sent:</span>
-                                <input type="date" value="${fac.contract_sent_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 115px;" onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.contract_sent_date=this.value; saveDataToCloud(); }">
+                                              <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <span style="font-size: 11px; font-weight: 700; color: #475569; width: 65px;">📋 Sent:</span>
+                            <input type="date" value="${fac.contract_sent_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 115px;" onchange="const m=mockFacilities.find(f=>f.id=='${fac.id}'); if(m){ m.contract_sent_date=this.value; saveDataToCloud(); }">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <span style="font-size: 11px; font-weight: 700; color: #0369a1; width: 65px;">✍️ Signed:</span>
+                            <input type="date" value="${fac.contract_received_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 115px;" onchange="const m=mockFacilities.find(f=>f.id=='${fac.id}'); if(m){ m.contract_received_date=this.value; saveDataToCloud(); }">
+                        </div>
+                    </div>
+                </td>
+                <td style="padding: 14px 18px; vertical-align: middle;">
+                    <div style="display: flex; flex-direction: column; gap: 6px; width: fit-content;">
+                        <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span style="font-size: 10px; color: #64748b; font-weight: 600;">Inv Sent:</span>
+                                <input type="date" value="${fac.invoice_sent_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 105px;" onchange="const m=mockFacilities.find(f=>f.id=='${fac.id}'); if(m){ m.invoice_sent_date=this.value; saveDataToCloud(); }">
                             </div>
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <span style="font-size: 11px; font-weight: 700; color: #0369a1; width: 65px;">✍️ Signed:</span>
-                                <input type="date" value="${fac.contract_received_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 115px;" onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.contract_received_date=this.value; saveDataToCloud(); }">
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span style="font-size: 10px; color: #64748b; font-weight: 600;">Chk Rec'd:</span>
+                                <input type="date" value="${fac.check_received_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 105px;" onchange="const m=mockFacilities.find(f=>f.id=='${fac.id}'); if(m){ m.check_received_date=this.value; saveDataToCloud(); }">
                             </div>
                         </div>
-                    </td>
-                    <td style="padding: 14px 18px; vertical-align: middle;">
-                        <div style="display: flex; flex-direction: column; gap: 6px; width: fit-content;">
-                            <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span style="font-size: 10px; color: #64748b; font-weight: 600;">Inv Sent:</span>
-                                    <input type="date" value="${fac.invoice_sent_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 105px;" onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.invoice_sent_date=this.value; saveDataToCloud(); }">
-                                </div>
-                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <span style="font-size: 10px; color: #64748b; font-weight: 600;">Chk Rec'd:</span>
-                                    <input type="date" value="${fac.check_received_date || ''}" style="padding: 4px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; width: 105px;" onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.check_received_date=this.value; saveDataToCloud(); }">
-                                </div>
-                            </div>
+                    </div>
+
                             <div style="display: flex; align-items: center; gap: 6px;">
                                 <span style="font-size: 10px; color: #64748b; font-weight: 600; min-width: 42px;">Status:</span>
                                 <select style="font-size: 12px; padding: 4px; font-weight: 700; border-radius: 4px; width: 172px; ${badgeStyle || ''}" onchange="const m=mockFacilities.find(f=>f.id==${fac.id}); if(m){ m.payment_status=this.value; saveDataToCloud(); renderDashboard(); }">
