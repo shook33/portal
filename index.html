@@ -128,22 +128,37 @@
                 <div id="leads-list"></div> 
             </div>
             
-            <div id="form-tray-leads" class="form-tray"> 
-                <h3 style="margin: 0 0 1rem 0; color: #0369a1; font-weight: 700;">🔮 Register New Potential Referral Lead</h3> 
-                <form onsubmit="addNewLead(event)"> 
-                    <div class="form-grid"> 
-                        <input type="text" id="l-name" placeholder="Facility Name" class="form-input" required> 
-                        <input type="text" id="l-add" placeholder="Location/Address" class="form-input"> 
-                        <input type="text" id="l-con" placeholder="Contact Person" class="form-input"> 
-                    </div> 
-                    <div class="form-grid"> 
-                        <input type="text" id="l-ph" placeholder="Phone Number" class="form-input"> 
-                        <input type="text" id="l-ref" placeholder="Referred By" class="form-input"> 
-                        <button type="submit" class="btn-green" style="width: 100%;">🔮 Save Pipeline Lead</button> 
-                    </div> 
-                </form> 
-            </div> 
-        </div> 
+                    <div id="form-tray-leads" class="form-tray" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); margin-top: 24px;">
+                <h3 style="margin: 0 0 16px 0; color: #0369a1; font-weight: 800; font-size: 1.5rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">🆕 Register New Potential Referral Lead</h3>
+                <form onsubmit="addNewLead(event)">
+                    <!-- Clean matching layout grid structure for input rows -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" id="l-name" placeholder="Facility Name" class="form-input" required style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" id="l-add" placeholder="Location/Address" class="form-input" style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" id="l-con" placeholder="Contact Person" class="form-input" style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <!-- NEW FORM MATRIX ROW ENTRY: Contact Email mapping binding lookup target -->
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="email" id="l-em" placeholder="Contact Email" class="form-input" style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" id="l-ph" placeholder="Phone Number" class="form-input" style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" id="l-ref" placeholder="Referred By" class="form-input" style="padding: 8px 12px; font-size: 13.5px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn-green" style="padding: 10px 24px; font-weight: bold; border-radius: 6px; cursor: pointer; min-width: 200px;">Save Pipeline Lead</button>
+                    </div>
+                </form>
+            </div>
+
 
         <div id="panel-schedule" class="tab-panel" style="display:none;">
             <div style="background: #ffffff; padding: 2rem; border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); max-width: 100%;">
@@ -411,20 +426,22 @@
             }
         }
 
-        function addNewLead(e) {
-            e.preventDefault();
-            if (userRole === "board") return;
-            mockLeads.push({
-                id: Date.now().toString(),
-                name: document.getElementById('l-name').value,
-                address: document.getElementById('l-add').value || '',
-                rep: document.getElementById('l-con').value || '',
-                phone: document.getElementById('l-ph').value || '',
-                source: document.getElementById('l-ref').value || '',
-                notes: []
-            });
-            saveDataToCloud(); renderDashboard(); e.target.reset();
-        }
+   function addNewLead(e) {
+    e.preventDefault();
+    if (userRole === "board") return;
+    mockLeads.push({
+        id: Date.now().toString(),
+        name: document.getElementById('l-name').value,
+        address: document.getElementById('l-add').value || '',
+        rep: document.getElementById('l-con').value || '',
+        email: document.getElementById('l-em').value || '', // ADDED: Grabs the new input value
+        phone: document.getElementById('l-ph').value || '',
+        source: document.getElementById('l-ref').value || '',
+        notes: []
+    });
+    saveDataToCloud(); renderDashboard(); e.target.reset();
+}
+
 
         function addInlineLeadNote(leadId, noteText, dateVal) {
             if (userRole === "board") return;
