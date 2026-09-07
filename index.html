@@ -634,9 +634,7 @@
                 </tr>`;
             });
             tableHTML += `</tbody></table></div>`; fList.innerHTML = tableHTML;
-               
-
-            let leadsHTML = `<div style="overflow-x: auto; background: #f1f5f9; padding: 12px; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:16%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:16%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:14%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Contact Email</th><th style="padding:14px 18px; font-weight:700; width:13%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:13%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
+                             let leadsHTML = `<div style="overflow-x: auto; background: #f1f5f9; padding: 12px; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;"><thead style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><tr><th style="padding:14px 18px; font-weight:700; width:16%;">Facility</th><th style="padding:14px 18px; font-weight:700; width:16%;">Location/Address</th><th style="padding:14px 18px; font-weight:700; width:14%;">Contact Person</th><th style="padding:14px 18px; font-weight:700; width:16%;">Contact Email</th><th style="padding:14px 18px; font-weight:700; width:13%;">Phone Number</th><th style="padding:14px 18px; font-weight:700; width:13%;">Referred By</th><th style="padding:14px 18px; text-align:center; width:6%;">Actions</th></tr></thead><tbody>`;
                     
                     mockLeads.forEach(lead => {
                         let currentNotesHTML = '';
@@ -693,35 +691,6 @@
             });
             if (typeof populateDropdown === "function") populateDropdown();
         }
-          // --- FIXED: DISASTER-FREE INSTANT CLOUD BACKUP TEXT COPY UTILITY ---
-function copyCloudBackupToClipboard(buttonId) {
-    const backupContainer = document.getElementById('master-notes-list');
-    if (!backupContainer) {
-        alert("Backup content text container ('master-notes-list') not found.");
-        return;
-    }
-    const rawText = backupContainer.innerText || backupContainer.textContent;
-    navigator.clipboard.writeText(rawText).then(() => {
-        const btn = document.getElementById(buttonId);
-        if (btn) {
-            const originalText = btn.innerHTML;
-            btn.style.background = "#22c55e";
-            btn.style.color = "#ffffff";
-            btn.style.borderColor = "#16a34a";
-            btn.innerHTML = "✅ Copied Payload!";
-            setTimeout(() => {
-                btn.style.background = "";
-                btn.style.color = "";
-                btn.style.borderColor = "";
-                btn.innerHTML = originalText;
-            }, 2000);
-        }
-    }).catch(err => {
-        console.error("Clipboard operational backup error: ", err);
-    });
-}
-
-
                   function loadScheduleMatrixData() {
             const savedSched = localStorage.getItem('sill_schedule_matrix');
             if (savedSched) {
